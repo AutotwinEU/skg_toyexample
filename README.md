@@ -10,15 +10,16 @@ Copyright information is provided within each Project.
 ## Requirements
 
 ### Neo4j
-Install neo4j-python-driver
-pip install neo4j
+Install the neo4j-python-driver
+
+`pip install neo4j`
 OR
-conda install -c conda-forge neo4j-python-driver
+`conda install -c conda-forge neo4j-python-driver`
 
-Install Neo4j from https://neo4j.com/download/
+Install [Neo4j](https://neo4j.com/download/):
 
-- Neo4j Desktop https://neo4j.com/download-center/#desktop (recommended), or
-- Neo4j Community Server, https://neo4j.com/download-center/#community
+- Use the [Neo4j Desktop](https://neo4j.com/download-center/#desktop)  (recommended), or
+- [Neo4j Community Server](https://neo4j.com/download-center/#community)
 
 ### EKG Construction
 The EKG construction is specified in `ekg-creator` and is a submodule, for documentation see [ekg_creator](https://github.com/Ava-S/ekg_creator).
@@ -26,20 +27,20 @@ The EKG construction is specified in `ekg-creator` and is a submodule, for docum
 So do not forget to run `git submodule init` and `git submodule update`.
 
 ### Other packages
-- numpy
-- pandas
-- tabulate
-- tqdm
+- `numpy`
+- `pandas`
+- `tabulate`
+- `tqdm`
 
 ## Get started
 
 ### Create a new graph database
 
 - The scripts in this release assume password "12345678".
-- The scripts assume the server to be available at the default URL bolt://localhost:7687
-- You can modify this also in the script.
-- ensure to allocate enough memory to your database, advised: dbms.memory.heap.max_size=5G
-- the script expects the Neo4j APOC library to be installed as a plugin, see https://neo4j.com/labs/apoc/
+- The scripts assume the server to be available at the default URL `bolt://localhost:7687`
+  - You can modify this also in the script.
+- ensure to allocate enough memory to your database, advised: `dbms.memory.heap.max_size=5G`
+- the script expects the `Neo4j APOC library` to be installed as a plugin, see https://neo4j.com/labs/apoc/
 
 ### Store the preprocessed data sets
 
@@ -51,7 +52,7 @@ How to use
 For data import
 
 1. start the Neo4j server
-1. run main.py
+1. run `main.py`
 
 Output: 
 Event logs for the pizza, sensors and stations in data\ToyExample\event_logs.
@@ -63,10 +64,10 @@ The following projects are part of this repository
 ### Missing Case Identifiers Inference
 Method to infer missing case identifiers in event data by exploiting knowledge about the activities and their locations.
 
-### semantic header (json files)
+### Semantic Header (json files)
 First version for semantic header for system/event knowledge graphs: https://multiprocessmining.org/2022/10/26/data-storage-vs-data-semantics-for-object-centric-event-data/
 
-### event knowledge graphs
+### Event Knowledge Graphs
 
 Data model and generic query templates for translating and integrating a set of related CSV event logs into single event
 graph over multiple behavioral dimensions, stored as labeled property graph in [Neo4J](https://neo4j.com/).
