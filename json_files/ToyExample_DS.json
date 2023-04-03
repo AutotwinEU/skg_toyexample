@@ -1,7 +1,7 @@
 [
     {
       "name": "ToyExample",
-      "file_directory": "..\\data\\ToyExample\\",
+      "file_directory": "data\\ToyExample\\",
       "file_names": [
         "s1.csv",
         "s2.csv",

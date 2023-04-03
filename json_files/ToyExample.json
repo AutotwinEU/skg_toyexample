@@ -16,7 +16,7 @@
       "entity_attributes": [
       ],
       "corr": true,
-      "df": true,
+      "df": false,
       "include_label_in_df": true,
       "merge_duplicate_df": true
     },

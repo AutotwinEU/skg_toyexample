@@ -1,29 +1,32 @@
 import os
+from pathlib import Path
 
-from data_managers.interpreters import Interpreter
-from data_managers.semantic_header import SemanticHeader
-from database_managers.EventKnowledgeGraph import EventKnowledgeGraph, DatabaseConnection
-from data_managers.datastructures import ImportedDataStructures
+from ekg_creator.data_managers.interpreters import Interpreter
+from ekg_creator.data_managers.semantic_header import SemanticHeader
+from ekg_creator.database_managers.EventKnowledgeGraph import EventKnowledgeGraph, DatabaseConnection
+from ekg_creator.data_managers.datastructures import ImportedDataStructures
+from ekg_creator.utilities.performance_handling import Performance
+
+from ekg_creator.database_managers import authentication
+
+from ekg_creator.cypher_queries.custom_query_library import CustomCypherQueryLibrary as ccql
 
 # several steps of import, each can be switch on/off
-from utilities.performance_handling import Performance
 from colorama import Fore
-
-from database_managers import authentication
-
-from cypher_queries.custom_query_library import CustomCypherQueryLibrary as ccql
 
 connection = authentication.connections_map[authentication.Connections.LOCAL]
 
 dataset_name = 'ToyExample'
+semantic_header_path = Path(f'json_files/{dataset_name}.json')
 use_sample = False
 
 query_interpreter = Interpreter("Cypher")
-semantic_header = SemanticHeader.create_semantic_header(dataset_name, query_interpreter)
+semantic_header = SemanticHeader.create_semantic_header(semantic_header_path, query_interpreter)
 perf_path = os.path.join("..", "perf", dataset_name, f"{dataset_name}Performance.csv")
 number_of_steps = 100
 
-datastructures = ImportedDataStructures(dataset_name)
+ds_path = Path(f'json_files/{dataset_name}_DS.json')
+datastructures = ImportedDataStructures(ds_path)
 
 step_clear_db = True
 step_populate_graph = True
@@ -104,7 +107,6 @@ def populate_graph(graph: EventKnowledgeGraph, perf: Performance):
     perf.finished_step(log_message=f"Merged duplicate [:DF] edges done")
 
 
-
 def main() -> None:
     """
     Main function, read all the logs, clear and create the graph, perform checks
@@ -136,12 +138,10 @@ def main() -> None:
         graph.save_event_log(entity="Pizza", additional_event_attributes=["sensor"])
         graph.save_event_log(entity="Station", additional_event_attributes=["pizzaId"])
 
-
     perf.finish()
     perf.save()
 
     graph.print_statistics()
-
 
     db_connection.close_connection()
 

@@ -1,0 +1,3 @@
+[submodule "ekg_creator"]
+	path = ekg_creator
+	url = https://github.com/Ava-S/ekg_creator.git
