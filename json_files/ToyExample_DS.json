@@ -3,13 +3,13 @@
       "name": "ToyExample",
       "file_directory": "data\\ToyExample\\",
       "file_names": [
-        "s1.csv",
-        "s2.csv",
-        "s3.csv",
-        "s4.csv",
-        "s5.csv",
-        "s6.csv",
-        "s7.csv"
+        "S1.csv",
+        "S2.csv",
+        "S3.csv",
+        "S4.csv",
+        "S5.csv",
+        "S6.csv",
+        "S7.csv"
       ],
       "labels": [
         "Event"
