@@ -9,7 +9,7 @@ from ekg_creator.utilities.performance_handling import Performance
 
 from ekg_creator.database_managers import authentication
 
-from ekg_creator.cypher_queries.custom_query_library import CustomCypherQueryLibrary as ccql
+from ekg_creator_custom.ekg_modules.ekg_custom_module import CustomModule
 
 # several steps of import, each can be switch on/off
 from colorama import Fore
@@ -47,7 +47,8 @@ def create_graph_instance(perf: Performance) -> EventKnowledgeGraph:
 
     return EventKnowledgeGraph(db_connection=db_connection, db_name=connection.user,
                                batch_size=5000, event_tables=datastructures, use_sample=use_sample,
-                               semantic_header=semantic_header, perf=perf)
+                               semantic_header=semantic_header, perf=perf,
+                               custom_module_name=CustomModule)
 
 
 def clear_graph(graph: EventKnowledgeGraph, perf: Performance) -> None:
@@ -129,9 +130,13 @@ def main() -> None:
         populate_graph(graph=graph, perf=perf)
 
     if step_analysis:
-        graph.create_df_process_model(entity_type="Pizza")
-        graph.do_custom_query("create_stations", entity_type="Pizza")
-        graph.do_custom_query("correlate_events_to_station")
+        graph.create_df_process_model(entity_type="Pizza", classifiers=["sensor"])
+        graph.do_custom_query("create_station_aggregation", entity_type="Pizza")
+        graph.do_custom_query("observe_events_to_station_aggregation_query")
+        graph.create_df_process_model(entity_type="Pizza", classifiers=["station"])
+
+        # create Station Entities
+        graph.do_custom_query("create_station_entities_and_correlate_to_events")
 
         graph.create_df_edges(entity_types=["Station"])
 
