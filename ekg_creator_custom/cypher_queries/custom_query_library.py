@@ -64,11 +64,11 @@ class CustomCypherQueryLibrary:
         return Query(query_string=query_str, kwargs={})
 
     @staticmethod
-    def get_create_processing_station_entities_query():
+    def get_create_processing_station_entities_and_correlate_to_events_query():
         query_str = '''
             MATCH (e) - [:OBSERVED] ->  (cs:Class_station {type:"Processing"})
             WITH e, cs, cs.type + cs.start_sensor+cs.end_sensor AS id
-            MERGE (:Entity:Station {entityType: "Station", type: cs.type, 
+            MERGE (s:Entity:Station {entityType: "Station", type: cs.type, 
                                     start_sensor: cs.start_sensor, end_sensor: cs.end_sensor,
                                     ID: id, uID:"Station_"+id})
             MERGE (e) - [:CORR] -> (s)

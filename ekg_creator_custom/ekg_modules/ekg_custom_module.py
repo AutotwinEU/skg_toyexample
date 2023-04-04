@@ -29,5 +29,5 @@ class CustomModule:
         self.connection.exec_query(ccql.get_observe_events_to_station_aggregation_query)
 
     def create_station_entities_and_correlate_to_events(self):
-        self.connection.exec_query(ccql.get_create_non_processing_station_entities_and_correlate_to_events_query)
+        self.connection.exec_query(ccql.get_create_processing_station_entities_and_correlate_to_events_query)
         self.connection.exec_query(ccql.get_create_non_processing_station_entities_and_correlate_to_events_query)
