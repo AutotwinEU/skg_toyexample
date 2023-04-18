@@ -21,7 +21,7 @@
           "columns": [
             {
               "name": "pizzaId",
-              "dtype": "Int64"
+              "dtype": "str"
             }
           ],
           "mandatory": true
