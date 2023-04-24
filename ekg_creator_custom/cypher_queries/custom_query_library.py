@@ -3,19 +3,16 @@ from typing import Dict, Optional
 
 from string import Template
 
-
-@dataclass
-class Query:
-    query_string: str
-    kwargs: Optional[Dict[str, any]]
+from ekg_creator.database_managers.db_connection import Query
 
 
 class CustomCypherQueryLibrary:
 
     @staticmethod
     def get_create_source_station_aggregation_query(entity_type):
+        # language=sql
         query_str = '''
-            MATCH (c_start:Class_sensor)
+            MATCH (c_start:Class {classType: "sensor"})
             WHERE NOT EXISTS ((:Class) - [:$df_c_type] -> (c_start))
             WITH c_start, "SourceStation"+c_start.cID as id
             MERGE (s:Entity:Station {entityType: "Station", type: "Source", sensors: [c_start.cID],
@@ -24,13 +21,14 @@ class CustomCypherQueryLibrary:
             MERGE (s) - [:LOCATED_AT] -> (l)
         '''
 
-        query_str = Template(query_str).substitute(df_c_type=f"DF_C_{entity_type.upper()}")
-        return Query(query_string=query_str, kwargs={})
+        return Query(query_str=query_str,
+                     template_string_parameters={"df_c_type": f"DF_C_{entity_type.upper()}"})
 
     @staticmethod
     def get_create_sink_station_aggregation_query(entity_type):
+        # language=sql
         query_str = '''
-                MATCH (c_end:Class_sensor)
+                MATCH (c_end:Class {classType: "sensor"})
                 WHERE NOT EXISTS ((c_end) - [:$df_c_type] -> (:Class))
                 WITH c_end, "SinkStation"+c_end.cID as id
                 MERGE (s:Entity:Station {entityType: "Station", type: "Sink", sensors: [c_end.cID],
@@ -39,14 +37,16 @@ class CustomCypherQueryLibrary:
                 MERGE (s) - [:LOCATED_AT] -> (l)
             '''
 
-        query_str = Template(query_str).substitute(df_c_type=f"DF_C_{entity_type.upper()}")
-        return Query(query_string=query_str, kwargs={})
+        return Query(query_str=query_str,
+                     template_string_parameters={"df_c_type": f"DF_C_{entity_type.upper()}"})
 
     @staticmethod
     def get_create_processing_stations_aggregation_query(entity_type):
+        # language=sql
         query_str = '''
-                    MATCH p=(c_start:Class_sensor) - [:$df_c_type*] -> (c_end:Class_sensor)
-                    WHERE NOT EXISTS ((c_end) - [:$df_c_type] -> (:Class_sensor)) AND NOT EXISTS ((:Class_sensor) - [:$df_c_type] -> (c_start))
+                    MATCH p=(c_start:Class {classType: "sensor"}) - [:$df_c_type*] -> (c_end:Class {classType: "sensor"})
+                    WHERE NOT EXISTS ((c_end) - [:$df_c_type] -> (:Class {classType: "sensor"})) AND NOT EXISTS ((:Class {classType: "sensor"}) - [
+                    :$df_c_type] -> (c_start))
                     WITH nodes(p) as classList
                     UNWIND range(1,size(classList)-3,2) AS i
                     WITH classList[i] as first, classList[i+1] as second
@@ -59,27 +59,32 @@ class CustomCypherQueryLibrary:
                     MERGE (s) - [:LOCATED_AT] -> (l)
                 '''
 
-        query_str = Template(query_str).substitute(df_c_type=f"DF_C_{entity_type.upper()}")
-        return Query(query_string=query_str, kwargs={})
+        return Query(query_str=query_str,
+                     template_string_parameters={"df_c_type": f"DF_C_{entity_type.upper()}"})
 
     @staticmethod
     def get_observe_events_to_station_aggregation_query():
+        # language=sql
         query_str = '''
-            MATCH (e:Event) - [:OBSERVED] -> (c:Class_sensor) - [:OCCURS_AT] -> (l:Location)
+            MATCH (e:Event) - [:OBSERVED] -> (c:Class {classType: "sensor"}) - [:OCCURS_AT] -> (l:Location)
             MERGE (e) - [:OCCURRED_AT] -> (l)
         '''
-        return Query(query_string=query_str, kwargs={})
+
+        return Query(query_str=query_str)
 
     @staticmethod
     def get_create_station_entities_and_correlate_to_events_query():
+        # language=sql
         query_str = '''
             MATCH (e) - [:OCCURRED_AT] ->  (l:Location) <- [:LOCATED_AT] - (s:Station)
             MERGE (e) - [:CORR] -> (s)
         '''
-        return Query(query_string=query_str, kwargs={})
+
+        return Query(query_str=query_str)
 
     @staticmethod
     def get_create_non_processing_station_entities_and_correlate_to_events_query():
+        # language=sql
         query_str = '''
                 MATCH (e) - [:AT] -> (cs:Location)
                 WHERE cs.type <> "Processing"
@@ -90,4 +95,5 @@ class CustomCypherQueryLibrary:
                 MERGE (s) - [:LOCATED_AT] -> (cs)
                 MERGE (e) - [:CORR] -> (s)
             '''
-        return Query(query_string=query_str, kwargs={})
+
+        return Query(query_str=query_str)
