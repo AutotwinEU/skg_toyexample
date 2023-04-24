@@ -46,7 +46,7 @@ def create_graph_instance(perf: Performance) -> EventKnowledgeGraph:
     """
 
     return EventKnowledgeGraph(db_connection=db_connection, db_name=connection.user,
-                               batch_size=5000, event_tables=datastructures, use_sample=use_sample,
+                               batch_size=5000, specification_of_data_structures=datastructures, use_sample=use_sample,
                                semantic_header=semantic_header, perf=perf,
                                custom_module_name=CustomModule)
 
@@ -79,10 +79,10 @@ def populate_graph(graph: EventKnowledgeGraph, perf: Performance):
     perf.finished_step(log_message=f"(:Log) nodes and [:HAS] relations done")
 
     # for each entity, we add the entity nodes to graph and correlate them to the correct events
-    graph.create_entities_by_nodes(node_label="Event")
+    graph.create_entities_by_nodes()
     perf.finished_step(log_message=f"(:Entity) nodes done")
 
-    graph.correlate_events_to_entities(node_label="Event")
+    graph.correlate_events_to_entities()
     perf.finished_step(log_message=f"[:CORR] edges done")
 
     graph.create_classes()
@@ -140,8 +140,8 @@ def main() -> None:
 
         graph.create_df_edges(entity_types=["Station"])
 
-        graph.save_event_log(entity="Pizza", additional_event_attributes=["sensor"])
-        graph.save_event_log(entity="Station", additional_event_attributes=["pizzaId"])
+        graph.save_event_log(entity_type="Pizza", additional_event_attributes=["sensor"])
+        graph.save_event_log(entity_type="Station", additional_event_attributes=["pizzaId"])
 
     perf.finish()
     perf.save()
