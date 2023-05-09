@@ -14,12 +14,16 @@ from ekg_creator_custom.ekg_modules.ekg_custom_module import CustomModule
 # several steps of import, each can be switch on/off
 from colorama import Fore
 
+from process_discovery.discover_process_model import ProcessDiscovery
+
 connection = authentication.connections_map[authentication.Connections.LOCAL]
 
 dataset_name = 'ToyExample'
 semantic_header_path = Path(f'json_files/{dataset_name}.json')
+config_path = Path(f'json_files/config.json')
 use_sample = False
 
+process_discovery = ProcessDiscovery(config_path)
 query_interpreter = Interpreter("Cypher")
 semantic_header = SemanticHeader.create_semantic_header(semantic_header_path, query_interpreter)
 perf_path = os.path.join("..", "perf", dataset_name, f"{dataset_name}Performance.csv")
@@ -133,6 +137,7 @@ def main() -> None:
         graph.create_df_process_model(entity_type="Pizza", classifiers=["sensor"])
         graph.do_custom_query("create_station_aggregation", entity_type="Pizza")
         graph.do_custom_query("observe_events_to_station_aggregation_query")
+        graph.do_custom_query("connect_stations", entity_type="Pizza")
         graph.create_df_process_model(entity_type="Pizza", classifiers=["station"])
 
         # create Station Entities
@@ -142,6 +147,10 @@ def main() -> None:
 
         graph.save_event_log(entity_type="Pizza", additional_event_attributes=["sensor"])
         graph.save_event_log(entity_type="Station", additional_event_attributes=["pizzaId"])
+
+        event_log = graph.do_custom_query("read_log")
+        process_model_graph = process_discovery.get_discovered_proces_model(event_log)
+        graph.do_custom_query("write_attributes", graph=process_model_graph)
 
     perf.finish()
     perf.save()
