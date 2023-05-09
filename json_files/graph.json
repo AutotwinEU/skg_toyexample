@@ -1,0 +1,136 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": [
+        [
+            "name",
+            "Toy Example"
+        ],
+        [
+            "start_stations",
+            [
+                "SourceStationS1"
+            ]
+        ],
+        [
+            "end_stations",
+            [
+                "SinkStationS7",
+                "SinkStationS6"
+            ]
+        ],
+        [
+            "wip_limits",
+            [
+                12
+            ]
+        ],
+        [
+            "generation_time",
+            82.92493009567261
+        ]
+    ],
+    "nodes": [
+        {
+            "index": 0,
+            "frequency": 2497,
+            "buffer_capacity": 0,
+            "machine_capacity": 1,
+            "processing_time": {
+                "mean": 2521.3055666800174,
+                "std": 512.0336933699604
+            },
+            "id": "SourceStationS1"
+        },
+        {
+            "index": 1,
+            "frequency": 2492,
+            "buffer_capacity": 2,
+            "machine_capacity": 4,
+            "processing_time": {
+                "mean": 7708.816686722832,
+                "std": 4.524289087417165
+            },
+            "id": "ProcessingStationS2S3"
+        },
+        {
+            "index": 2,
+            "frequency": 258,
+            "buffer_capacity": 2,
+            "machine_capacity": 1,
+            "processing_time": {
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "id": "SinkStationS7"
+        },
+        {
+            "index": 3,
+            "frequency": 2231,
+            "buffer_capacity": 2,
+            "machine_capacity": 3,
+            "processing_time": {
+                "mean": 6499.937247870902,
+                "std": 5.705446013775951
+            },
+            "id": "ProcessingStationS4S5"
+        },
+        {
+            "index": 4,
+            "frequency": 2231,
+            "buffer_capacity": 2,
+            "machine_capacity": 1,
+            "processing_time": {
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "id": "SinkStationS6"
+        }
+    ],
+    "adjacency": [
+        [
+            {
+                "frequency": 2497,
+                "routing_probability": 1.0,
+                "transfer_time": {
+                    "mean": 3530.7368842611095,
+                    "std": 4.5133408442908
+                },
+                "id": "ProcessingStationS2S3"
+            }
+        ],
+        [
+            {
+                "frequency": 258,
+                "routing_probability": 0.10353130016051364,
+                "transfer_time": {
+                    "mean": 4170.542635658915,
+                    "std": 3.133868587845179
+                },
+                "id": "SinkStationS7"
+            },
+            {
+                "frequency": 2234,
+                "routing_probability": 0.8964686998394864,
+                "transfer_time": {
+                    "mean": 4000.067144136079,
+                    "std": 5.70548750943959
+                },
+                "id": "ProcessingStationS4S5"
+            }
+        ],
+        [],
+        [
+            {
+                "frequency": 2231,
+                "routing_probability": 1.0,
+                "transfer_time": {
+                    "mean": 2874.661586732414,
+                    "std": 4.989652880391771
+                },
+                "id": "SinkStationS6"
+            }
+        ],
+        []
+    ]
+}

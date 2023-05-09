@@ -1,0 +1,13 @@
+{
+    "name": "Toy Example",
+    "work_path": "json_files",
+    "file_name": "graph.json",
+    "log": {
+        "path": "",
+        "mappings": {}
+    },
+    "generation": {
+        "seize_delay": 0.0,
+        "release_delay": 0.0
+    }
+}
