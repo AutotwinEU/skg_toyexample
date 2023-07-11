@@ -1,0 +1,255 @@
+[
+    {
+      "name": "ToyExamplePizzaSensors",
+      "file_directory": "data\\ToyExampleV2\\",
+      "file_names": [
+        "S1.csv",
+        "S2.csv",
+        "S3.csv",
+        "S4.csv",
+        "S16.csv"
+      ],
+      "labels": [
+        "Event"
+      ],
+      "seperator": ";",
+      "attributes": [
+        {
+          "name": "pizzaId",
+          "columns": [
+            {
+              "name": "pizzaId",
+              "dtype": "str"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "activity",
+          "columns": [
+            {
+              "name": "sensor"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "sensor",
+          "columns": [
+            {
+              "name": "sensor"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "timestamp",
+          "columns": [
+            {
+              "name": "timestamp"
+            }
+          ],
+          "mandatory": true
+        }
+      ]
+    },
+    {
+      "name": "ToyExamplePizzaBoxSensors",
+      "file_directory": "data\\ToyExampleV2\\",
+      "file_names": [
+        "S5.csv",
+        "S6.csv",
+        "S7.csv",
+        "S8.csv"
+      ],
+      "labels": [
+        "Event"
+      ],
+      "seperator": ";",
+      "attributes": [
+        {
+          "name": "boxId",
+          "columns": [
+            {
+              "name": "boxId",
+              "dtype": "str"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "activity",
+          "columns": [
+            {
+              "name": "sensor"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "sensor",
+          "columns": [
+            {
+              "name": "sensor"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "timestamp",
+          "columns": [
+            {
+              "name": "timestamp"
+            }
+          ],
+          "mandatory": true
+        }
+      ]
+    },
+    {
+      "name": "ToyExamplePackageSensors",
+      "file_directory": "data\\ToyExampleV2\\",
+      "file_names": [
+        "S9.csv",
+        "S10.csv"
+      ],
+      "labels": [
+        "Event"
+      ],
+      "seperator": ";",
+      "attributes": [
+        {
+          "name": "packageId",
+          "columns": [
+            {
+              "name": "packageId",
+              "dtype": "str"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "activity",
+          "columns": [
+            {
+              "name": "sensor"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "sensor",
+          "columns": [
+            {
+              "name": "sensor"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "timestamp",
+          "columns": [
+            {
+              "name": "timestamp"
+            }
+          ],
+          "mandatory": true
+        }
+      ]
+    },
+    {
+      "name": "ToyExamplePizzaPalletSensors",
+      "file_directory": "data\\ToyExampleV2\\",
+      "file_names": [
+        "S11.csv",
+        "S12.csv",
+        "S13.csv",
+        "S14.csv",
+        "S15.csv"
+      ],
+      "labels": [
+        "Event"
+      ],
+      "seperator": ";",
+      "attributes": [
+        {
+          "name": "palletId",
+          "columns": [
+            {
+              "name": "palletId",
+              "dtype": "str"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "activity",
+          "columns": [
+            {
+              "name": "sensor"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "sensor",
+          "columns": [
+            {
+              "name": "sensor"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "timestamp",
+          "columns": [
+            {
+              "name": "timestamp"
+            }
+          ],
+          "mandatory": true
+        }
+      ]
+    },
+    {
+      "name": "ToyExampleStations",
+      "file_directory": "data\\ToyExampleV2\\",
+      "file_names": [
+        "stations.csv"
+      ],
+      "labels": [
+        "Station"
+      ],
+      "attributes": [
+        {
+          "name": "ID",
+          "columns": [
+            {
+              "name": "name",
+              "dtype": "str"
+            }
+          ],
+          "mandatory": true,
+          "is_primary_key": true
+        },
+        {
+          "name": "type",
+          "columns": [
+            {
+              "name": "type"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "sensors",
+          "columns": [
+            {
+              "name": "sensors"
+            }
+          ],
+          "mandatory": true
+        }
+      ]
+    }
+]

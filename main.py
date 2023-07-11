@@ -18,7 +18,7 @@ from process_discovery.discover_process_model import ProcessDiscovery
 
 connection = authentication.connections_map[authentication.Connections.LOCAL]
 
-dataset_name = 'ToyExample'
+dataset_name = 'ToyExampleSim'
 semantic_header_path = Path(f'json_files/{dataset_name}.json')
 config_path = Path(f'json_files/config.json')
 use_sample = False
@@ -32,9 +32,9 @@ number_of_steps = 100
 ds_path = Path(f'json_files/{dataset_name}_DS.json')
 datastructures = ImportedDataStructures(ds_path)
 
-step_clear_db = True
+step_clear_db = False
 step_populate_graph = True
-step_analysis = True
+step_analysis = False
 
 use_preloaded_files = False  # if false, read/import files instead
 verbose = False

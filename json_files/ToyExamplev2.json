@@ -1,0 +1,124 @@
+{
+  "name": "ToyExample",
+  "version": "1.0.0",
+  "entities": [
+    {
+      "type": "Station",
+      "entities_derived_from_nodes": {
+      },
+      "labels": [
+      ],
+      "primary_keys": [
+      ],
+      "entity_attributes": [
+      ],
+      "corr": true,
+      "df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Pizza",
+      "constructed_by_node": {
+        "node_label": "Event"
+      },
+      "labels": [
+        "Pizza"
+      ],
+      "primary_keys": [
+        "pizzaId"
+      ],
+      "corr": true,
+      "df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Sensor",
+      "constructed_by_node": {
+        "node_label": "Event"
+      },
+      "labels": [
+        "Sensor"
+      ],
+      "primary_keys": [
+        "sensor"
+      ],
+      "corr": true,
+      "df": false,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Box",
+      "constructed_by_node": {
+        "node_label": "Event"
+      },
+      "labels": [
+        "Box"
+      ],
+      "primary_keys": [
+        "boxId"
+      ],
+      "corr": true,
+      "df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Package",
+      "constructed_by_node": {
+        "node_label": "Event"
+      },
+      "labels": [
+        "Package"
+      ],
+      "primary_keys": [
+        "packageId"
+      ],
+      "corr": true,
+      "df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Pallet",
+      "constructed_by_node": {
+        "node_label": "Event"
+      },
+      "labels": [
+        "Pallet"
+      ],
+      "primary_keys": [
+        "palletId"
+      ],
+      "corr": true,
+      "df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    }
+  ],
+  "classes": [
+    {
+      "label": "Event",
+      "class_identifiers": [
+        "sensor"
+      ]
+    }
+  ],
+  "log": {
+    "include": true,
+    "has": true
+  },
+  "relations": [
+    {
+      "type": "PART_OF",
+      "constructed_by_nodes": {
+        "from_node_label": "Station",
+        "to_node_label": "Sensor",
+        "foreign_key": "sensors",
+        "reversed": true
+      }
+    }
+  ]
+}
