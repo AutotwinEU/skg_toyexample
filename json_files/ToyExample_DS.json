@@ -12,7 +12,7 @@
         "S7.csv"
       ],
       "labels": [
-        "Event"
+        "SensorRecord"
       ],
       "seperator": ";",
       "attributes": [
@@ -27,37 +27,13 @@
           "mandatory": true
         },
         {
-          "name": "activity",
+          "name": "sensorId",
           "columns": [
             {
-              "name": "sensor"
+              "name": "sensor",
+              "dtype": "str"
             }
           ],
-          "mandatory": true
-        },
-        {
-          "name": "sensor",
-          "columns": [
-            {
-              "name": "sensor"
-            }
-          ],
-          "mandatory": true
-        },
-        {
-          "name": "timestampInDatetime",
-          "columns": [
-            {
-              "name": "timestamp"
-            }
-          ],
-          "datetime_object": {
-            "is_epoch": true,
-            "unit": "s",
-            "format": "dd/MM/yyyy HH:mm:ss",
-            "convert_to": "ISO_DATE_TIME"
-          },
-
           "mandatory": true
         },
         {

@@ -1,6 +1,59 @@
 {
   "name": "ToyExample",
   "version": "1.0.0",
+  "nodes": [
+    {
+      "type": "Event",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorRecord)",
+          "result": "(e:Event {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
+        }
+      ]
+    },
+    {
+      "type": "Activity",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorRecord)",
+          "result": "(a:Activity {activity: \"Pass Sensor \" + record.sensorId})",
+          "infer_observed": true
+        }
+      ]
+    },
+    {
+      "type": "Pizza",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorRecord)",
+          "result": "(v:Entity:Pizza {sysId: record.pizzaId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Sensor",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorRecord)",
+          "result": "(v:Entity:Resource:MachinePart:Sensor {sysId: record.sensorId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "EXECUTED_BY"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+
+    {
+      "type": "Station"
+    }
+  ],
   "entities": [
     {
       "type": "Station",
