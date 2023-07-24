@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-from ekg_creator.data_managers.interpreters import Interpreter
 from ekg_creator.data_managers.semantic_header import SemanticHeader
 from ekg_creator.database_managers.EventKnowledgeGraph import EventKnowledgeGraph, DatabaseConnection
 from ekg_creator.data_managers.datastructures import ImportedDataStructures
@@ -18,23 +17,22 @@ from process_discovery.discover_process_model import ProcessDiscovery
 
 connection = authentication.connections_map[authentication.Connections.LOCAL]
 
-dataset_name = 'ToyExampleSim'
+dataset_name = 'ToyExample'
 semantic_header_path = Path(f'json_files/{dataset_name}.json')
 config_path = Path(f'json_files/config.json')
 use_sample = False
 
 process_discovery = ProcessDiscovery(config_path)
-query_interpreter = Interpreter("Cypher")
-semantic_header = SemanticHeader.create_semantic_header(semantic_header_path, query_interpreter)
+semantic_header = SemanticHeader.create_semantic_header(semantic_header_path)
 perf_path = os.path.join("..", "perf", dataset_name, f"{dataset_name}Performance.csv")
 number_of_steps = 100
 
 ds_path = Path(f'json_files/{dataset_name}_DS.json')
 datastructures = ImportedDataStructures(ds_path)
 
-step_clear_db = False
+step_clear_db = True
 step_populate_graph = True
-step_analysis = False
+step_analysis = True
 
 use_preloaded_files = False  # if false, read/import files instead
 verbose = False
@@ -73,34 +71,18 @@ def populate_graph(graph: EventKnowledgeGraph, perf: Performance):
 
     # import the events from all sublogs in the graph with the corresponding labels
     graph.import_data()
-    perf.finished_step(log_message=f"(:Event) nodes done")
+    perf.finished_step(log_message=f"(:Record) nodes done")
 
     # TODO: constraints in semantic header?
     graph.set_constraints()
     perf.finished_step(log_message=f"All constraints are set")
 
-    graph.create_log()
-    perf.finished_step(log_message=f"(:Log) nodes and [:HAS] relations done")
-
     # for each entity, we add the entity nodes to graph and correlate them to the correct events
-    graph.create_entities_by_nodes()
+    graph.create_nodes_by_records()
     perf.finished_step(log_message=f"(:Entity) nodes done")
 
-    graph.correlate_events_to_entities()
-    perf.finished_step(log_message=f"[:CORR] edges done")
-
-    graph.create_classes()
-    perf.finished_step(log_message=f"(:Class) nodes done")
-
-    graph.create_entity_relations_using_nodes()
-    graph.create_entity_relations_using_relations()
-    perf.finished_step(log_message=f"[:REL] edges done")
-
-    graph.create_entities_by_relations()
+    graph.create_relations_using_record()
     perf.finished_step(log_message=f"Reified (:Entity) nodes done")
-
-    graph.correlate_events_to_reification()
-    perf.finished_step(log_message=f"[:CORR] edges for Reified (:Entity) nodes done")
 
     graph.create_df_edges()
     perf.finished_step(log_message=f"[:DF] edges done")
@@ -135,22 +117,22 @@ def main() -> None:
 
     if step_analysis:
         graph.create_df_process_model(entity_type="Pizza", classifiers=["sensor"])
-        graph.do_custom_query("create_station_aggregation", entity_type="Pizza")
-        graph.do_custom_query("observe_events_to_station_aggregation_query")
-        graph.do_custom_query("connect_stations", entity_type="Pizza")
-        graph.create_df_process_model(entity_type="Pizza", classifiers=["station"])
+        graph.custom_module.create_station_aggregation(entity_type="Pizza")
+        graph.custom_module.observe_events_to_station_aggregation_query()
+        graph.custom_module.connect_stations_and_sensors(entity_type="Pizza")
+        graph.custom_module.update_sensor_attributes()
 
         # create Station Entities
-        graph.do_custom_query("create_station_entities_and_correlate_to_events")
+        # graph.do_custom_query("create_station_entities_and_correlate_to_events")
 
         graph.create_df_edges(entity_types=["Station"])
 
-        graph.save_event_log(entity_type="Pizza", additional_event_attributes=["sensor"])
-        graph.save_event_log(entity_type="Station", additional_event_attributes=["pizzaId"])
+        graph.save_event_log(entity_type="Pizza")
+        graph.save_event_log(entity_type="Station")
 
-        event_log = graph.do_custom_query("read_log")
+        event_log = graph.custom_module.read_log()
         process_model_graph = process_discovery.get_discovered_proces_model(event_log)
-        graph.do_custom_query("write_attributes", graph=process_model_graph)
+        graph.custom_module.write_attributes(graph=process_model_graph)
 
     perf.finish()
     perf.save()
