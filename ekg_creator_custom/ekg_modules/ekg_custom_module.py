@@ -33,9 +33,14 @@ class CustomModule:
     def create_station_entities_and_correlate_to_events(self):
         self.connection.exec_query(ccql.get_create_station_entities_and_correlate_to_events_query)
 
-    def connect_stations(self, entity_type):
+    def connect_stations_and_sensors(self, entity_type):
         self.connection.exec_query(ccql.get_connect_stations_queries,
                                    **{"entity_type": entity_type})
+        self.connection.exec_query(ccql.get_connect_sensors_queries,
+                                   **{"entity_type": entity_type})
+
+    def update_sensor_attributes(self):
+        self.connection.exec_query(ccql.get_update_sensors_queries)
 
     def read_log(self):
         data = self.connection.exec_query(ccql.get_read_log_query)
