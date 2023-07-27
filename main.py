@@ -1,12 +1,11 @@
 import os
 from pathlib import Path
 
-from ekg_creator.data_managers.semantic_header import SemanticHeader
-from ekg_creator.database_managers.EventKnowledgeGraph import EventKnowledgeGraph, DatabaseConnection
-from ekg_creator.data_managers.datastructures import ImportedDataStructures
-from ekg_creator.utilities.performance_handling import Performance
-
-from ekg_creator.database_managers import authentication
+from promg import SemanticHeader
+from promg import EventKnowledgeGraph, DatabaseConnection
+from promg import ImportedDataStructures
+from promg import Performance
+from promg import authentication
 
 from ekg_creator_custom.ekg_modules.ekg_custom_module import CustomModule
 
@@ -17,7 +16,7 @@ from process_discovery.discover_process_model import ProcessDiscovery
 
 connection = authentication.connections_map[authentication.Connections.LOCAL]
 
-dataset_name = 'ToyExample'
+dataset_name = 'ToyExamplev2'
 semantic_header_path = Path(f'json_files/{dataset_name}.json')
 config_path = Path(f'json_files/config.json')
 use_sample = False
@@ -81,6 +80,9 @@ def populate_graph(graph: EventKnowledgeGraph, perf: Performance):
     graph.create_nodes_by_records()
     perf.finished_step(log_message=f"(:Entity) nodes done")
 
+    graph.custom_module.complete_corr()
+
+
     graph.create_relations_using_record()
     perf.finished_step(log_message=f"Reified (:Entity) nodes done")
 
@@ -116,11 +118,16 @@ def main() -> None:
         populate_graph(graph=graph, perf=perf)
 
     if step_analysis:
-        graph.create_df_process_model(entity_type="Pizza", classifiers=["sensor"])
-        graph.custom_module.create_station_aggregation(entity_type="Pizza")
+
+        graph.create_df_process_model(entity_type="Pizza")
+        graph.create_df_process_model(entity_type="Pack")
+        graph.create_df_process_model(entity_type="Box")
+        graph.create_df_process_model(entity_type="Pallet")
+        # graph.custom_module.create_station_aggregation(entity_type="Pizza")
+        graph.custom_module.connect_activities_to_location()
         graph.custom_module.observe_events_to_station_aggregation_query()
-        graph.custom_module.connect_stations_and_sensors(entity_type="Pizza")
-        graph.custom_module.update_sensor_attributes()
+        graph.custom_module.connect_stations_and_sensors()
+        # graph.custom_module.update_sensor_attributes()
 
         # create Station Entities
         # graph.do_custom_query("create_station_entities_and_correlate_to_events")

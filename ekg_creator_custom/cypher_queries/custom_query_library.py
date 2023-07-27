@@ -3,7 +3,7 @@ from typing import Dict, Optional
 
 from string import Template
 
-from ekg_creator.database_managers.db_connection import Query
+from promg import Query
 
 
 class CustomCypherQueryLibrary:
@@ -70,6 +70,59 @@ class CustomCypherQueryLibrary:
                      template_string_parameters={"df_c_type": f"DF_C_{entity_type.upper()}"})
 
     @staticmethod
+    def get_complete_corr_query(entity_type, from_activity, to_activity):
+        query_str = '''
+            CALL apoc.periodic.commit('
+            MATCH (e:Event {activity: "$from_activity"})
+            WHERE e.used IS NULL
+            WITH e LIMIT $limit
+            CALL {WITH e
+                    MATCH (f:Event {activity: "$to_activity"})
+                    WHERE f.timestamp > e.timestamp
+                    RETURN f
+                    ORDER BY f.timestamp ASC
+                    LIMIT 1
+            }
+            MATCH (e) - [:ACTS_ON] -> (n:$entity_type)
+            MERGE (f) - [:ACTS_ON] -> (n)
+            WITH e, f            
+            SET e.used = True
+            RETURN count(*)',
+            {limit: 2500})
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={"entity_type": entity_type,
+
+                                                 "from_activity": from_activity,
+                                                 "to_activity": to_activity
+                     })
+
+    @staticmethod
+    def get_reset_used_prop_query():
+        query_str = '''
+                CALL apoc.periodic.commit('
+                MATCH (e:Event)
+                WHERE e.used = True
+                WITH e LIMIT $limit
+                SET e.used = Null
+                RETURN count(*)',
+                {limit: 2500})
+            '''
+
+        return Query(query_str=query_str)
+
+    @staticmethod
+    def get_connect_activities_to_location_query():
+        # language=sql
+        query_str = '''
+            MATCH (l:Location) <- [:PART_OF] - (:Sensor) <- [:EXECUTED_BY] - (e:Event) <- [:OBSERVED] - (a:Activity)
+            MERGE (a) - [:OCCURS_AT] -> (l)
+        '''
+
+        return Query(query_str=query_str)
+
+    @staticmethod
     def get_observe_events_to_station_aggregation_query():
         # language=sql
         query_str = '''
@@ -80,37 +133,30 @@ class CustomCypherQueryLibrary:
         return Query(query_str=query_str)
 
     @staticmethod
-    def get_connect_stations_queries(entity_type):
+    def get_connect_stations_queries():
         # language=sql
         query_str = '''
             MATCH (s1:Station) <- [:OCCURS_AT] - (:Activity) 
-                - [:$df_c_type] -> (:Activity) - [:OCCURS_AT] -> (s2:Station)
+                - [df] -> (:Activity) - [:OCCURS_AT] -> (s2:Station)
             WHERE s1 <> s2
-            MERGE (s1) - [:CONN {movedEntity: "$entity_type"}] -> (s2)
+            MERGE (s1) - [:CONN {movedEntity: df.entityType}] -> (s2)
         '''
 
-        return Query(query_str=query_str,
-                     template_string_parameters={
-                         "df_c_type": f"DF_C_{entity_type.upper()}",
-                         "entity_type": entity_type
-                     })
+        return Query(query_str=query_str)
 
     @staticmethod
-    def get_connect_sensors_queries(entity_type):
+    def get_connect_sensors_queries():
         # language=sql
         query_str = '''
-                 MATCH (s1:Sensor) <- [:EXECUTED_BY] - (:Event) <- [:OBSERVED] - (:Activity) 
-                    - [:$df_c_type] -> (:Activity) - [:OBSERVED] -> (:Event) - [:EXECUTED_BY] -> (s2:Sensor)
-                WHERE s1 <> s2
-                WITH s1, s2
-                MERGE (s1) - [:CONN {movedEntity: "$entity_type"}] -> (s2)
+            MATCH (e1:Event) - [:EXECUTED_BY] -> (s1:Sensor) - [:PART_OF] -> (:Station) <- [:OCCURS_AT] - (:Activity) 
+                    - [df] -> (:Activity) - [:OCCURS_AT] -> (:Station) <- [:PART_OF] - (s2:Sensor) <- [:EXECUTED_BY] 
+                    - (e2:Event) <- [] - (e1)
+            WHERE s1 <> s2
+            WITH s1, s2, df
+            MERGE (s1) - [:CONN {movedEntity: df.entityType}] -> (s2)
             '''
 
-        return Query(query_str=query_str,
-                     template_string_parameters={
-                         "df_c_type": f"DF_C_{entity_type.upper()}",
-                         "entity_type": entity_type
-                     })
+        return Query(query_str=query_str)
 
     @staticmethod
     def get_update_sensors_queries():

@@ -12,7 +12,7 @@
         "S7.csv"
       ],
       "labels": [
-        "SensorRecord"
+        "Record"
       ],
       "seperator": ";",
       "attributes": [

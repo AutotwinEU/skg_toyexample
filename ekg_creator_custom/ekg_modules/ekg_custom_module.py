@@ -1,7 +1,7 @@
 import pandas as pd
 
-from ekg_creator.database_managers.db_connection import DatabaseConnection
-from ekg_creator.utilities.performance_handling import Performance
+from promg import DatabaseConnection
+from promg import Performance
 from ekg_creator_custom.cypher_queries.custom_query_library import CustomCypherQueryLibrary as ccql
 
 
@@ -27,17 +27,34 @@ class CustomModule:
         self.connection.exec_query(ccql.get_create_processing_stations_aggregation_query,
                                    **{"entity_type": entity_type})
 
+    def complete_corr(self):
+        completion_dict = [
+            {"entity_type": 'Pizza', "from_activity": "Pass Sensor S4", "to_activity": "Pass Sensor S5"},
+            {"entity_type": 'Pack', "from_activity": "Pass Sensor S8", "to_activity": "Pass Sensor S9"},
+            {"entity_type": 'Box', "from_activity": "Pass Sensor S10", "to_activity": "Pass Sensor S13"}
+        ]
+        for dict in completion_dict:
+            self.connection.exec_query(ccql.get_complete_corr_query,
+                                       **{
+                                           "entity_type": dict["entity_type"],
+                                           "from_activity": dict["from_activity"],
+                                           "to_activity": dict["to_activity"]
+                                       })
+
+        self.connection.exec_query(ccql.get_reset_used_prop_query)
+
+    def connect_activities_to_location(self):
+        self.connection.exec_query(ccql.get_connect_activities_to_location_query)
+
     def observe_events_to_station_aggregation_query(self):
         self.connection.exec_query(ccql.get_observe_events_to_station_aggregation_query)
 
     def create_station_entities_and_correlate_to_events(self):
         self.connection.exec_query(ccql.get_create_station_entities_and_correlate_to_events_query)
 
-    def connect_stations_and_sensors(self, entity_type):
-        self.connection.exec_query(ccql.get_connect_stations_queries,
-                                   **{"entity_type": entity_type})
-        self.connection.exec_query(ccql.get_connect_sensors_queries,
-                                   **{"entity_type": entity_type})
+    def connect_stations_and_sensors(self):
+        self.connection.exec_query(ccql.get_connect_stations_queries)
+        self.connection.exec_query(ccql.get_connect_sensors_queries)
 
     def update_sensor_attributes(self):
         self.connection.exec_query(ccql.get_update_sensors_queries)

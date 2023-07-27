@@ -1,12 +1,18 @@
 {
   "name": "ToyExample",
   "version": "1.0.0",
+
+  "records": [
+    "(record:SensorEventRecord {timestamp, sensorId}",
+    "(record:PizzaRecord {pizzaId})",
+    "(record:SensorRecord {sensorId})"
+  ],
   "nodes": [
     {
       "type": "Event",
       "constructor": [
         {
-          "prevalent_record": "(record:SensorRecord)",
+          "prevalent_record": "(record:SensorEventRecord)",
           "result": "(e:Event {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
         }
       ]
@@ -15,7 +21,7 @@
       "type": "Activity",
       "constructor": [
         {
-          "prevalent_record": "(record:SensorRecord)",
+          "prevalent_record": "(record:SensorEventRecord)",
           "result": "(a:Activity {activity: \"Pass Sensor \" + record.sensorId})",
           "infer_observed": true
         }
@@ -25,7 +31,7 @@
       "type": "Pizza",
       "constructor": [
         {
-          "prevalent_record": "(record:SensorRecord)",
+          "prevalent_record": "(record:PizzaRecord)",
           "result": "(v:Entity:Pizza {sysId: record.pizzaId})",
           "infer_corr_from_event_record": true,
           "corr_type": "ACTS_ON"
@@ -53,50 +59,5 @@
     {
       "type": "Station"
     }
-  ],
-  "entities": [
-    {
-      "type": "Station",
-      "entities_derived_from_nodes": {
-      },
-      "labels": [
-      ],
-      "primary_keys": [
-      ],
-      "entity_attributes": [
-      ],
-      "corr": true,
-      "df": true,
-      "include_label_in_df": true,
-      "merge_duplicate_df": true
-    },
-    {
-      "type": "Pizza",
-      "constructed_by_node": {
-        "node_label": "Event"
-      },
-      "labels": [
-        "Pizza"
-      ],
-      "primary_keys": [
-        "pizzaId"
-      ],
-      "corr": true,
-      "df": true,
-      "include_label_in_df": true,
-      "merge_duplicate_df": true
-    }
-  ],
-  "classes": [
-    {
-      "label": "Event",
-      "class_identifiers": [
-        "sensor"
-      ]
-    }
-  ],
-  "log": {
-    "include": true,
-    "has": true
-  }
+  ]
 }
