@@ -9,7 +9,9 @@
     "(record:PalletRecord {palletId})",
     "(record:SensorRecord {sensorId})",
     "(record:SensorTypeRecord {sensorId, sensorType})",
-    "(record:StationRecord {stationName, stationType})"
+    "(record:StationRecord {stationName, stationType})",
+    "(record:PizzaDetailRecord {code, diameter, height, weight, packCount, boxCount, boxQuantity, interval, intervalDelta})",
+    "(record:PizzaCodeRecord {code})"
   ],
   "nodes": [
     {
@@ -116,9 +118,58 @@
           "infer_corr_from_event_record": true
         }
       ]
+    },
+    {
+      "type": "PizzaDescription",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PizzaCodeRecord)",
+          "result": "(v:PizzaDescription {code: record.code}})",
+          "infer_corr_from_event_record": false
+        },
+        {
+          "prevalent_record": "(record:PizzaDetailRecord)",
+          "result": "(v:PizzaDescription {code: record.code, OPTIONAL diameter: record.diameter, OPTIONAL height: record.height, OPTIONAL weight: record.weight, OPTIONAL packCount: record.packCount, OPTIONAL boxCount: record.boxCount, OPTIONAL boxQuantity: record.boxQuantity, OPTIONAL interval: record.interval, OPTIONAL intervalDelta: record.intervalDelta})",
+          "infer_corr_from_event_record": false
+        }
+      ]
     }
   ],
   "relations": [
+
+    {
+      "type": "HAS_TYPE",
+      "constructor": {
+        "prevalent_record": "(record:PizzaCodeRecord:PizzaRecord)",
+        "from_node": "(pizza: Pizza)",
+        "to_node": "(description: PizzaDescription)",
+        "result": "(pizza) - [:HAS_TYPE] -> (description)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "HAS_TYPE",
+      "constructor": {
+        "prevalent_record": "(record:PizzaCodeRecord:PackRecord)",
+        "from_node": "(pack: Pack)",
+        "to_node": "(description: PizzaDescription)",
+        "result": "(pack) - [:HAS_TYPE] -> (description)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "HAS_TYPE",
+      "constructor": {
+        "prevalent_record": "(record:PizzaCodeRecord:BoxRecord)",
+        "from_node": "(box: Box)",
+        "to_node": "(description: PizzaDescription)",
+        "result": "(box) - [:HAS_TYPE] -> (description)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
     {
       "type": "PART_OF",
       "constructor": {
@@ -128,6 +179,45 @@
         "result": "(sensor) - [:PART_OF] -> (station)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "PART_OF",
+      "constructor": {
+        "relations": [
+          "(pizza:Pizza) <- [:ACTS_ON] - (e:Event)",
+          "(pack:Pack) <- [:ACTS_ON] - (e)"
+        ],
+        "from_node": "(pizza: Pizza)",
+        "to_node": "(pack: Pack)",
+        "result": "(pizza) - [:PART_OF] -> (pack)",
+        "model_as_node": false
+      }
+    },
+    {
+      "type": "PART_OF",
+      "constructor": {
+        "relations": [
+          "(pack:Pack) <- [:ACTS_ON] - (e:Event)",
+          "(box:Box) <- [:ACTS_ON] - (e)"
+        ],
+        "from_node": "(pack: Pack)",
+        "to_node": "(box: Box)",
+        "result": "(pack) - [:PART_OF] -> (box)",
+        "model_as_node": false
+      }
+    },
+    {
+      "type": "PART_OF",
+      "constructor": {
+        "relations": [
+          "(box:Box) <- [:ACTS_ON] - (e:Event)",
+          "(pallet:Pallet) <- [:ACTS_ON] - (e)"
+        ],
+        "from_node": "(box: Box)",
+        "to_node": "(pallet: Pallet)",
+        "result": "(box) - [:PART_OF] -> (pallet)",
+        "model_as_node": false
       }
     }
   ]

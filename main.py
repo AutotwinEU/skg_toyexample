@@ -8,6 +8,7 @@ from promg import Performance
 from promg import authentication
 
 from ekg_creator_custom.ekg_modules.ekg_custom_module import CustomModule
+from tts_credentials import remote
 
 # several steps of import, each can be switch on/off
 from colorama import Fore
@@ -15,6 +16,7 @@ from colorama import Fore
 from process_discovery.discover_process_model import ProcessDiscovery
 
 connection = authentication.connections_map[authentication.Connections.LOCAL]
+use_local = False
 
 dataset_name = 'ToyExamplev2'
 semantic_header_path = Path(f'json_files/{dataset_name}.json')
@@ -29,15 +31,19 @@ number_of_steps = 100
 ds_path = Path(f'json_files/{dataset_name}_DS.json')
 datastructures = ImportedDataStructures(ds_path)
 
-step_clear_db = True
+step_clear_db = False
 step_populate_graph = True
 step_analysis = True
 
 use_preloaded_files = False  # if false, read/import files instead
 verbose = False
 
-db_connection = DatabaseConnection(db_name=connection.user, uri=connection.uri, user=connection.user,
-                                   password=connection.password, verbose=verbose)
+if use_local:
+    db_connection = DatabaseConnection(db_name=connection.user, uri=connection.uri, user=connection.user,
+                                       password=connection.password, verbose=verbose)
+else:
+    db_connection = DatabaseConnection(db_name=remote.user, uri=remote.uri, user=remote.user,
+                                       password=remote.password, verbose=verbose)
 
 
 def create_graph_instance(perf: Performance) -> EventKnowledgeGraph:
@@ -82,8 +88,8 @@ def populate_graph(graph: EventKnowledgeGraph, perf: Performance):
 
     graph.custom_module.complete_corr()
 
-
     graph.create_relations_using_record()
+    graph.create_relations_using_relations()
     perf.finished_step(log_message=f"Reified (:Entity) nodes done")
 
     graph.create_df_edges()
@@ -134,12 +140,12 @@ def main() -> None:
 
         graph.create_df_edges(entity_types=["Station"])
 
-        graph.save_event_log(entity_type="Pizza")
-        graph.save_event_log(entity_type="Station")
-
-        event_log = graph.custom_module.read_log()
-        process_model_graph = process_discovery.get_discovered_proces_model(event_log)
-        graph.custom_module.write_attributes(graph=process_model_graph)
+        # graph.save_event_log(entity_type="Pizza")
+        # graph.save_event_log(entity_type="Station")
+        #
+        # event_log = graph.custom_module.read_log()
+        # process_model_graph = process_discovery.get_discovered_proces_model(event_log)
+        # graph.custom_module.write_attributes(graph=process_model_graph)
 
     perf.finish()
     perf.save()
