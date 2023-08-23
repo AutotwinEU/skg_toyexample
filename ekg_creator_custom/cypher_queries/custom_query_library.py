@@ -70,36 +70,79 @@ class CustomCypherQueryLibrary:
                      template_string_parameters={"df_c_type": f"DF_C_{entity_type.upper()}"})
 
     @staticmethod
-    def get_complete_corr_query(entity_type, from_activity, to_activity):
+    def get_complete_corr_query(version_number):
         query_str = '''
-            CALL apoc.periodic.commit('
-            MATCH (e:Event {activity: "$from_activity"})
-            WHERE e.used IS NULL
-            WITH e LIMIT $limit
-            CALL {WITH e
-                    MATCH (f:Event {activity: "$to_activity"})
-                    WHERE f.timestamp > e.timestamp
-                    RETURN f
-                    ORDER BY f.timestamp ASC
-                    LIMIT 1
+            MATCH (p:Entity:$version_number) <-[:ACTS_ON] - (e:Event:$version_number) - [:OCCURRED_AT] -> (s:Station:$version_number)
+            WITH s, apoc.coll.flatten(collect (distinct labels(p))) as labels
+            CALL {
+                WITH s, labels
+                UNWIND labels as _label
+                WITH s, _label
+                WHERE _label = "Pizza" or _label = "Pack" or _label = "Box" or _label = "Pallet"
+                WITH s, collect(distinct _label) as unique_labels 
+                WHERE size(unique_labels) > 1
+                RETURN s as packingStation, unique_labels
             }
-            MATCH (e) - [:ACTS_ON] -> (n:$entity_type)
+            MATCH (e:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
+            MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor:$version_number {sensorType: "ENTER"})
+            CALL {WITH e, packingStation
+                  MATCH (f:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
+                  MATCH (f) - [:EXECUTED_BY] -> (sensor:Sensor {sensorType: "EXIT"})
+                  WHERE f.timestamp > e.timestamp
+                  RETURN f
+                  ORDER BY f.timestamp ASC
+                  LIMIT 1
+                  }
+            MATCH (e) - [:ACTS_ON] -> (n)
             MERGE (f) - [:ACTS_ON] -> (n)
-            WITH e, f            
-            SET e.used = True
-            RETURN count(*)',
-            {limit: 2500})
         '''
 
         return Query(query_str=query_str,
-                     template_string_parameters={"entity_type": entity_type,
-
-                                                 "from_activity": from_activity,
-                                                 "to_activity": to_activity
+                     template_string_parameters={"version_number": version_number
                      })
 
     @staticmethod
-    def get_reset_used_prop_query():
+    def get_complete_quality_query(version_number):
+        query_str = '''
+                MATCH (p:pizzaQualityAttribute:$version_number)
+                SET p.defective = NOT(p.burned)
+            '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "version_number": version_number
+                     })
+
+    @staticmethod
+    def get_create_quality_for_pizzas_query(version_number):
+        query_str = '''
+                MATCH (p:Pizza:$version_number)
+                WHERE NOT EXISTS ((p) - [:HAS_PROPERTY] -> (:PizzaQualityAttribute:$version_number))
+                CREATE (q:EntityAttribute:PizzaQualityAttribute:$version_number {burned: false, defective: false})
+                CREATE (p) - [:HAS_PROPERTY] -> (q)
+            '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "version_number": version_number
+                     })
+
+    @staticmethod
+    def get_create_qualifier_rel_to_pizza_quality_query(version_number):
+        query_str = '''
+                    MATCH (q:PizzaQualityAttribute:$version_number) <- [:HAS_PROPERTY] - (p:Pizza:$version_number) <- [:ACTS_ON] - (e:Event)
+                    MATCH (e) - [:EXECUTED_BY] -> (:Sensor:$version_number {sensorType: "EXIT"}) 
+                        - [:PART_OF] -> (:Station:$version_number {sysId: "Oven"})
+                    CREATE (e) - [:CREATES] -> (q)
+                '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "version_number": version_number
+                     })
+
+    @staticmethod
+    def get_reset_used_prop_query(batch_size):
         query_str = '''
                 CALL apoc.periodic.commit('
                 MATCH (e:Event)
@@ -107,10 +150,11 @@ class CustomCypherQueryLibrary:
                 WITH e LIMIT $limit
                 SET e.used = Null
                 RETURN count(*)',
-                {limit: 2500})
+                {limit: $limit})
             '''
 
-        return Query(query_str=query_str)
+        return Query(query_str=query_str,
+                     parameters={"limit": batch_size})
 
     @staticmethod
     def get_connect_activities_to_location_query():
