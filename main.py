@@ -16,9 +16,9 @@ from colorama import Fore
 from process_discovery.discover_process_model import ProcessDiscovery
 
 connection = authentication.connections_map[authentication.Connections.LOCAL]
-use_local = False
+use_local = True
 
-dataset_name = 'ToyExamplev2'
+dataset_name = 'ToyExamplev3'
 semantic_header_path = Path(f'json_files/{dataset_name}.json')
 config_path = Path(f'json_files/config.json')
 use_sample = False
@@ -31,7 +31,7 @@ number_of_steps = 100
 ds_path = Path(f'json_files/{dataset_name}_DS.json')
 datastructures = ImportedDataStructures(ds_path)
 
-step_clear_db = False
+step_clear_db = True
 step_populate_graph = True
 step_analysis = True
 
@@ -46,7 +46,7 @@ else:
                                        password=remote.password, verbose=verbose)
 
 
-def create_graph_instance(perf: Performance) -> EventKnowledgeGraph:
+def create_graph_instance() -> EventKnowledgeGraph:
     """
     Creates an instance of an EventKnowledgeGraph
     @return: returns an EventKnowledgeGraph
@@ -54,52 +54,42 @@ def create_graph_instance(perf: Performance) -> EventKnowledgeGraph:
 
     return EventKnowledgeGraph(db_connection=db_connection, db_name=connection.user,
                                batch_size=5000, specification_of_data_structures=datastructures, use_sample=use_sample,
-                               semantic_header=semantic_header, perf=perf,
+                               semantic_header=semantic_header, perf_path=perf_path,
                                custom_module_name=CustomModule)
 
 
-def clear_graph(graph: EventKnowledgeGraph, perf: Performance) -> None:
+def clear_graph(graph: EventKnowledgeGraph) -> None:
     """
     # delete all nodes and relations in the graph to start fresh
     @param graph: EventKnowledgeGraph
-    @param perf: Performance
     @return: None
     """
 
     print("Clearing DB...")
     graph.clear_db()
-    perf.finished_step(log_message=f"Cleared DB")
 
 
-def populate_graph(graph: EventKnowledgeGraph, perf: Performance):
+def populate_graph(graph: EventKnowledgeGraph):
+    graph.set_constraints()
     graph.create_static_nodes_and_relations()
 
     # import the events from all sublogs in the graph with the corresponding labels
     graph.import_data()
-    perf.finished_step(log_message=f"(:Record) nodes done")
-
-    # TODO: constraints in semantic header?
-    graph.set_constraints()
-    perf.finished_step(log_message=f"All constraints are set")
 
     # for each entity, we add the entity nodes to graph and correlate them to the correct events
     graph.create_nodes_by_records()
-    perf.finished_step(log_message=f"(:Entity) nodes done")
 
-    graph.custom_module.complete_corr()
-
-    graph.create_relations_using_record()
-    graph.create_relations_using_relations()
-    perf.finished_step(log_message=f"Reified (:Entity) nodes done")
+    graph.create_relations(
+        ["FOLLOWS_PIZZA", "FOLLOWS_PACK", "FOLLOWS_BOX", "PART_OF_SENSOR_STATION", "OCCURRED_AT", "OCCURS_AT", "HAS_PROPERTY"])
+    graph.custom_module.complete_quality(version_number="V3")
+    graph.custom_module.complete_corr(version_number="V3")
+    graph.create_relations(["PART_OF_PIZZA_PACK", "PART_OF_PACK_BOX", "PART_OF_BOX_PALLET"])
 
     graph.create_df_edges()
-    perf.finished_step(log_message=f"[:DF] edges done")
 
     graph.delete_parallel_dfs_derived()
-    perf.finished_step(log_message=f"Deleted all duplicate parallel [:DF] edges done")
 
     graph.merge_duplicate_df()
-    perf.finished_step(log_message=f"Merged duplicate [:DF] edges done")
 
 
 def main() -> None:
@@ -114,42 +104,31 @@ def main() -> None:
 
     # performance class to measure performance
 
-    perf = Performance(perf_path, number_of_steps=number_of_steps)
-    graph = create_graph_instance(perf)
+    graph = create_graph_instance()
 
     if step_clear_db:
-        clear_graph(graph=graph, perf=perf)
+        clear_graph(graph=graph)
 
     if step_populate_graph:
-        populate_graph(graph=graph, perf=perf)
+        populate_graph(graph=graph)
 
     if step_analysis:
-
         graph.create_df_process_model(entity_type="Pizza")
         graph.create_df_process_model(entity_type="Pack")
         graph.create_df_process_model(entity_type="Box")
         graph.create_df_process_model(entity_type="Pallet")
-        # graph.custom_module.create_station_aggregation(entity_type="Pizza")
-        graph.custom_module.connect_activities_to_location()
-        graph.custom_module.observe_events_to_station_aggregation_query()
         graph.custom_module.connect_stations_and_sensors()
-        # graph.custom_module.update_sensor_attributes()
-
-        # create Station Entities
-        # graph.do_custom_query("create_station_entities_and_correlate_to_events")
 
         graph.create_df_edges(entity_types=["Station"])
 
-        # graph.save_event_log(entity_type="Pizza")
+        graph.save_event_log(entity_type="Pizza")
         # graph.save_event_log(entity_type="Station")
         #
         # event_log = graph.custom_module.read_log()
         # process_model_graph = process_discovery.get_discovered_proces_model(event_log)
         # graph.custom_module.write_attributes(graph=process_model_graph)
 
-    perf.finish()
-    perf.save()
-
+    graph.save_perf()
     graph.print_statistics()
 
     db_connection.close_connection()
