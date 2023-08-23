@@ -6,18 +6,15 @@ from ekg_creator_custom.cypher_queries.custom_query_library import CustomCypherQ
 
 
 class CustomModule:
-    def __init__(self, db_connection: DatabaseConnection, perf: Performance):
+    def __init__(self, db_connection: DatabaseConnection):
         self.connection = db_connection
-        self.perf = perf
-
-    def _write_message_to_performance(self, message: str):
-        if self.perf is not None:
-            self.perf.finished_step(activity=message)
+        self.batch_size = 5000
 
     def do_custom_query(self, query_name, **kwargs):
         func = getattr(self, query_name)
         return func(**kwargs)
 
+    @Performance.track('entity_type')
     def create_station_aggregation(self, entity_type):
         self.connection.exec_query(ccql.get_create_source_station_aggregation_query,
                                    **{"entity_type": entity_type})
@@ -27,38 +24,53 @@ class CustomModule:
         self.connection.exec_query(ccql.get_create_processing_stations_aggregation_query,
                                    **{"entity_type": entity_type})
 
-    def complete_corr(self):
-        completion_dict = [
-            {"entity_type": 'Pizza', "from_activity": "Pass Sensor S4", "to_activity": "Pass Sensor S5"},
-            {"entity_type": 'Pack', "from_activity": "Pass Sensor S8", "to_activity": "Pass Sensor S9"},
-            {"entity_type": 'Box', "from_activity": "Pass Sensor S10", "to_activity": "Pass Sensor S13"}
-        ]
-        for dict in completion_dict:
-            self.connection.exec_query(ccql.get_complete_corr_query,
-                                       **{
-                                           "entity_type": dict["entity_type"],
-                                           "from_activity": dict["from_activity"],
-                                           "to_activity": dict["to_activity"]
-                                       })
+    @Performance.track()
+    def complete_corr(self, version_number):
+        self.connection.exec_query(ccql.get_complete_corr_query,
+                                   **{
+                                       "version_number": version_number
+                                   })
 
-        self.connection.exec_query(ccql.get_reset_used_prop_query)
+    @Performance.track()
+    def complete_quality(self, version_number):
+        self.connection.exec_query(ccql.get_complete_quality_query,
+                                   **{
+                                       "version_number": version_number
+                                   })
+        self.connection.exec_query(ccql.get_create_quality_for_pizzas_query,
+                                   **{
+                                       "version_number": version_number
+                                   }
+                                   )
+        self.connection.exec_query(ccql.get_create_qualifier_rel_to_pizza_quality_query,
+                                   **{
+                                       "version_number": version_number
+                                   }
+                                   )
 
+
+    @Performance.track()
     def connect_activities_to_location(self):
         self.connection.exec_query(ccql.get_connect_activities_to_location_query)
 
+    @Performance.track()
     def observe_events_to_station_aggregation_query(self):
         self.connection.exec_query(ccql.get_observe_events_to_station_aggregation_query)
 
+    @Performance.track()
     def create_station_entities_and_correlate_to_events(self):
         self.connection.exec_query(ccql.get_create_station_entities_and_correlate_to_events_query)
 
+    @Performance.track()
     def connect_stations_and_sensors(self):
         self.connection.exec_query(ccql.get_connect_stations_queries)
         self.connection.exec_query(ccql.get_connect_sensors_queries)
 
+    @Performance.track()
     def update_sensor_attributes(self):
         self.connection.exec_query(ccql.get_update_sensors_queries)
 
+    @Performance.track()
     def read_log(self):
         data = self.connection.exec_query(ccql.get_read_log_query)
         i = 0
@@ -82,6 +94,7 @@ class CustomModule:
         log = log.loc[:, ['time', 'station', 'part', 'activity']]
         return log
 
+    @Performance.track()
     def write_attributes(self, graph):
         for station, attributes in graph.nodes.items():
             buffer_capacity = attributes['buffer_capacity']
