@@ -114,6 +114,23 @@ class CustomCypherQueryLibrary:
                      })
 
     @staticmethod
+    def get_connect_operators_to_station_query(version_number, operator, station):
+        query_str = '''
+            MATCH (operator:Operator:$version_number {sysId: $operator})
+            MATCH (station:Station:$version_number {sysId: $station})
+            MERGE (operator) - [:OPERATES] -> (station)
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "version_number": version_number
+                     },
+                     parameters={
+                         "operator": operator,
+                         "station": station
+                     })
+
+    @staticmethod
     def get_create_quality_for_pizzas_query(version_number):
         query_str = '''
                 MATCH (p:Pizza:$version_number)

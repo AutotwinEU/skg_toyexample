@@ -3,15 +3,17 @@
   "version": "3.0.0",
   "records": [
     "(record:EventRecord:SensorEventRecord:V3 {timestamp, sensorId}",
-    "(record:PizzaRecord:V3 {pizzaId})",
-    "(record:PackRecord:V3 {packId})",
-    "(record:BoxRecord:V3 {boxId})",
-    "(record:PalletRecord:V3 {palletId})",
-    "(record:SensorRecord:V3 {sensorId, OPTIONAL sensorType})",
-    "(record:StationRecord:V3 {stationName, stationType})",
+    "(record:EntityRecord:PizzaRecord:V3 {pizzaId})",
+    "(record:EntityRecord:PackRecord:V3 {packId})",
+    "(record:EntityRecord:BoxRecord:V3 {boxId})",
+    "(record:EntityRecord:PalletRecord:V3 {palletId})",
+    "(record:EntityRecord:SensorRecord:V3 {sensorId, OPTIONAL sensorType})",
+    "(record:EntityRecord:StationRecord:V3 {stationName, stationType})",
     "(record:ProductionPlanRecord:V3 {code, OPTIONAL diameter, OPTIONAL height, OPTIONAL weight, OPTIONAL packCount, OPTIONAL boxCount, OPTIONAL boxQuantity, OPTIONAL interval, OPTIONAL intervalDelta})",
-    "(record:PizzaQualityAttributeRecord:V3 {exceededCookingTime})"
-    "(record:OperatorRecord:V3 {operatorId})"
+    "(record:EntityRecord:PizzaQualityAttributeRecord:V3 {exceededCookingTime})",
+    "(record:EntityRecord:OperatorRecord:V3 {operatorId})",
+    "(record:EventRecord:OperatorEventRecord:OperatorStartEventRecord:V3 WHERE record.hasBreak = 1 {timestamp, hasBreak})",
+    "(record:EventRecord:OperatorEventRecord:OperatorCompleteEventRecord:V3 WHERE record.hasBreak = 0 {timestamp, hasBreak})"
   ],
   "nodes": [
     {
@@ -20,6 +22,14 @@
         {
           "prevalent_record": "(record:SensorEventRecord:V3)",
           "result": "(e:Event:V3 {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
+        },
+        {
+          "prevalent_record": "(record:OperatorStartEventRecord:V3)",
+          "result": "(e:Event:V3 {timestamp:record.timestamp, activity: \"Start Break\"})"
+        },
+        {
+          "prevalent_record": "(record:OperatorCompleteEventRecord:V3)",
+          "result": "(e:Event:V3 {timestamp:record.timestamp, activity: \"Stop Break\"})"
         }
       ]
     },
@@ -30,6 +40,14 @@
           "prevalent_record": "(record:SensorEventRecord:V3)",
           "result": "(a:Activity:V3 {activity: \"Pass Sensor \" + record.sensorId})",
           "infer_observed": true
+        },
+        {
+          "prevalent_record": "(record:OperatorStartEventRecord:V3)",
+          "result": "(a:Activity:V3 {activity: \"Start Break\"})"
+        },
+        {
+          "prevalent_record": "(record:OperatorCompleteEventRecord:V3)",
+          "result": "(a:Activity:V3 {activity: \"Stop Break\"})"
         }
       ]
     },
@@ -47,7 +65,6 @@
       "include_label_in_df": true,
       "merge_duplicate_df": true
     },
-
     {
       "type": "pizzaQualityAttribute",
       "constructor": [
@@ -133,9 +150,21 @@
           "infer_corr_from_event_record": false
         }
       ]
+    },
+    {
+      "type": "OperatorRecord",
+      "constructor": [
+        {
+          "prevalent_record": "(record:OperatorRecord:V3)",
+          "result": "(v:Entity:Resource:HumanResource:Operator:V3 {sysId: record.operatorId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "INITIATED_BY"
+        }
+      ]
     }
   ],
-  "relations": [ {
+  "relations": [
+    {
       "type": "HAS_PROPERTY",
       "constructor": {
         "prevalent_record": "(record:PizzaQualityAttributeRecord:PizzaRecord:V3)",

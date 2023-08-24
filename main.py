@@ -79,11 +79,14 @@ def populate_graph(graph: EventKnowledgeGraph):
     # for each entity, we add the entity nodes to graph and correlate them to the correct events
     graph.create_nodes_by_records()
 
-    graph.create_relations(
-        ["FOLLOWS_PIZZA", "FOLLOWS_PACK", "FOLLOWS_BOX", "PART_OF_SENSOR_STATION", "OCCURRED_AT", "OCCURS_AT", "HAS_PROPERTY"])
+    relations = [relation.type for relation in graph.semantic_header.relations]
+    relations_to_be_constructed_later = ["PART_OF_PIZZA_PACK", "PART_OF_PACK_BOX", "PART_OF_BOX_PALLET"]
+
+    graph.create_relations(list(set(relations) - set(relations_to_be_constructed_later)))
     graph.custom_module.complete_quality(version_number="V3")
     graph.custom_module.complete_corr(version_number="V3")
-    graph.create_relations(["PART_OF_PIZZA_PACK", "PART_OF_PACK_BOX", "PART_OF_BOX_PALLET"])
+    graph.custom_module.connect_operators_to_station(version_number="V3")
+    graph.create_relations(relations_to_be_constructed_later)
 
     graph.create_df_edges()
 

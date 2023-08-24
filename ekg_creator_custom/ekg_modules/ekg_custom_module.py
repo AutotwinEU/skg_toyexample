@@ -48,6 +48,23 @@ class CustomModule:
                                    }
                                    )
 
+    @Performance.track()
+    def connect_operators_to_station(self, version_number):
+        mappings = [
+            {
+                "operator": 'opBox_onBreak', "station": "BoxStation"
+            },
+            {
+                "operator": 'opPack_onBreak', "station": "PackStation"
+            }
+        ]
+        for mapping in mappings:
+            self.connection.exec_query(ccql.get_connect_operators_to_station_query,
+                                       **{
+                                           "operator": mapping["operator"],
+                                           "station": mapping["station"],
+                                           "version_number": version_number
+                                       })
 
     @Performance.track()
     def connect_activities_to_location(self):

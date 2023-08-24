@@ -55,7 +55,8 @@
         "name": "timestamp",
         "columns": [
           {
-            "name": "timestamp"
+            "name": "timestamp",
+            "dtype": "int"
           }
         ],
         "optional": false
@@ -112,7 +113,8 @@
         "name": "timestamp",
         "columns": [
           {
-            "name": "timestamp"
+            "name": "timestamp",
+            "dtype": "int"
           }
         ],
         "optional": false
@@ -181,7 +183,8 @@
         "name": "timestamp",
         "columns": [
           {
-            "name": "timestamp"
+            "name": "timestamp",
+            "dtype": "int"
           }
         ],
         "optional": false
@@ -238,7 +241,8 @@
         "name": "timestamp",
         "columns": [
           {
-            "name": "timestamp"
+            "name": "timestamp",
+            "dtype": "int"
           }
         ],
         "optional": false
@@ -286,7 +290,8 @@
         "name": "timestamp",
         "columns": [
           {
-            "name": "timestamp"
+            "name": "timestamp",
+            "dtype": "int"
           }
         ],
         "optional": false
@@ -345,7 +350,7 @@
     ]
   },
   {
-    "name": "ToyExampleStations",
+    "name": "ToyExampleProductionPlan",
     "file_directory": "data\\ToyExampleV3\\",
     "file_names": [
       "production_plan.csv"
@@ -440,6 +445,52 @@
         "columns": [
           {
             "name": "intervalDelta",
+            "dtype": "int"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExampleOperators",
+    "file_directory": "data\\ToyExampleV3\\",
+    "file_names": [
+      "opBox_onBreak.csv",
+      "opPack_onBreak.csv"
+    ],
+    "labels": [
+      "Record",
+      "OperatorRecord",
+      "OperatorEventRecord"
+    ],
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "int"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "operatorId",
+        "columns": [
+          {
+            "name": "operatorId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "hasBreak",
+        "columns": [
+          {
+            "name": "hasBreak",
             "dtype": "int"
           }
         ],
