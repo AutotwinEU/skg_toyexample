@@ -32,6 +32,27 @@ class CustomModule:
                                    })
 
     @Performance.track()
+    def delete_df_edges(self, version_number):
+        self.connection.exec_query(ccql.get_delete_df_query,
+                                   **{
+                                       "version_number": version_number
+                                   })
+
+    @Performance.track()
+    def merge_sensor_events(self, version_number):
+        self.connection.exec_query(ccql.get_merge_sensor_events_query,
+                                   **{
+                                       "version_number": version_number
+                                   })
+
+    @Performance.track()
+    def connect_wip_sensor_to_assembly_line(self, version_number):
+        self.connection.exec_query(ccql.get_connect_wip_sensor_to_assembly_line_query,
+                                   **{
+                                       "version_number": version_number
+                                   })
+
+    @Performance.track()
     def complete_quality(self, version_number):
         self.connection.exec_query(ccql.get_complete_quality_query,
                                    **{

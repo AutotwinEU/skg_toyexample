@@ -85,6 +85,7 @@ class CustomCypherQueryLibrary:
             }
             MATCH (e:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
             MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor:$version_number {sensorType: "ENTER"})
+            WHERE NOT EXISTS ((e) - [:DF_PIZZA|DF_PACK|DF_BOX] -> (:Event))
             CALL {WITH e, packingStation
                   MATCH (f:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
                   MATCH (f) - [:EXECUTED_BY] -> (sensor:Sensor {sensorType: "EXIT"})
@@ -100,6 +101,43 @@ class CustomCypherQueryLibrary:
         return Query(query_str=query_str,
                      template_string_parameters={"version_number": version_number
                      })
+
+    @staticmethod
+    def get_delete_df_query(version_number):
+        query_str = '''
+            MATCH (e:Event:$version_number) - [df:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET] -> (f:Event:$version_number)
+            DELETE df
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "version_number": version_number
+                     })
+
+    @staticmethod
+    def get_merge_sensor_events_query(version_number):
+        query_str = '''
+            MATCH (e:SensorStatusEvent:$version_number)
+            WITH e.timestamp as timestamp, e.activity as activity, collect(e) as batchedEvents
+            CALL apoc.refactor.mergeNodes(batchedEvents, {properties:"combine", mergeRels: true})
+            YIELD node
+            return count(*)
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={"version_number": version_number})
+
+    @staticmethod
+    def get_connect_wip_sensor_to_assembly_line_query(version_number):
+        query_str = '''
+            MATCH (record:AssemblyLineRecord&SensorRecord&$version_number&!StationRecord)
+            MATCH (a:AssemblyLine) - [:PREVALENCE] -> (record)
+            MATCH (s:Sensor) - [:PREVALENCE] -> (record)
+            MERGE (s) - [:PART_OF] -> (a)
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={"version_number": version_number})
 
     @staticmethod
     def get_complete_quality_query(version_number):

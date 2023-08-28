@@ -307,7 +307,8 @@
     "labels": [
       "Record",
       "SensorRecord",
-      "StationRecord"
+      "StationRecord",
+      "AssemblyLineRecord"
     ],
     "attributes": [
       {
@@ -336,13 +337,23 @@
             "dtype": "str"
           }
         ],
-        "optional": false
+        "optional": true
       },
       {
         "name": "stationType",
         "columns": [
           {
             "name": "stationType"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "assemblyName",
+        "columns": [
+          {
+            "name": "assemblyName",
+            "dtype": "str"
           }
         ],
         "optional": false
@@ -491,6 +502,99 @@
         "columns": [
           {
             "name": "hasBreak",
+            "dtype": "boolean"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExampleLockStatus",
+    "file_directory": "data\\ToyExampleV3\\",
+    "file_names": [
+      "In1_distanceLock.csv",
+      "In1_policyLock.csv"
+    ],
+    "labels": [
+      "Record",
+      "SensorRecord",
+      "StatusEventRecord",
+      "LockStatusRecord"
+    ],
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "int"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "sensorId",
+        "columns": [
+          {
+            "name": "sensorId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "locked",
+        "columns": [
+          {
+            "name": "locked",
+            "dtype": "boolean"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExampleLockStatus",
+    "file_directory": "data\\ToyExampleV3\\",
+    "file_names": [
+      "wip.csv"
+    ],
+    "labels": [
+      "Record",
+      "WIPRecord",
+      "WIPEventRecord",
+      "SensorRecord"
+    ],
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "int"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "sensorId",
+        "columns": [
+          {
+            "name": "sensorId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "amount",
+        "columns": [
+          {
+            "name": "amount",
             "dtype": "int"
           }
         ],

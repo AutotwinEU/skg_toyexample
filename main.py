@@ -18,7 +18,9 @@ from process_discovery.discover_process_model import ProcessDiscovery
 connection = authentication.connections_map[authentication.Connections.LOCAL]
 use_local = True
 
-dataset_name = 'ToyExamplev3'
+number = 3
+dataset_name = f'ToyExamplev{number}'
+version_number = f"V{number}"
 semantic_header_path = Path(f'json_files/{dataset_name}.json')
 config_path = Path(f'json_files/config.json')
 use_sample = False
@@ -78,14 +80,23 @@ def populate_graph(graph: EventKnowledgeGraph):
 
     # for each entity, we add the entity nodes to graph and correlate them to the correct events
     graph.create_nodes_by_records()
+    if version_number == "V3":
+        graph.custom_module.merge_sensor_events(version_number=version_number)
+        graph.custom_module.connect_wip_sensor_to_assembly_line(version_number=version_number)
 
     relations = [relation.type for relation in graph.semantic_header.relations]
     relations_to_be_constructed_later = ["PART_OF_PIZZA_PACK", "PART_OF_PACK_BOX", "PART_OF_BOX_PALLET"]
 
     graph.create_relations(list(set(relations) - set(relations_to_be_constructed_later)))
-    graph.custom_module.complete_quality(version_number="V3")
-    graph.custom_module.complete_corr(version_number="V3")
-    graph.custom_module.connect_operators_to_station(version_number="V3")
+
+    graph.create_df_edges()
+    graph.custom_module.complete_corr(version_number=version_number)
+    graph.custom_module.delete_df_edges(version_number=version_number)
+
+    if version_number == "V3":
+        graph.custom_module.complete_quality(version_number=version_number)
+        graph.custom_module.connect_operators_to_station(version_number=version_number)
+
     graph.create_relations(relations_to_be_constructed_later)
 
     graph.create_df_edges()

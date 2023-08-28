@@ -9,11 +9,16 @@
     "(record:EntityRecord:PalletRecord:V3 {palletId})",
     "(record:EntityRecord:SensorRecord:V3 {sensorId, OPTIONAL sensorType})",
     "(record:EntityRecord:StationRecord:V3 {stationName, stationType})",
+    "(record:EntityRecord:AssemblyLineRecord:V3 {assemblyName})",
     "(record:ProductionPlanRecord:V3 {code, OPTIONAL diameter, OPTIONAL height, OPTIONAL weight, OPTIONAL packCount, OPTIONAL boxCount, OPTIONAL boxQuantity, OPTIONAL interval, OPTIONAL intervalDelta})",
     "(record:EntityRecord:PizzaQualityAttributeRecord:V3 {exceededCookingTime})",
     "(record:EntityRecord:OperatorRecord:V3 {operatorId})",
-    "(record:EventRecord:OperatorEventRecord:OperatorStartEventRecord:V3 WHERE record.hasBreak = 1 {timestamp, hasBreak})",
-    "(record:EventRecord:OperatorEventRecord:OperatorCompleteEventRecord:V3 WHERE record.hasBreak = 0 {timestamp, hasBreak})"
+    "(record:EventRecord:OperatorEventRecord:OperatorStartEventRecord:V3 WHERE record.hasBreak = true {timestamp, hasBreak})",
+    "(record:EventRecord:OperatorEventRecord:OperatorCompleteEventRecord:V3 WHERE record.hasBreak = false {timestamp, hasBreak})",
+    "(record:EventRecord:StatusEventRecord:V3 {timestamp, locked})",
+    "(record:EventRecord:LockStatusRecord:V3 {locked})",
+    "(record:EventRecord:WIPRecord:V3 {amount})",
+    "(record:EventRecord:WIPEventRecord:V3 {timestamp, amount})"
   ],
   "nodes": [
     {
@@ -21,15 +26,23 @@
       "constructor": [
         {
           "prevalent_record": "(record:SensorEventRecord:V3)",
-          "result": "(e:Event:V3 {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
+          "result": "(e:Event:SensorEvent:V3 {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
         },
         {
           "prevalent_record": "(record:OperatorStartEventRecord:V3)",
-          "result": "(e:Event:V3 {timestamp:record.timestamp, activity: \"Start Break\"})"
+          "result": "(e:Event:OperatorEvent:V3 {timestamp:record.timestamp, activity: \"Start Break\"})"
         },
         {
           "prevalent_record": "(record:OperatorCompleteEventRecord:V3)",
-          "result": "(e:Event:V3 {timestamp:record.timestamp, activity: \"Stop Break\"})"
+          "result": "(e:Event:OperatorEvent:V3 {timestamp:record.timestamp, activity: \"Stop Break\"})"
+        },
+        {
+          "prevalent_record": "(record:StatusEventRecord:V3)",
+          "result": "(e:Event:SensorReadingEvent:V3 {timestamp:record.timestamp, activity: \"Read Lock Status\"})"
+        },
+        {
+          "prevalent_record": "(record:WIPEventRecord:V3)",
+          "result": "(e:Event:SensorReadingEvent:V3 {timestamp:record.timestamp, activity: \"Read WIP amount\"})"
         }
       ]
     },
@@ -48,6 +61,14 @@
         {
           "prevalent_record": "(record:OperatorCompleteEventRecord:V3)",
           "result": "(a:Activity:V3 {activity: \"Stop Break\"})"
+        },
+        {
+          "prevalent_record": "(record:StatusEventRecord:V3)",
+          "result": "(a:Activity:V3 {activity: \"Read Lock Status\"})"
+        },
+        {
+          "prevalent_record": "(record:WIPEventRecord:V3)",
+          "result": "(a:Activity:V3 {activity: \"Read WIP amount\"})"
         }
       ]
     },
@@ -132,12 +153,45 @@
       "merge_duplicate_df": true
     },
     {
+      "type": "SensorReading",
+      "constructor": [
+        {"prevalent_record": "(record:LockStatusRecord WHERE record.locked = true)",
+          "result": "(ls:EntityAttribute:SensorReading:V3 {status: \"locked\"})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "CREATES"
+        },
+        {"prevalent_record": "(record:LockStatusRecord WHERE record.locked = false)",
+          "result": "(ls:EntityAttribute:SensorReading:V3 {status: \"not locked\"})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "CREATES"
+        },
+        {"prevalent_record": "(record:WIPRecord)",
+          "result": "(ls:EntityAttribute:SensorReading:V3 {status:\"WIP amount \" + record.amount})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "CREATES"
+        }
+      ]
+    },
+    {
       "type": "Station",
       "constructor": [
         {
           "prevalent_record": "(record:StationRecord:V3)",
           "result": "(v:Entity:Resource:Station:Location:V3 {sysId: record.stationName, type: record.stationType})",
-          "infer_corr_from_event_record": true
+          "infer_corr_from_event_record": true,
+          "corr_type": "OCCURRED_AT"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "AssemblyLine",
+      "constructor": [
+        {
+          "prevalent_record": "(record:AssemblyLineRecord:V3)",
+          "result": "(v:Entity:Resource:AssemblyLine:V3 {sysId: record.assemblyName})"
         }
       ]
     },
@@ -176,11 +230,33 @@
       }
     },
     {
+      "type": "HAS_VALUE",
+      "constructor": {
+        "prevalent_record": "(record:LockStatusRecord:SensorRecord:V3)",
+        "from_node": "(sensor:Sensor:V3)",
+        "to_node": "(ls:SensorReading:V3)",
+        "result": "(sensor) - [:HAS_VALUE] -> (ls)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "HAS_VALUE",
+      "constructor": {
+        "prevalent_record": "(record:WIPRecord:SensorRecord:V3)",
+        "from_node": "(sensor:Sensor:V3)",
+        "to_node": "(ls:SensorReading:V3)",
+        "result": "(sensor) - [:HAS_VALUE] -> (ls)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
       "type": "FOLLOWS_PIZZA",
       "constructor": {
-        "prevalent_record": "(record:PizzaCodeRecord:PizzaRecord:V3)",
+        "prevalent_record": "(record:ProductionPlanRecord:PizzaRecord:V3)",
         "from_node": "(pizza: Pizza:V3)",
-        "to_node": "(description: PizzaDescription:V3)",
+        "to_node": "(description: ProductionPlan:V3)",
         "result": "(pizza) - [:FOLLOWS] -> (description)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
@@ -189,9 +265,9 @@
     {
       "type": "FOLLOWS_PACK",
       "constructor": {
-        "prevalent_record": "(record:PizzaCodeRecord:PackRecord:V3)",
+        "prevalent_record": "(record:ProductionPlanRecord:PackRecord:V3)",
         "from_node": "(pack: Pack:V3)",
-        "to_node": "(description: PizzaDescription:V3)",
+        "to_node": "(description: ProductionPlan:V3)",
         "result": "(pack) - [:HAS_TYPE] -> (description)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
@@ -200,9 +276,9 @@
     {
       "type": "FOLLOWS_BOX",
       "constructor": {
-        "prevalent_record": "(record:PizzaCodeRecord:BoxRecord)",
+        "prevalent_record": "(record:ProductionPlanRecord:BoxRecord)",
         "from_node": "(box: Box:V3)",
-        "to_node": "(description: PizzaDescription:V3)",
+        "to_node": "(description: ProductionPlan:V3)",
         "result": "(box) - [:HAS_TYPE] -> (description)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
@@ -211,10 +287,21 @@
     {
       "type": "PART_OF_SENSOR_STATION",
       "constructor": {
-        "prevalent_record": "(record:SensorRecord:StationRecord)",
+        "prevalent_record": "(record:SensorRecord:StationRecord:V3)",
         "from_node": "(sensor: Sensor:V3)",
         "to_node": "(station: Station:V3)",
         "result": "(sensor) - [:PART_OF] -> (station)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "PART_OF_STATION_ASSEMBLYLINE",
+      "constructor": {
+        "prevalent_record": "(record:AssemblyLineRecord:StationRecord:V3)",
+        "from_node": "(station: Station:V3)",
+        "to_node": "(assembly: AssemblyLine:V3)",
+        "result": "(station) - [:PART_OF] -> (assembly)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
@@ -234,6 +321,7 @@
       }
     },
     {
+      "include": true,
       "type": "OCCURS_AT",
       "constructor": {
         "relations": [
