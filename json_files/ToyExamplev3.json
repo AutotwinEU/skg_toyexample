@@ -206,7 +206,7 @@
       ]
     },
     {
-      "type": "OperatorRecord",
+      "type": "Operator",
       "constructor": [
         {
           "prevalent_record": "(record:OperatorRecord:V3)",
@@ -214,7 +214,10 @@
           "infer_corr_from_event_record": true,
           "corr_type": "INITIATED_BY"
         }
-      ]
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
     }
   ],
   "relations": [
@@ -268,7 +271,7 @@
         "prevalent_record": "(record:ProductionPlanRecord:PackRecord:V3)",
         "from_node": "(pack: Pack:V3)",
         "to_node": "(description: ProductionPlan:V3)",
-        "result": "(pack) - [:HAS_TYPE] -> (description)",
+        "result": "(pack) - [:FOLLOWS] -> (description)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
@@ -279,7 +282,7 @@
         "prevalent_record": "(record:ProductionPlanRecord:BoxRecord)",
         "from_node": "(box: Box:V3)",
         "to_node": "(description: ProductionPlan:V3)",
-        "result": "(box) - [:HAS_TYPE] -> (description)",
+        "result": "(box) - [:FOLLOWS] -> (description)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
@@ -290,7 +293,7 @@
         "prevalent_record": "(record:SensorRecord:StationRecord:V3)",
         "from_node": "(sensor: Sensor:V3)",
         "to_node": "(station: Station:V3)",
-        "result": "(sensor) - [:PART_OF] -> (station)",
+        "result": "(sensor) - [:FOLLOWS] -> (station)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
@@ -301,7 +304,7 @@
         "prevalent_record": "(record:AssemblyLineRecord:StationRecord:V3)",
         "from_node": "(station: Station:V3)",
         "to_node": "(assembly: AssemblyLine:V3)",
-        "result": "(station) - [:PART_OF] -> (assembly)",
+        "result": "(station) - [:FOLLOWS] -> (assembly)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
