@@ -1,49 +1,63 @@
 {
   "name": "ToyExample",
   "version": "1.0.0",
-  "entities": [
+
+  "records": [
+    "(record:SensorEventRecord {timestamp, sensorId}",
+    "(record:PizzaRecord {pizzaId})",
+    "(record:SensorRecord {sensorId})"
+  ],
+  "nodes": [
     {
-      "type": "Station",
-      "entities_derived_from_nodes": {
-      },
-      "labels": [
+      "type": "Event",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorEventRecord)",
+          "result": "(e:Event {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
+        }
+      ]
+    },
+    {
+      "type": "Activity",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorEventRecord)",
+          "result": "(a:Activity {activity: \"Pass Sensor \" + record.sensorId})",
+          "infer_observed": true
+        }
+      ]
+    },
+    {
+      "type": "Pizza",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PizzaRecord)",
+          "result": "(v:Entity:Pizza {sysId: record.pizzaId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
       ],
-      "primary_keys": [
-      ],
-      "entity_attributes": [
-      ],
-      "corr": true,
-      "df": true,
+      "infer_df": true,
       "include_label_in_df": true,
       "merge_duplicate_df": true
     },
     {
-      "type": "Pizza",
-      "constructed_by_node": {
-        "node_label": "Event"
-      },
-      "labels": [
-        "Pizza"
+      "type": "Sensor",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorRecord)",
+          "result": "(v:Entity:Resource:MachinePart:Sensor {sysId: record.sensorId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "EXECUTED_BY"
+        }
       ],
-      "primary_keys": [
-        "pizzaId"
-      ],
-      "corr": true,
-      "df": true,
+      "infer_df": true,
       "include_label_in_df": true,
       "merge_duplicate_df": true
-    }
-  ],
-  "classes": [
+    },
+
     {
-      "label": "Event",
-      "class_identifiers": [
-        "sensor"
-      ]
+      "type": "Station"
     }
-  ],
-  "log": {
-    "include": true,
-    "has": true
-  }
+  ]
 }

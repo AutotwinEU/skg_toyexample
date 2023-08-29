@@ -1,0 +1,114 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": [
+        [
+            "name",
+            "Toy Example"
+        ],
+        [
+            "start_stations",
+            [
+                "SourceStationS1"
+            ]
+        ],
+        [
+            "end_stations",
+            [
+                "PackStation",
+                "SinkStationS16"
+            ]
+        ],
+        [
+            "wip_limits",
+            [
+                6849
+            ]
+        ],
+        [
+            "generation_time",
+            26.335641145706177
+        ]
+    ],
+    "nodes": [
+        {
+            "index": 0,
+            "frequency": 6847,
+            "buffer_capacity": 0,
+            "machine_capacity": 6848,
+            "processing_time": {
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "id": "SourceStationS1"
+        },
+        {
+            "index": 1,
+            "frequency": 6843,
+            "buffer_capacity": 3,
+            "machine_capacity": 3,
+            "processing_time": {
+                "mean": 2416.4908692476297,
+                "std": 4.772906552213528
+            },
+            "id": "Oven"
+        },
+        {
+            "index": 2,
+            "frequency": 6467,
+            "buffer_capacity": 3,
+            "machine_capacity": 5,
+            "processing_time": {
+                "mean": 2216.6939848461407,
+                "std": 2023.0380787209212
+            },
+            "id": "PackStation"
+        },
+        {
+            "index": 3,
+            "frequency": 0,
+            "buffer_capacity": 3,
+            "machine_capacity": 373,
+            "processing_time": {
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "id": "SinkStationS16"
+        }
+    ],
+    "adjacency": [
+        [
+            {
+                "frequency": 6847,
+                "routing_probability": 1.0,
+                "transfer_time": {
+                    "mean": 2997.1900102234604,
+                    "std": 4.4951981505155585
+                },
+                "id": "Oven"
+            }
+        ],
+        [
+            {
+                "frequency": 6470,
+                "routing_probability": 0.9454917433874032,
+                "transfer_time": {
+                    "mean": 2846.962905718712,
+                    "std": 73.59906205229755
+                },
+                "id": "PackStation"
+            },
+            {
+                "frequency": 373,
+                "routing_probability": 0.05450825661259681,
+                "transfer_time": {
+                    "mean": 4229.061662198397,
+                    "std": 37.09083523621397
+                },
+                "id": "SinkStationS16"
+            }
+        ],
+        [],
+        []
+    ]
+}

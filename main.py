@@ -1,27 +1,32 @@
 import os
 from pathlib import Path
 
-from ekg_creator.data_managers.interpreters import Interpreter
-from ekg_creator.data_managers.semantic_header import SemanticHeader
-from ekg_creator.database_managers.EventKnowledgeGraph import EventKnowledgeGraph, DatabaseConnection
-from ekg_creator.data_managers.datastructures import ImportedDataStructures
-from ekg_creator.utilities.performance_handling import Performance
-
-from ekg_creator.database_managers import authentication
+from promg import SemanticHeader
+from promg import EventKnowledgeGraph, DatabaseConnection
+from promg import ImportedDataStructures
+from promg import Performance
+from promg import authentication
 
 from ekg_creator_custom.ekg_modules.ekg_custom_module import CustomModule
+from tts_credentials import remote
 
 # several steps of import, each can be switch on/off
 from colorama import Fore
 
-connection = authentication.connections_map[authentication.Connections.LOCAL]
+from process_discovery.discover_process_model import ProcessDiscovery
 
-dataset_name = 'ToyExample'
+connection = authentication.connections_map[authentication.Connections.LOCAL]
+use_local = True
+
+number = 3
+dataset_name = f'ToyExamplev{number}'
+version_number = f"V{number}"
 semantic_header_path = Path(f'json_files/{dataset_name}.json')
+config_path = Path(f'json_files/config.json')
 use_sample = False
 
-query_interpreter = Interpreter("Cypher")
-semantic_header = SemanticHeader.create_semantic_header(semantic_header_path, query_interpreter)
+process_discovery = ProcessDiscovery(config_path)
+semantic_header = SemanticHeader.create_semantic_header(semantic_header_path)
 perf_path = os.path.join("..", "perf", dataset_name, f"{dataset_name}Performance.csv")
 number_of_steps = 100
 
@@ -35,77 +40,70 @@ step_analysis = True
 use_preloaded_files = False  # if false, read/import files instead
 verbose = False
 
-db_connection = DatabaseConnection(db_name=connection.user, uri=connection.uri, user=connection.user,
-                                   password=connection.password, verbose=verbose)
+if use_local:
+    db_connection = DatabaseConnection(db_name=connection.user, uri=connection.uri, user=connection.user,
+                                       password=connection.password, verbose=verbose)
+else:
+    db_connection = DatabaseConnection(db_name=remote.user, uri=remote.uri, user=remote.user,
+                                       password=remote.password, verbose=verbose)
 
 
-def create_graph_instance(perf: Performance) -> EventKnowledgeGraph:
+def create_graph_instance() -> EventKnowledgeGraph:
     """
     Creates an instance of an EventKnowledgeGraph
     @return: returns an EventKnowledgeGraph
     """
 
     return EventKnowledgeGraph(db_connection=db_connection, db_name=connection.user,
-                               batch_size=5000, event_tables=datastructures, use_sample=use_sample,
-                               semantic_header=semantic_header, perf=perf,
+                               batch_size=5000, specification_of_data_structures=datastructures, use_sample=use_sample,
+                               semantic_header=semantic_header, perf_path=perf_path,
                                custom_module_name=CustomModule)
 
 
-def clear_graph(graph: EventKnowledgeGraph, perf: Performance) -> None:
+def clear_graph(graph: EventKnowledgeGraph) -> None:
     """
     # delete all nodes and relations in the graph to start fresh
     @param graph: EventKnowledgeGraph
-    @param perf: Performance
     @return: None
     """
 
     print("Clearing DB...")
     graph.clear_db()
-    perf.finished_step(log_message=f"Cleared DB")
 
 
-def populate_graph(graph: EventKnowledgeGraph, perf: Performance):
+def populate_graph(graph: EventKnowledgeGraph):
+    graph.set_constraints()
     graph.create_static_nodes_and_relations()
 
     # import the events from all sublogs in the graph with the corresponding labels
     graph.import_data()
-    perf.finished_step(log_message=f"(:Event) nodes done")
-
-    # TODO: constraints in semantic header?
-    graph.set_constraints()
-    perf.finished_step(log_message=f"All constraints are set")
-
-    graph.create_log()
-    perf.finished_step(log_message=f"(:Log) nodes and [:HAS] relations done")
 
     # for each entity, we add the entity nodes to graph and correlate them to the correct events
-    graph.create_entities_by_nodes(node_label="Event")
-    perf.finished_step(log_message=f"(:Entity) nodes done")
+    graph.create_nodes_by_records()
+    if version_number == "V3":
+        graph.custom_module.merge_sensor_events(version_number=version_number)
+        graph.custom_module.connect_wip_sensor_to_assembly_line(version_number=version_number)
 
-    graph.correlate_events_to_entities(node_label="Event")
-    perf.finished_step(log_message=f"[:CORR] edges done")
+    relations = [relation.type for relation in graph.semantic_header.relations]
+    relations_to_be_constructed_later = ["PART_OF_PIZZA_PACK", "PART_OF_PACK_BOX", "PART_OF_BOX_PALLET"]
 
-    graph.create_classes()
-    perf.finished_step(log_message=f"(:Class) nodes done")
-
-    graph.create_entity_relations_using_nodes()
-    graph.create_entity_relations_using_relations()
-    perf.finished_step(log_message=f"[:REL] edges done")
-
-    graph.create_entities_by_relations()
-    perf.finished_step(log_message=f"Reified (:Entity) nodes done")
-
-    graph.correlate_events_to_reification()
-    perf.finished_step(log_message=f"[:CORR] edges for Reified (:Entity) nodes done")
+    graph.create_relations(list(set(relations) - set(relations_to_be_constructed_later)))
 
     graph.create_df_edges()
-    perf.finished_step(log_message=f"[:DF] edges done")
+    graph.custom_module.complete_corr(version_number=version_number)
+    graph.custom_module.delete_df_edges(version_number=version_number)
+
+    if version_number == "V3":
+        graph.custom_module.complete_quality(version_number=version_number)
+        graph.custom_module.connect_operators_to_station(version_number=version_number)
+
+    graph.create_relations(relations_to_be_constructed_later)
+
+    graph.create_df_edges()
 
     graph.delete_parallel_dfs_derived()
-    perf.finished_step(log_message=f"Deleted all duplicate parallel [:DF] edges done")
 
     graph.merge_duplicate_df()
-    perf.finished_step(log_message=f"Merged duplicate [:DF] edges done")
 
 
 def main() -> None:
@@ -120,32 +118,31 @@ def main() -> None:
 
     # performance class to measure performance
 
-    perf = Performance(perf_path, number_of_steps=number_of_steps)
-    graph = create_graph_instance(perf)
+    graph = create_graph_instance()
 
     if step_clear_db:
-        clear_graph(graph=graph, perf=perf)
+        clear_graph(graph=graph)
 
     if step_populate_graph:
-        populate_graph(graph=graph, perf=perf)
+        populate_graph(graph=graph)
 
     if step_analysis:
-        graph.create_df_process_model(entity_type="Pizza", classifiers=["sensor"])
-        graph.do_custom_query("create_station_aggregation", entity_type="Pizza")
-        graph.do_custom_query("observe_events_to_station_aggregation_query")
-        graph.create_df_process_model(entity_type="Pizza", classifiers=["station"])
-
-        # create Station Entities
-        graph.do_custom_query("create_station_entities_and_correlate_to_events")
+        graph.create_df_process_model(entity_type="Pizza")
+        graph.create_df_process_model(entity_type="Pack")
+        graph.create_df_process_model(entity_type="Box")
+        graph.create_df_process_model(entity_type="Pallet")
+        graph.custom_module.connect_stations_and_sensors()
 
         graph.create_df_edges(entity_types=["Station"])
 
-        graph.save_event_log(entity="Pizza", additional_event_attributes=["sensor"])
-        graph.save_event_log(entity="Station", additional_event_attributes=["pizzaId"])
+        graph.save_event_log(entity_type="Pizza")
+        # graph.save_event_log(entity_type="Station")
+        #
+        # event_log = graph.custom_module.read_log()
+        # process_model_graph = process_discovery.get_discovered_proces_model(event_log)
+        # graph.custom_module.write_attributes(graph=process_model_graph)
 
-    perf.finish()
-    perf.save()
-
+    graph.save_perf()
     graph.print_statistics()
 
     db_connection.close_connection()

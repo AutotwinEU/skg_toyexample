@@ -1,0 +1,246 @@
+{
+  "name": "ToyExample",
+  "version": "2.0.0",
+  "records": [
+    "(record:SensorEventRecord:V2 {timestamp, sensorId}",
+    "(record:PizzaRecord:V2 {pizzaId})",
+    "(record:PackRecord:V2 {packId})",
+    "(record:BoxRecord:V2 {boxId})",
+    "(record:PalletRecord:V2 {palletId})",
+    "(record:SensorRecord:V2 {sensorId})",
+    "(record:SensorTypeRecord:V2 {sensorId, sensorType})",
+    "(record:StationRecord:V2 {stationName, stationType})",
+    "(record:ProductionPlanRecord:V2 {code, OPTIONAL diameter, OPTIONAL height, OPTIONAL weight, OPTIONAL packCount, OPTIONAL boxCount, OPTIONAL boxQuantity, OPTIONAL interval, OPTIONAL intervalDelta})"
+  ],
+  "nodes": [
+    {
+      "type": "Event",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorEventRecord)",
+          "result": "(e:Event:V2 {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
+        }
+      ]
+    },
+    {
+      "type": "Activity",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorEventRecord)",
+          "result": "(a:Activity:V2 {activity: \"Pass Sensor \" + record.sensorId})",
+          "infer_observed": true
+        }
+      ]
+    },
+    {
+      "type": "Pizza",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PizzaRecord)",
+          "result": "(v:Entity:Pizza:V2 {sysId: record.pizzaId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Pack",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PackRecord)",
+          "result": "(v:Entity:Pack:V2 {sysId: record.packId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Box",
+      "constructor": [
+        {
+          "prevalent_record": "(record:BoxRecord)",
+          "result": "(v:Entity:Box:V2 {sysId: record.boxId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Pallet",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PalletRecord)",
+          "result": "(v:Entity:Pallet:V2 {sysId: record.palletId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Sensor",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorTypeRecord)",
+          "result": "(v:Entity:Resource:MachinePart:Sensor:V2 {sysId: record.sensorId, type: record.sensorType})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "EXECUTED_BY"
+        },
+        {
+          "prevalent_record": "(record:SensorRecord)",
+          "result": "(v:Entity:Resource:MachinePart:Sensor:V2 {sysId: record.sensorId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "EXECUTED_BY"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Station",
+      "constructor": [
+        {
+          "prevalent_record": "(record:StationRecord)",
+          "result": "(v:Entity:Resource:Station:Location:V2 {sysId: record.stationName, type: record.stationType})",
+          "infer_corr_from_event_record": true
+        }
+      ]
+    },
+    {
+      "type": "ProductionPlan",
+      "constructor": [
+        {
+          "prevalent_record": "(record:ProductionPlanRecord)",
+          "result": "(v:ProductionPlan:V2 {code: record.code, OPTIONAL diameter: record.diameter, OPTIONAL height: record.height, OPTIONAL weight: record.weight, OPTIONAL packCount: record.packCount, OPTIONAL boxCount: record.boxCount, OPTIONAL boxQuantity: record.boxQuantity, OPTIONAL interval: record.interval, OPTIONAL intervalDelta: record.intervalDelta})",
+          "infer_corr_from_event_record": false
+        }
+      ]
+    }
+  ],
+  "relations": [
+
+    {
+      "type": "FOLLOWS_PIZZA",
+      "constructor": {
+        "prevalent_record": "(record:ProductionPlanRecord:PizzaRecord:V3)",
+        "from_node": "(pizza: Pizza:V3)",
+        "to_node": "(description: ProductionPlan:V3)",
+        "result": "(pizza) - [:FOLLOWS] -> (description)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "FOLLOWS_PACK",
+      "constructor": {
+        "prevalent_record": "(record:ProductionPlanRecord:PackRecord:V3)",
+        "from_node": "(pack: Pack:V3)",
+        "to_node": "(description: ProductionPlan:V3)",
+        "result": "(pack) - [:HAS_TYPE] -> (description)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "FOLLOWS_BOX",
+      "constructor": {
+        "prevalent_record": "(record:ProductionPlanRecord:BoxRecord)",
+        "from_node": "(box: Box:V3)",
+        "to_node": "(description: ProductionPlan:V3)",
+        "result": "(box) - [:HAS_TYPE] -> (description)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "PART_OF_SENSOR_STATION",
+      "constructor": {
+        "prevalent_record": "(record:SensorRecord:StationRecord:V3)",
+        "from_node": "(sensor: Sensor:V3)",
+        "to_node": "(station: Station:V3)",
+        "result": "(sensor) - [:PART_OF] -> (station)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "OCCURRED_AT",
+      "constructor": {
+        "relations": [
+          "(e:Event:V3) - [:EXECUTED_BY] -> (sensor:Sensor)",
+          "(sensor) - [:PART_OF] -> (station:Station)"
+        ],
+        "from_node": "(e:Event:V3)",
+        "to_node": "(station:Station:V3)",
+        "result": "(e) - [:OCCURRED_AT] -> (station)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "OCCURS_AT",
+      "constructor": {
+        "relations": [
+          "(e:Event:V3) <- [:OBSERVED] - (a:Activity)",
+          "(e) - [:OCCURRED_AT] -> (station:Station)"
+        ],
+        "from_node": "(a:Activity:V3)",
+        "to_node": "(station:Station:V3)",
+        "result": "(a) - [:OCCURS_AT] -> (station)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "PART_OF_PIZZA_PACK",
+      "constructor": {
+        "relations": [
+          "(pizza:Pizza:V2) <- [:ACTS_ON] - (e:Event:V2)",
+          "(pack:Pack:V2) <- [:ACTS_ON] - (e)"
+        ],
+        "from_node": "(pizza: Pizza:V2)",
+        "to_node": "(pack: Pack:V2)",
+        "result": "(pizza) - [:PART_OF] -> (pack)",
+        "model_as_node": false
+      }
+    },
+    {
+      "type": "PART_OF_PACK_BOX",
+      "constructor": {
+        "relations": [
+          "(pack:Pack:V2) <- [:ACTS_ON] - (e:Event:V2)",
+          "(box:Box:V2) <- [:ACTS_ON] - (e)"
+        ],
+        "from_node": "(pack: Pack:V2)",
+        "to_node": "(box: Box:V2)",
+        "result": "(pack) - [:PART_OF] -> (box)",
+        "model_as_node": false
+      }
+    },
+    {
+      "type": "PART_OF_BOX_PALLET",
+      "constructor": {
+        "relations": [
+          "(box:Box:V2) <- [:ACTS_ON] - (e:Event:V2)",
+          "(pallet:Pallet:V2) <- [:ACTS_ON] - (e)"
+        ],
+        "from_node": "(box: Box:V2)",
+        "to_node": "(pallet: Pallet:V2)",
+        "result": "(box) - [:PART_OF] -> (pallet)",
+        "model_as_node": false
+      }
+    }
+  ]
+}

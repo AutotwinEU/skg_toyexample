@@ -1,7 +1,7 @@
 [
     {
-      "name": "ToyExample",
-      "file_directory": "data\\ToyExample\\",
+      "name": "ToyExampleSimulation",
+      "file_directory": "data\\ToyExampleSimulation\\",
       "file_names": [
         "S1.csv",
         "S2.csv",
@@ -12,7 +12,7 @@
         "S7.csv"
       ],
       "labels": [
-        "Record"
+        "Simulated_Event"
       ],
       "seperator": ";",
       "attributes": [
@@ -27,13 +27,37 @@
           "mandatory": true
         },
         {
-          "name": "sensorId",
+          "name": "activity",
           "columns": [
             {
-              "name": "sensor",
-              "dtype": "str"
+              "name": "sensor"
             }
           ],
+          "mandatory": true
+        },
+        {
+          "name": "sensor",
+          "columns": [
+            {
+              "name": "sensor"
+            }
+          ],
+          "mandatory": true
+        },
+        {
+          "name": "timestampInDatetime",
+          "columns": [
+            {
+              "name": "timestamp"
+            }
+          ],
+          "datetime_object": {
+            "is_epoch": true,
+            "unit": "s",
+            "format": "dd/MM/yyyy HH:mm:ss",
+            "convert_to": "ISO_DATE_TIME"
+          },
+
           "mandatory": true
         },
         {

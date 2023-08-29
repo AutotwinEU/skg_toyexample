@@ -1,0 +1,378 @@
+{
+  "name": "ToyExample",
+  "version": "3.0.0",
+  "records": [
+    "(record:EventRecord:SensorEventRecord:V3 {timestamp, sensorId}",
+    "(record:EntityRecord:PizzaRecord:V3 {pizzaId})",
+    "(record:EntityRecord:PackRecord:V3 {packId})",
+    "(record:EntityRecord:BoxRecord:V3 {boxId})",
+    "(record:EntityRecord:PalletRecord:V3 {palletId})",
+    "(record:EntityRecord:SensorRecord:V3 {sensorId, OPTIONAL sensorType})",
+    "(record:EntityRecord:StationRecord:V3 {stationName, stationType})",
+    "(record:EntityRecord:AssemblyLineRecord:V3 {assemblyName})",
+    "(record:ProductionPlanRecord:V3 {code, OPTIONAL diameter, OPTIONAL height, OPTIONAL weight, OPTIONAL packCount, OPTIONAL boxCount, OPTIONAL boxQuantity, OPTIONAL interval, OPTIONAL intervalDelta})",
+    "(record:EntityRecord:PizzaQualityAttributeRecord:V3 {exceededCookingTime})",
+    "(record:EntityRecord:OperatorRecord:V3 {operatorId})",
+    "(record:EventRecord:OperatorEventRecord:OperatorStartEventRecord:V3 WHERE record.hasBreak = true {timestamp, hasBreak})",
+    "(record:EventRecord:OperatorEventRecord:OperatorCompleteEventRecord:V3 WHERE record.hasBreak = false {timestamp, hasBreak})",
+    "(record:EventRecord:StatusEventRecord:V3 {timestamp, locked})",
+    "(record:EventRecord:LockStatusRecord:V3 {locked})",
+    "(record:EventRecord:WIPRecord:V3 {amount})",
+    "(record:EventRecord:WIPEventRecord:V3 {timestamp, amount})"
+  ],
+  "nodes": [
+    {
+      "type": "Event",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorEventRecord:V3)",
+          "result": "(e:Event:SensorEvent:V3 {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
+        },
+        {
+          "prevalent_record": "(record:OperatorStartEventRecord:V3)",
+          "result": "(e:Event:OperatorEvent:V3 {timestamp:record.timestamp, activity: \"Start Break\"})"
+        },
+        {
+          "prevalent_record": "(record:OperatorCompleteEventRecord:V3)",
+          "result": "(e:Event:OperatorEvent:V3 {timestamp:record.timestamp, activity: \"Stop Break\"})"
+        },
+        {
+          "prevalent_record": "(record:StatusEventRecord:V3)",
+          "result": "(e:Event:SensorReadingEvent:V3 {timestamp:record.timestamp, activity: \"Read Lock Status\"})"
+        },
+        {
+          "prevalent_record": "(record:WIPEventRecord:V3)",
+          "result": "(e:Event:SensorReadingEvent:V3 {timestamp:record.timestamp, activity: \"Read WIP amount\"})"
+        }
+      ]
+    },
+    {
+      "type": "Activity",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorEventRecord:V3)",
+          "result": "(a:Activity:V3 {activity: \"Pass Sensor \" + record.sensorId})",
+          "infer_observed": true
+        },
+        {
+          "prevalent_record": "(record:OperatorStartEventRecord:V3)",
+          "result": "(a:Activity:V3 {activity: \"Start Break\"})"
+        },
+        {
+          "prevalent_record": "(record:OperatorCompleteEventRecord:V3)",
+          "result": "(a:Activity:V3 {activity: \"Stop Break\"})"
+        },
+        {
+          "prevalent_record": "(record:StatusEventRecord:V3)",
+          "result": "(a:Activity:V3 {activity: \"Read Lock Status\"})"
+        },
+        {
+          "prevalent_record": "(record:WIPEventRecord:V3)",
+          "result": "(a:Activity:V3 {activity: \"Read WIP amount\"})"
+        }
+      ]
+    },
+    {
+      "type": "Pizza",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PizzaRecord:V3)",
+          "result": "(v:Entity:Pizza:V3 {sysId: record.pizzaId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "pizzaQualityAttribute",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PizzaQualityAttributeRecord:V3)",
+          "result": "(v:EntityAttribute:PizzaQualityAttribute:V3 {burned: record.exceededCookingTime})",
+          "infer_corr_from_event_record": false
+        }
+      ]
+    },
+    {
+      "type": "Pack",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PackRecord:V3)",
+          "result": "(v:Entity:Pack:V3 {sysId: record.packId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Box",
+      "constructor": [
+        {
+          "prevalent_record": "(record:BoxRecord:V3)",
+          "result": "(v:Entity:Box:V3 {sysId: record.boxId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Pallet",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PalletRecord:V3)",
+          "result": "(v:Entity:Pallet:V3 {sysId: record.palletId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Sensor",
+      "constructor": [
+        {
+          "prevalent_record": "(record:SensorRecord:V3)",
+          "result": "(v:Entity:Resource:MachinePart:Sensor:V3 {sysId: record.sensorId, OPTIONAL sensorType:record.sensorType})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "EXECUTED_BY"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "SensorReading",
+      "constructor": [
+        {"prevalent_record": "(record:LockStatusRecord WHERE record.locked = true)",
+          "result": "(ls:EntityAttribute:SensorReading:V3 {status: \"locked\"})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "CREATES"
+        },
+        {"prevalent_record": "(record:LockStatusRecord WHERE record.locked = false)",
+          "result": "(ls:EntityAttribute:SensorReading:V3 {status: \"not locked\"})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "CREATES"
+        },
+        {"prevalent_record": "(record:WIPRecord)",
+          "result": "(ls:EntityAttribute:SensorReading:V3 {status:\"WIP amount \" + record.amount})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "CREATES"
+        }
+      ]
+    },
+    {
+      "type": "Station",
+      "constructor": [
+        {
+          "prevalent_record": "(record:StationRecord:V3)",
+          "result": "(v:Entity:Resource:Station:Location:V3 {sysId: record.stationName, type: record.stationType})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "OCCURRED_AT"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "AssemblyLine",
+      "constructor": [
+        {
+          "prevalent_record": "(record:AssemblyLineRecord:V3)",
+          "result": "(v:Entity:Resource:AssemblyLine:V3 {sysId: record.assemblyName})"
+        }
+      ]
+    },
+    {
+      "type": "ProductionPlan",
+      "constructor": [
+        {
+          "prevalent_record": "(record:ProductionPlanRecord:V3)",
+          "result": "(v:ProductionPlan:V3 {code: record.code, OPTIONAL diameter: record.diameter, OPTIONAL height: record.height, OPTIONAL weight: record.weight, OPTIONAL packCount: record.packCount, OPTIONAL boxCount: record.boxCount, OPTIONAL boxQuantity: record.boxQuantity, OPTIONAL interval: record.interval, OPTIONAL intervalDelta: record.intervalDelta})",
+          "infer_corr_from_event_record": false
+        }
+      ]
+    },
+    {
+      "type": "OperatorRecord",
+      "constructor": [
+        {
+          "prevalent_record": "(record:OperatorRecord:V3)",
+          "result": "(v:Entity:Resource:HumanResource:Operator:V3 {sysId: record.operatorId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "INITIATED_BY"
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "type": "HAS_PROPERTY",
+      "constructor": {
+        "prevalent_record": "(record:PizzaQualityAttributeRecord:PizzaRecord:V3)",
+        "from_node": "(pizza: Pizza:V3)",
+        "to_node": "(quality: PizzaQualityAttribute:V3)",
+        "result": "(pizza) - [:HAS_PROPERTY] -> (quality)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "HAS_VALUE",
+      "constructor": {
+        "prevalent_record": "(record:LockStatusRecord:SensorRecord:V3)",
+        "from_node": "(sensor:Sensor:V3)",
+        "to_node": "(ls:SensorReading:V3)",
+        "result": "(sensor) - [:HAS_VALUE] -> (ls)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "HAS_VALUE",
+      "constructor": {
+        "prevalent_record": "(record:WIPRecord:SensorRecord:V3)",
+        "from_node": "(sensor:Sensor:V3)",
+        "to_node": "(ls:SensorReading:V3)",
+        "result": "(sensor) - [:HAS_VALUE] -> (ls)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "FOLLOWS_PIZZA",
+      "constructor": {
+        "prevalent_record": "(record:ProductionPlanRecord:PizzaRecord:V3)",
+        "from_node": "(pizza: Pizza:V3)",
+        "to_node": "(description: ProductionPlan:V3)",
+        "result": "(pizza) - [:FOLLOWS] -> (description)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "FOLLOWS_PACK",
+      "constructor": {
+        "prevalent_record": "(record:ProductionPlanRecord:PackRecord:V3)",
+        "from_node": "(pack: Pack:V3)",
+        "to_node": "(description: ProductionPlan:V3)",
+        "result": "(pack) - [:HAS_TYPE] -> (description)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "FOLLOWS_BOX",
+      "constructor": {
+        "prevalent_record": "(record:ProductionPlanRecord:BoxRecord)",
+        "from_node": "(box: Box:V3)",
+        "to_node": "(description: ProductionPlan:V3)",
+        "result": "(box) - [:HAS_TYPE] -> (description)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "PART_OF_SENSOR_STATION",
+      "constructor": {
+        "prevalent_record": "(record:SensorRecord:StationRecord:V3)",
+        "from_node": "(sensor: Sensor:V3)",
+        "to_node": "(station: Station:V3)",
+        "result": "(sensor) - [:PART_OF] -> (station)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "PART_OF_STATION_ASSEMBLYLINE",
+      "constructor": {
+        "prevalent_record": "(record:AssemblyLineRecord:StationRecord:V3)",
+        "from_node": "(station: Station:V3)",
+        "to_node": "(assembly: AssemblyLine:V3)",
+        "result": "(station) - [:PART_OF] -> (assembly)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "OCCURRED_AT",
+      "constructor": {
+        "relations": [
+          "(e:Event:V3) - [:EXECUTED_BY] -> (sensor:Sensor)",
+          "(sensor) - [:PART_OF] -> (station:Station)"
+        ],
+        "from_node": "(e:Event:V3)",
+        "to_node": "(station:Station:V3)",
+        "result": "(e) - [:OCCURRED_AT] -> (station)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "include": true,
+      "type": "OCCURS_AT",
+      "constructor": {
+        "relations": [
+          "(e:Event:V3) <- [:OBSERVED] - (a:Activity)",
+          "(e) - [:OCCURRED_AT] -> (station:Station)"
+        ],
+        "from_node": "(a:Activity:V3)",
+        "to_node": "(station:Station:V3)",
+        "result": "(a) - [:OCCURS_AT] -> (station)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "PART_OF_PIZZA_PACK",
+      "constructor": {
+        "relations": [
+          "(pizza:Pizza:V3) <- [:ACTS_ON] - (e:Event:V3)",
+          "(pack:Pack:V3) <- [:ACTS_ON] - (e)"
+        ],
+        "from_node": "(pizza: Pizza:V3)",
+        "to_node": "(pack: Pack:V3)",
+        "result": "(pizza) - [:PART_OF] -> (pack)",
+        "model_as_node": false
+      }
+    },
+    {
+      "type": "PART_OF_PACK_BOX",
+      "constructor": {
+        "relations": [
+          "(pack:Pack:V3) <- [:ACTS_ON] - (e:Event:V3)",
+          "(box:Box:V3) <- [:ACTS_ON] - (e)"
+        ],
+        "from_node": "(pack: Pack:V3)",
+        "to_node": "(box: Box:V3)",
+        "result": "(pack) - [:PART_OF] -> (box)",
+        "model_as_node": false
+      }
+    },
+    {
+      "type": "PART_OF_BOX_PALLET",
+      "constructor": {
+        "relations": [
+          "(box:Box:V3) <- [:ACTS_ON] - (e:Event:V3)",
+          "(pallet:Pallet:V3) <- [:ACTS_ON] - (e)"
+        ],
+        "from_node": "(box: Box:V3)",
+        "to_node": "(pallet: Pallet:V3)",
+        "result": "(box) - [:PART_OF] -> (pallet)",
+        "model_as_node": false
+      }
+    }
+  ]
+}

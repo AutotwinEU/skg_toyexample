@@ -3,3 +3,4 @@
 *.pyc
 /ekg_creator/database_managers/remote_authentication.py
 /perf/ECESample/
+/*credentials.py
