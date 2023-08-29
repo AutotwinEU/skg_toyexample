@@ -10,7 +10,11 @@
       "S16.csv"
     ],
     "labels": [
-      "Record"
+      "Record",
+      "PizzaRecord",
+      "SensorEventRecord",
+      "SensorRecord",
+      "ProductionPlanRecord"
     ],
     "seperator": ";",
     "attributes": [
@@ -65,7 +69,11 @@
       "S8.csv"
     ],
     "labels": [
-      "Record"
+      "Record",
+      "PackRecord",
+      "SensorEventRecord",
+      "SensorRecord",
+      "ProductionPlanRecord"
     ],
     "seperator": ";",
     "attributes": [
@@ -118,7 +126,10 @@
       "S10.csv"
     ],
     "labels": [
-      "Record"
+      "BoxRecord",
+      "SensorEventRecord",
+      "SensorRecord",
+      "ProductionPlanRecord"
     ],
     "seperator": ";",
     "attributes": [
@@ -174,7 +185,10 @@
       "S15.csv"
     ],
     "labels": [
-      "Record"
+      "Record",
+      "PalletRecord",
+      "SensorEventRecord",
+      "SensorRecord"
     ],
     "seperator": ";",
     "attributes": [
@@ -215,7 +229,9 @@
       "stations.csv"
     ],
     "labels": [
-      "Record"
+      "Record",
+      "SensorRecord",
+      "StationRecord"
     ],
     "attributes": [
       {
@@ -258,13 +274,14 @@
     ]
   },
   {
-    "name": "ToyExampleStations",
+    "name": "ToyExampleProductionPlan",
     "file_directory": "data\\ToyExampleV2\\",
     "file_names": [
-      "pizza_info.csv"
+      "production_plan.csv"
     ],
     "labels": [
-      "Record"
+      "Record",
+      "ProductionPlanRecord"
     ],
     "attributes": [
       {
