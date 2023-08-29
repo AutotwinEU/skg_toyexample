@@ -7,7 +7,7 @@
     "(record:PackRecord:V2 {packId})",
     "(record:BoxRecord:V2 {boxId})",
     "(record:PalletRecord:V2 {palletId})",
-    "(record:SensorRecord:V2 {sensorId})",
+    "(record:EntityRecord:SensorRecord:V2 {sensorId, OPTIONAL sensorType})",
     "(record:SensorTypeRecord:V2 {sensorId, sensorType})",
     "(record:StationRecord:V2 {stationName, stationType})",
     "(record:ProductionPlanRecord:V2 {code, OPTIONAL diameter, OPTIONAL height, OPTIONAL weight, OPTIONAL packCount, OPTIONAL boxCount, OPTIONAL boxQuantity, OPTIONAL interval, OPTIONAL intervalDelta})"
@@ -17,7 +17,7 @@
       "type": "Event",
       "constructor": [
         {
-          "prevalent_record": "(record:SensorEventRecord)",
+          "prevalent_record": "(record:SensorEventRecord:V2)",
           "result": "(e:Event:V2 {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
         }
       ]
@@ -26,7 +26,7 @@
       "type": "Activity",
       "constructor": [
         {
-          "prevalent_record": "(record:SensorEventRecord)",
+          "prevalent_record": "(record:SensorEventRecord:V2)",
           "result": "(a:Activity:V2 {activity: \"Pass Sensor \" + record.sensorId})",
           "infer_observed": true
         }
@@ -36,7 +36,7 @@
       "type": "Pizza",
       "constructor": [
         {
-          "prevalent_record": "(record:PizzaRecord)",
+          "prevalent_record": "(record:PizzaRecord:V2)",
           "result": "(v:Entity:Pizza:V2 {sysId: record.pizzaId})",
           "infer_corr_from_event_record": true,
           "corr_type": "ACTS_ON"
@@ -50,7 +50,7 @@
       "type": "Pack",
       "constructor": [
         {
-          "prevalent_record": "(record:PackRecord)",
+          "prevalent_record": "(record:PackRecord:V2)",
           "result": "(v:Entity:Pack:V2 {sysId: record.packId})",
           "infer_corr_from_event_record": true,
           "corr_type": "ACTS_ON"
@@ -64,7 +64,7 @@
       "type": "Box",
       "constructor": [
         {
-          "prevalent_record": "(record:BoxRecord)",
+          "prevalent_record": "(record:BoxRecord:V2)",
           "result": "(v:Entity:Box:V2 {sysId: record.boxId})",
           "infer_corr_from_event_record": true,
           "corr_type": "ACTS_ON"
@@ -78,7 +78,7 @@
       "type": "Pallet",
       "constructor": [
         {
-          "prevalent_record": "(record:PalletRecord)",
+          "prevalent_record": "(record:PalletRecord:V2)",
           "result": "(v:Entity:Pallet:V2 {sysId: record.palletId})",
           "infer_corr_from_event_record": true,
           "corr_type": "ACTS_ON"
@@ -92,14 +92,8 @@
       "type": "Sensor",
       "constructor": [
         {
-          "prevalent_record": "(record:SensorTypeRecord)",
-          "result": "(v:Entity:Resource:MachinePart:Sensor:V2 {sysId: record.sensorId, type: record.sensorType})",
-          "infer_corr_from_event_record": true,
-          "corr_type": "EXECUTED_BY"
-        },
-        {
-          "prevalent_record": "(record:SensorRecord)",
-          "result": "(v:Entity:Resource:MachinePart:Sensor:V2 {sysId: record.sensorId})",
+          "prevalent_record": "(record:SensorRecord:V2)",
+          "result": "(v:Entity:Resource:MachinePart:Sensor:V2 {sysId: record.sensorId, OPTIONAL sensorType:record.sensorType})",
           "infer_corr_from_event_record": true,
           "corr_type": "EXECUTED_BY"
         }
@@ -112,7 +106,7 @@
       "type": "Station",
       "constructor": [
         {
-          "prevalent_record": "(record:StationRecord)",
+          "prevalent_record": "(record:StationRecord:V2)",
           "result": "(v:Entity:Resource:Station:Location:V2 {sysId: record.stationName, type: record.stationType})",
           "infer_corr_from_event_record": true
         }
@@ -122,7 +116,7 @@
       "type": "ProductionPlan",
       "constructor": [
         {
-          "prevalent_record": "(record:ProductionPlanRecord)",
+          "prevalent_record": "(record:ProductionPlanRecord:V2)",
           "result": "(v:ProductionPlan:V2 {code: record.code, OPTIONAL diameter: record.diameter, OPTIONAL height: record.height, OPTIONAL weight: record.weight, OPTIONAL packCount: record.packCount, OPTIONAL boxCount: record.boxCount, OPTIONAL boxQuantity: record.boxQuantity, OPTIONAL interval: record.interval, OPTIONAL intervalDelta: record.intervalDelta})",
           "infer_corr_from_event_record": false
         }
@@ -134,9 +128,9 @@
     {
       "type": "FOLLOWS_PIZZA",
       "constructor": {
-        "prevalent_record": "(record:ProductionPlanRecord:PizzaRecord:V3)",
-        "from_node": "(pizza: Pizza:V3)",
-        "to_node": "(description: ProductionPlan:V3)",
+        "prevalent_record": "(record:ProductionPlanRecord:PizzaRecord:V2)",
+        "from_node": "(pizza: Pizza:V2)",
+        "to_node": "(description: ProductionPlan:V2)",
         "result": "(pizza) - [:FOLLOWS] -> (description)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
@@ -145,10 +139,10 @@
     {
       "type": "FOLLOWS_PACK",
       "constructor": {
-        "prevalent_record": "(record:ProductionPlanRecord:PackRecord:V3)",
-        "from_node": "(pack: Pack:V3)",
-        "to_node": "(description: ProductionPlan:V3)",
-        "result": "(pack) - [:HAS_TYPE] -> (description)",
+        "prevalent_record": "(record:ProductionPlanRecord:PackRecord:V2)",
+        "from_node": "(pack: Pack:V2)",
+        "to_node": "(description: ProductionPlan:V2)",
+        "result": "(pack) - [:FOLLOWS] -> (description)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
@@ -157,9 +151,9 @@
       "type": "FOLLOWS_BOX",
       "constructor": {
         "prevalent_record": "(record:ProductionPlanRecord:BoxRecord)",
-        "from_node": "(box: Box:V3)",
-        "to_node": "(description: ProductionPlan:V3)",
-        "result": "(box) - [:HAS_TYPE] -> (description)",
+        "from_node": "(box: Box:V2)",
+        "to_node": "(description: ProductionPlan:V2)",
+        "result": "(box) - [:FOLLOWS] -> (description)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
@@ -167,9 +161,9 @@
     {
       "type": "PART_OF_SENSOR_STATION",
       "constructor": {
-        "prevalent_record": "(record:SensorRecord:StationRecord:V3)",
-        "from_node": "(sensor: Sensor:V3)",
-        "to_node": "(station: Station:V3)",
+        "prevalent_record": "(record:SensorRecord:StationRecord:V2)",
+        "from_node": "(sensor: Sensor:V2)",
+        "to_node": "(station: Station:V2)",
         "result": "(sensor) - [:PART_OF] -> (station)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
@@ -179,11 +173,11 @@
       "type": "OCCURRED_AT",
       "constructor": {
         "relations": [
-          "(e:Event:V3) - [:EXECUTED_BY] -> (sensor:Sensor)",
-          "(sensor) - [:PART_OF] -> (station:Station)"
+          "(e:Event:V2) - [:EXECUTED_BY] -> (sensor:Sensor:V2)",
+          "(sensor) - [:PART_OF] -> (station:Station:V2)"
         ],
-        "from_node": "(e:Event:V3)",
-        "to_node": "(station:Station:V3)",
+        "from_node": "(e:Event:V2)",
+        "to_node": "(station:Station:V2)",
         "result": "(e) - [:OCCURRED_AT] -> (station)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
@@ -193,11 +187,11 @@
       "type": "OCCURS_AT",
       "constructor": {
         "relations": [
-          "(e:Event:V3) <- [:OBSERVED] - (a:Activity)",
-          "(e) - [:OCCURRED_AT] -> (station:Station)"
+          "(e:Event:V2) <- [:OBSERVED] - (a:Activity:V2)",
+          "(e) - [:OCCURRED_AT] -> (station:Station:V2)"
         ],
-        "from_node": "(a:Activity:V3)",
-        "to_node": "(station:Station:V3)",
+        "from_node": "(a:Activity:V2)",
+        "to_node": "(station:Station:V2)",
         "result": "(a) - [:OCCURS_AT] -> (station)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false

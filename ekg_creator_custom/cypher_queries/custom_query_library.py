@@ -13,7 +13,7 @@ class CustomCypherQueryLibrary:
         # language=sql
         query_str = '''
             MATCH (c_start:Activity)
-            WHERE NOT EXISTS ((:Activity) - [:$df_c_type] -> (c_start))
+            WHERE NOT EXISTS ((:Activity) - [:$df_a_type] -> (c_start))
             WITH c_start, right(c_start.activity, 2) as sensorId
             WITH c_start, sensorId, "SourceStation"+sensorId as id
             MERGE (station:Entity:Resource:Station:Location {type: "Source", sysId: id})
@@ -24,14 +24,14 @@ class CustomCypherQueryLibrary:
         '''
 
         return Query(query_str=query_str,
-                     template_string_parameters={"df_c_type": f"DF_C_{entity_type.upper()}"})
+                     template_string_parameters={"df_a_type": f"DF_A_{entity_type.upper()}"})
 
     @staticmethod
     def get_create_sink_station_aggregation_query(entity_type):
         # language=sql
         query_str = '''
                 MATCH (c_end:Activity)
-                WHERE NOT EXISTS ((c_end) - [:$df_c_type] -> (:Activity))
+                WHERE NOT EXISTS ((c_end) - [:$df_a_type] -> (:Activity))
                 WITH c_end, right(c_end.activity, 2) as sensorId
                 WITH c_end, sensorId, "SinkStation"+sensorId as id
                 MERGE (station:Entity:Resource:Station:Location {type: "Sink", sysId: id})
@@ -42,15 +42,15 @@ class CustomCypherQueryLibrary:
             '''
 
         return Query(query_str=query_str,
-                     template_string_parameters={"df_c_type": f"DF_C_{entity_type.upper()}"})
+                     template_string_parameters={"df_a_type": f"DF_A_{entity_type.upper()}"})
 
     @staticmethod
     def get_create_processing_stations_aggregation_query(entity_type):
         # language=sql
         query_str = '''
-                    MATCH p=(c_start:Activity) - [:$df_c_type*] -> (c_end:Activity)
-                    WHERE NOT EXISTS ((c_end) - [:$df_c_type] -> (:Activity)) AND NOT EXISTS 
-                    ((:Activity) - [:$df_c_type] -> (c_start))
+                    MATCH p=(c_start:Activity) - [:$df_a_type*] -> (c_end:Activity)
+                    WHERE NOT EXISTS ((c_end) - [:$df_a_type] -> (:Activity)) AND NOT EXISTS 
+                    ((:Activity) - [:$df_a_type] -> (c_start))
                     WITH nodes(p) as activityList
                     UNWIND range(1,size(activityList)-3,2) AS i
                     WITH activityList[i] as first, activityList[i+1] as second
@@ -67,7 +67,7 @@ class CustomCypherQueryLibrary:
                 '''
 
         return Query(query_str=query_str,
-                     template_string_parameters={"df_c_type": f"DF_C_{entity_type.upper()}"})
+                     template_string_parameters={"df_a_type": f"DF_A_{entity_type.upper()}"})
 
     @staticmethod
     def get_complete_corr_query(version_number):
@@ -131,8 +131,8 @@ class CustomCypherQueryLibrary:
     def get_connect_wip_sensor_to_assembly_line_query(version_number):
         query_str = '''
             MATCH (record:AssemblyLineRecord&SensorRecord&$version_number&!StationRecord)
-            MATCH (a:AssemblyLine) - [:PREVALENCE] -> (record)
-            MATCH (s:Sensor) - [:PREVALENCE] -> (record)
+            MATCH (a:AssemblyLine) - [:EXTRACTED_FROM] -> (record)
+            MATCH (s:Sensor) - [:EXTRACTED_FROM] -> (record)
             MERGE (s) - [:PART_OF] -> (a)
         '''
 
@@ -142,7 +142,7 @@ class CustomCypherQueryLibrary:
     @staticmethod
     def get_complete_quality_query(version_number):
         query_str = '''
-                MATCH (p:pizzaQualityAttribute:$version_number)
+                MATCH (p:PizzaQualityAttribute:$version_number)
                 SET p.defective = NOT(p.burned)
             '''
 
