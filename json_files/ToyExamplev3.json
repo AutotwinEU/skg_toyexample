@@ -293,7 +293,7 @@
         "prevalent_record": "(record:SensorRecord:StationRecord:V3)",
         "from_node": "(sensor: Sensor:V3)",
         "to_node": "(station: Station:V3)",
-        "result": "(sensor) - [:FOLLOWS] -> (station)",
+        "result": "(sensor) - [:PART_OF] -> (station)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
@@ -304,7 +304,7 @@
         "prevalent_record": "(record:AssemblyLineRecord:StationRecord:V3)",
         "from_node": "(station: Station:V3)",
         "to_node": "(assembly: AssemblyLine:V3)",
-        "result": "(station) - [:FOLLOWS] -> (assembly)",
+        "result": "(station) - [:PART_OF] -> (assembly)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }

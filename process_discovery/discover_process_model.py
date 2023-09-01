@@ -1,7 +1,7 @@
 from process_discovery import msm_lib as msm
 
 
-class ProcessDiscovery:
+class ProcessDiscoveryLog:
     def __init__(self, config_path):
         self.config_path = config_path
         self.config = msm.load_config(self.config_path)

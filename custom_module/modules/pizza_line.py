@@ -2,13 +2,12 @@ import pandas as pd
 
 from promg import DatabaseConnection
 from promg import Performance
-from ekg_creator_custom.cypher_queries.custom_query_library import CustomCypherQueryLibrary as ccql
+from custom_module.cypher_queries.custom_query_library import CustomCypherQueryLibrary as ccql
 
 
-class CustomModule:
-    def __init__(self, db_connection: DatabaseConnection):
-        self.connection = db_connection
-        self.batch_size = 5000
+class PizzaLineModule:
+    def __init__(self):
+        self.connection = DatabaseConnection()
 
     def do_custom_query(self, query_name, **kwargs):
         func = getattr(self, query_name)
