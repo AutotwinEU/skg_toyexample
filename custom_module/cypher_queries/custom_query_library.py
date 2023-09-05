@@ -84,11 +84,11 @@ class CustomCypherQueryLibrary:
                 RETURN s as packingStation, unique_labels
             }
             MATCH (e:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
-            MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor:$version_number {sensorType: "ENTER"})
+            MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor:$version_number {type: "ENTER"})
             WHERE NOT EXISTS ((e) - [:DF_PIZZA|DF_PACK|DF_BOX] -> (:Event))
             CALL {WITH e, packingStation
                   MATCH (f:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
-                  MATCH (f) - [:EXECUTED_BY] -> (sensor:Sensor {sensorType: "EXIT"})
+                  MATCH (f) - [:EXECUTED_BY] -> (sensor:Sensor {type: "EXIT"})
                   WHERE f.timestamp > e.timestamp
                   RETURN f
                   ORDER BY f.timestamp ASC
@@ -186,7 +186,7 @@ class CustomCypherQueryLibrary:
     def get_create_qualifier_rel_to_pizza_quality_query(version_number):
         query_str = '''
                     MATCH (q:PizzaQualityAttribute:$version_number) <- [:HAS_PROPERTY] - (p:Pizza:$version_number) <- [:ACTS_ON] - (e:Event)
-                    MATCH (e) - [:EXECUTED_BY] -> (:Sensor:$version_number {sensorType: "EXIT"}) 
+                    MATCH (e) - [:EXECUTED_BY] -> (:Sensor:$version_number {type: "EXIT"}) 
                         - [:PART_OF] -> (:Station:$version_number {sysId: "Oven"})
                     CREATE (e) - [:CREATES] -> (q)
                 '''
@@ -247,12 +247,11 @@ class CustomCypherQueryLibrary:
     def get_connect_sensors_queries():
         # language=sql
         query_str = '''
-            MATCH (e1:Event) - [:EXECUTED_BY] -> (s1:Sensor) - [:PART_OF] -> (:Station) <- [:OCCURS_AT] - (:Activity) 
-                    - [df] -> (:Activity) - [:OCCURS_AT] -> (:Station) <- [:PART_OF] - (s2:Sensor) <- [:EXECUTED_BY] 
-                    - (e2:Event) <- [] - (e1)
+            MATCH (s1:Sensor) <- [:EXECUTED_BY] - (e1:Event) - [df:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET] -> (e2:Event) - 
+            [:EXECUTED_BY] -> (s2:Sensor) 
             WHERE s1 <> s2
-            WITH s1, s2, df
-            MERGE (s1) - [:CONN {movedEntity: df.entityType}] -> (s2)
+            WITH DISTINCT s1, s2, df.entityType as movedEntity
+            MERGE (s1) - [:CONN {movedEntity: movedEntity}] -> (s2)
             '''
 
         return Query(query_str=query_str)
