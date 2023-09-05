@@ -1,12 +1,16 @@
 import os
 from datetime import datetime
+import time
 from pathlib import Path
+import random
 
+import numpy as np
 from promg import SemanticHeader, OcedPg
 from promg import DatabaseConnection
 from promg import DatasetDescriptions
 from promg import Performance
 from promg import authentication
+from promg.database_managers.authentication import Credentials
 from promg.modules.db_management import DBManagement
 from promg.modules.process_discovery import ProcessDiscovery
 from promg.modules.exporter import Exporter
@@ -18,6 +22,7 @@ from tts_credentials import remote
 from colorama import Fore
 
 from process_discovery.discover_process_model import ProcessDiscoveryLog
+randint = random.randint(0, 9999)
 
 number = 3
 dataset_name = f'ToyExamplev{number}'
@@ -39,14 +44,33 @@ step_analysis = True
 
 use_preprocessed_files = False  # if false, read/import files instead
 verbose = False
-connection_key = authentication.Connections.LOCAL
-# connection_key = authentication.Connections.REMOTE
+use_local = False
+
 
 def main() -> None:
     """
     Main function, read all the logs, clear and create the graph, perform checks
     @return: None
     """
+    _step_clear_db = step_clear_db
+    if not use_local:
+        number_str = str(randint).zfill(4)
+        request_permission = input(
+            f"You are going to make changes to the TTS instance. Is this your intention? Type {number_str} for Yes or "
+            f"N [No]")
+        if request_permission.lower().strip() == number_str:
+            _step_clear_db = False
+            credentials = remote
+            pass
+        elif request_permission.lower().strip() == "n" or request_permission.lower().strip() == "no":
+            print("As it is not your intention to make changes to the TTS instance, change use_local to True")
+            return
+        else:
+            print("Invalid input")
+            return
+    else:
+        credentials = authentication.connections_map[authentication.Connections.LOCAL]
+
     print("Started at =", datetime.now().strftime("%H:%M:%S"))
     if use_preprocessed_files:
         print(Fore.RED + '💾 Preloaded files are used!' + Fore.RESET)
@@ -56,11 +80,11 @@ def main() -> None:
     # performance class to measure performance
 
     performance = Performance.set_up_performance(dataset_name=dataset_name, use_sample=use_sample)
-    db_connection = DatabaseConnection.set_up_connection_using_key(key=connection_key,
-                                                                   verbose=verbose)
+    db_connection = DatabaseConnection.set_up_connection(credentials=credentials,
+                                                         verbose=verbose)
 
     db_manager = DBManagement()
-    if step_clear_db:
+    if _step_clear_db:
         db_manager.clear_db(replace=True)
         db_manager.set_constraints()
 
@@ -111,7 +135,7 @@ def main() -> None:
         # process_model_graph = process_discovery.get_discovered_proces_model(event_log)
         # graph.custom_module.write_attributes(graph=process_model_graph)
 
-    Performance().finish_and_save()
+    performance.finish_and_save()
     db_manager.print_statistics()
 
     db_connection.close_connection()
