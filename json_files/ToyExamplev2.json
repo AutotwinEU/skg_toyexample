@@ -93,7 +93,7 @@
       "constructor": [
         {
           "prevalent_record": "(record:SensorRecord:V2)",
-          "result": "(v:Entity:Resource:MachinePart:Sensor:V2 {sysId: record.sensorId, OPTIONAL sensorType:record.sensorType})",
+          "result": "(v:Entity:Resource:MachinePart:Sensor:V2 {sysId: record.sensorId, OPTIONAL type:record.sensorType})",
           "infer_corr_from_event_record": true,
           "corr_type": "EXECUTED_BY"
         }
