@@ -28,7 +28,7 @@ Install [Neo4j](https://neo4j.com/download/):
 
 ### Store the preprocessed data sets
 
-The preprocessed datasets (S1-S7.csv) should be stored in the following directory /data/ToyExample/
+The preprocessed datasets (S1-S7.csv) should be stored in the following directory `/data/ToyExampleV2/` or `/data/ToyExampleV3` respectively. 
 
 How to use
 ----------
