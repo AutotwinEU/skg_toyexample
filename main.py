@@ -15,6 +15,7 @@ from promg.modules.db_management import DBManagement
 from promg.modules.process_discovery import ProcessDiscovery
 from promg.modules.exporter import Exporter
 
+from custom_module.modules.df_discovery import DFDiscoveryModule
 from custom_module.modules.pizza_line import PizzaLineModule
 from tts_credentials import remote
 
@@ -22,6 +23,7 @@ from tts_credentials import remote
 from colorama import Fore
 
 from process_discovery.discover_process_model import ProcessDiscoveryLog
+
 randint = random.randint(0, 9999)
 
 number = 3
@@ -44,7 +46,7 @@ step_analysis = True
 
 use_preprocessed_files = False  # if false, read/import files instead
 verbose = False
-use_local = False
+use_local = True
 
 
 def main() -> None:
@@ -53,7 +55,7 @@ def main() -> None:
     @return: None
     """
     _step_clear_db = step_clear_db
-    if not use_local:
+    if not use_local:  # swap
         number_str = str(randint).zfill(4)
         request_permission = input(
             f"You are going to make changes to the TTS instance. Is this your intention? Type {number_str} for Yes or "
@@ -105,17 +107,35 @@ def main() -> None:
 
         oced_pg.create_relations(list(set(relations) - set(relations_to_be_constructed_later)))
 
-        oced_pg.create_df_edges()
-        pizza_module.complete_corr(version_number=version_number)
-        pizza_module.delete_df_edges(version_number=version_number)
+        df_discovery = DFDiscoveryModule()
+        df_edges_to_be_created = [
+            {"entity_type": "Pizza", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "Pack", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "Box", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "Pallet", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "Sensor", "df_label": "DF_SENSOR"},
+            {"entity_type": "Station", "df_label": "DF_STATION"},
+            {"entity_type": "Operator", "df_label": "DF_OPERATOR"}]
+
+        for df in df_edges_to_be_created:
+            df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"],
+                                                    version_number=version_number)
+
+        for station_id in ["PackStation", "BoxStation", "PalletStation"]:
+            pizza_module.infer_part_of_relation(version_number=version_number, station_id=station_id)
+
+        df_edges_to_be_created = [
+            {"entity_type": "PizzaPack", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "PackBox", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "BoxPallet", "df_label": "DF_CONTROL_FLOW_ITEM"}]
+
+        for df in df_edges_to_be_created:
+            df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"],
+                                                    version_number=version_number)
 
         if version_number == "V3":
             pizza_module.complete_quality(version_number=version_number)
             pizza_module.connect_operators_to_station(version_number=version_number)
-
-        oced_pg.create_relations(relations_to_be_constructed_later)
-
-        oced_pg.create_df_edges()
 
         process_discoverer = ProcessDiscovery()
 
