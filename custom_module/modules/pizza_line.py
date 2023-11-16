@@ -9,10 +9,6 @@ class PizzaLineModule:
     def __init__(self):
         self.connection = DatabaseConnection()
 
-    def do_custom_query(self, query_name, **kwargs):
-        func = getattr(self, query_name)
-        return func(**kwargs)
-
     @Performance.track('entity_type')
     def create_station_aggregation(self, entity_type):
         self.connection.exec_query(ccql.get_create_source_station_aggregation_query,
@@ -24,17 +20,72 @@ class PizzaLineModule:
                                    **{"entity_type": entity_type})
 
     @Performance.track()
-    def complete_corr(self, version_number):
-        self.connection.exec_query(ccql.get_complete_corr_query,
+    def infer_part_of_relation(self, version_number, station_id):
+        # depending on station, we first need to prepare the batching policy
+        if station_id in ["PackStation", "BoxStation"]:
+            self._determine_pp_changed_property(version_number=version_number, station_id=station_id)
+            self._determine_part_of_property(version_number=version_number, station_id=station_id)
+            self._determine_number_in_run(version_number=version_number, station_id=station_id)
+            self._create_part_of_relation_fifo_batch(version_number=version_number, station_id=station_id)
+            self._delete_temp_properties(version_number=version_number, station_id=station_id)
+        elif station_id in ["PalletStation"]:
+            self._create_part_of_relation_fifo(version_number=version_number, station_id=station_id)
+
+    def _determine_pp_changed_property(self, version_number, station_id):
+        self.connection.exec_query(ccql.get_set_pp_changed_property_query,
                                    **{
-                                       "version_number": version_number
+                                       "version_number": version_number,
+                                       "station_id": station_id
+                                   }
+                                   )
+        self.connection.exec_query(ccql.get_determine_pp_changed_query,
+                                   **{
+                                       "version_number": version_number,
+                                       "station_id": station_id
+                                   }
+                                   )
+
+    def _determine_part_of_property(self, version_number, station_id):
+        self.connection.exec_query(ccql.get_determine_entity_part_of_query,
+                                   **{
+                                       "version_number": version_number,
+                                       "station_id": station_id
+                                   }
+                                   )
+
+    def _determine_number_in_run(self, version_number, station_id):
+        self.connection.exec_query(ccql.get_determine_number_in_run_query,
+                                   **{
+                                       "version_number": version_number,
+                                       "station_id": station_id
+                                   }
+                                   )
+        self.connection.exec_query(ccql.get_determine_number_in_run_range_of_exit_stations_query,
+                                   **{
+                                       "version_number": version_number,
+                                       "station_id": station_id
+                                   }
+                                   )
+
+    def _create_part_of_relation_fifo_batch(self, version_number, station_id):
+        self.connection.exec_query(ccql.get_create_part_of_relation,
+                                   **{
+                                       "version_number": version_number,
+                                       "station_id": station_id
                                    })
 
-    @Performance.track()
-    def delete_df_edges(self, version_number):
-        self.connection.exec_query(ccql.get_delete_df_query,
+    def _create_part_of_relation_fifo(self, version_number, station_id):
+        self.connection.exec_query(ccql.get_create_part_of_FIFO_query,
                                    **{
-                                       "version_number": version_number
+                                       "version_number": version_number,
+                                       "station_id": station_id
+                                   })
+
+    def _delete_temp_properties(self, version_number, station_id):
+        self.connection.exec_query(ccql.get_delete_temp_properties_query,
+                                   **{
+                                       "version_number": version_number,
+                                       "station_id": station_id
                                    })
 
     @Performance.track()
