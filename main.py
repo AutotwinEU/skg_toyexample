@@ -12,7 +12,7 @@ from promg import Performance
 from promg import authentication
 from promg.database_managers.authentication import Credentials
 from promg.modules.db_management import DBManagement
-from promg.modules.process_discovery import ProcessDiscovery
+from custom_module.modules.process_model_discovery import ProcessDiscovery
 from promg.modules.exporter import Exporter
 
 from custom_module.modules.df_discovery import DFDiscoveryModule
@@ -94,10 +94,11 @@ def main() -> None:
         oced_pg = OcedPg(dataset_descriptions=datastructures,
                          use_sample=use_sample,
                          use_preprocessed_files=use_preprocessed_files)
-        pizza_module = PizzaLineModule()
 
         oced_pg.load()
         oced_pg.create_nodes_by_records()
+
+        pizza_module = PizzaLineModule()
         if version_number == "V3":
             pizza_module.merge_sensor_events(version_number=version_number)
             pizza_module.connect_wip_sensor_to_assembly_line(version_number=version_number)
@@ -138,14 +139,9 @@ def main() -> None:
             pizza_module.connect_operators_to_station(version_number=version_number)
 
         process_discoverer = ProcessDiscovery()
+        process_discoverer.create_df_process_model(df_label="DF_CONTROL_FLOW_ITEM", df_a_label="DF_A_CONTROL_FLOW_ITEM")
 
-        process_discoverer.create_df_process_model(entity_type="Pizza")
-        process_discoverer.create_df_process_model(entity_type="Pack")
-        process_discoverer.create_df_process_model(entity_type="Box")
-        process_discoverer.create_df_process_model(entity_type="Pallet")
         pizza_module.connect_stations_and_sensors()
-
-        oced_pg.create_df_edges(entity_types=["Station"])
 
         exporter = Exporter()
         exporter.save_event_log(entity_type="Pizza")
