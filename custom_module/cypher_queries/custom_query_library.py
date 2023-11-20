@@ -115,7 +115,7 @@ class CustomCypherQueryLibrary:
             MATCH (e:Event:$version_number) - [:OCCURRED_AT] -> (:Station:$version_number {sysId: '$stationId'})
             MATCH (e) - [:EXECUTED_BY] -> (s:Sensor:$version_number {type:"ENTER"})
             WITH e, CASE
-                WHEN EXISTS((e) - [:$df_enter_entity_label] -> (:Event)) THEN false
+                WHEN EXISTS((e) - [:DF_CONTROL_FLOW_ITEM] -> (:Event)) THEN false
                 ELSE true
                 END AS partOf
             set e.tempPartOf = partOf 
@@ -161,7 +161,7 @@ class CustomCypherQueryLibrary:
             MATCH (f:Event:$version_number) - [:OCCURRED_AT] -> (:Station:$version_number {sysId: '$stationId'})
             MATCH  (f) - [:ACTS_ON] -> (:Entity:$version_number:$exit_entity_label) - [:FOLLOWS] -> (pp:ProductionPlan)
             MATCH (f) - [:EXECUTED_BY] -> (sensor:Sensor:$version_number {type: "EXIT"})
-            WHERE NOT EXISTS ((:Event) - [:$df_exit_entity_label] -> (f))
+            WHERE NOT EXISTS ((:Event) - [:DF_CONTROL_FLOW_ITEM] -> (f))
             SET f.tempNumRange =  range(f.tempNumberInRun*pp.$quantity, (f.tempNumberInRun+1)*pp.$quantity-1)
         '''
 
@@ -169,7 +169,6 @@ class CustomCypherQueryLibrary:
                      template_string_parameters={
                          "version_number": version_number,
                          "exit_entity_label": station_info[station_id]["exit_entity"],
-                         "df_exit_entity_label": "DF_" + station_info[station_id]["exit_entity"].upper(),
                          "quantity": station_info[station_id]["quantity"],
                          "stationId": station_id
                      })
@@ -181,7 +180,7 @@ class CustomCypherQueryLibrary:
                 -> (packingStation:Station:$version_number {sysId: '$stationId'})
             MATCH  (e) - [:ACTS_ON] -> (:Entity:$version_number:$enter_entity_label) - [:FOLLOWS] -> (pp:ProductionPlan)
             MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor:$version_number {type: "ENTER"})
-            WHERE NOT EXISTS ((e) - [:$df_enter_entity_label] -> (:Event))
+            WHERE NOT EXISTS ((e) - [:DF_CONTROL_FLOW_ITEM] -> (:Event))
             CALL {WITH e, packingStation, pp
                   MATCH (f:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
                   MATCH  (f) - [:ACTS_ON] -> (:Entity:$version_number:$exit_entity_label) - [:FOLLOWS] -> (pp)
@@ -202,7 +201,6 @@ class CustomCypherQueryLibrary:
                      template_string_parameters={
                          "version_number": version_number,
                          "enter_entity_label": station_info[station_id]["enter_entity"],
-                         "df_enter_entity_label": "DF_" + station_info[station_id]["enter_entity"].upper(),
                          "exit_entity_label": station_info[station_id]["exit_entity"],
                          "enter_exit_combo": station_info[station_id]["enter_entity"] + station_info[station_id][
                              "exit_entity"],
@@ -215,11 +213,11 @@ class CustomCypherQueryLibrary:
         query_str = '''
             MATCH (e:Event:$version_number) - [:OCCURRED_AT] -> (packingStation {sysId:'$stationId'})
             MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor:$version_number {type: "ENTER"})
-            WHERE NOT EXISTS ((e) - [:$df_enter_entity_label] -> (:Event))
+            WHERE NOT EXISTS ((e) - [:DF_CONTROL_FLOW_ITEM] -> (:Event))
             CALL {WITH e, packingStation
                   MATCH (f:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
                   MATCH  (f) - [:ACTS_ON] -> (:Entity:$version_number:$exit_entity_label)
-                  WHERE f.timestamp > e.timestamp
+                  WHERE e.timestamp < f.timestamp
                   RETURN f
                   ORDER BY f.timestamp ASC
                   LIMIT 1
@@ -236,7 +234,6 @@ class CustomCypherQueryLibrary:
                      template_string_parameters={
                          "version_number": version_number,
                          "enter_entity_label": station_info[station_id]["enter_entity"],
-                         "df_enter_entity_label": "DF_" + station_info[station_id]["enter_entity"].upper(),
                          "enter_exit_combo": station_info[station_id]["enter_entity"] + station_info[station_id][
                              "exit_entity"],
                          "exit_entity_label": station_info[station_id]["exit_entity"],
@@ -389,7 +386,7 @@ class CustomCypherQueryLibrary:
     def get_connect_sensors_queries():
         # language=sql
         query_str = '''
-            MATCH (s1:Sensor) <- [:EXECUTED_BY] - (e1:Event) - [df:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET] -> (e2:Event) - 
+            MATCH (s1:Sensor) <- [:EXECUTED_BY] - (e1:Event) - [df:DF_CONTROL_FLOW_ITEM] -> (e2:Event) - 
             [:EXECUTED_BY] -> (s2:Sensor) 
             WHERE s1 <> s2
             WITH DISTINCT s1, s2, df.entityType as movedEntity
