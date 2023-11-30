@@ -16,6 +16,7 @@ from promg.modules.process_discovery import ProcessDiscovery
 from promg.modules.exporter import Exporter
 
 from custom_module.modules.pizza_line import PizzaLineModule
+from custom_module.modules.pizza_performance import PizzaPerformanceModule
 from tts_credentials import remote
 
 # several steps of import, each can be switch on/off
@@ -42,9 +43,11 @@ step_clear_db = True
 step_populate_graph = True
 step_analysis = True
 
+performance_analysis = True
+
 use_preprocessed_files = False  # if false, read/import files instead
 verbose = False
-use_local = False
+use_local = True
 
 
 def main() -> None:
@@ -134,6 +137,10 @@ def main() -> None:
         # event_log = graph.custom_module.read_log()
         # process_model_graph = process_discovery.get_discovered_proces_model(event_log)
         # graph.custom_module.write_attributes(graph=process_model_graph)
+
+    if performance_analysis:
+        perf_module = PizzaPerformanceModule()
+        perf_module.add_performance_to_skg()
 
     performance.finish_and_save()
     db_manager.print_statistics()
