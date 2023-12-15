@@ -103,10 +103,7 @@ def main() -> None:
             pizza_module.merge_sensor_events(version_number=version_number)
             pizza_module.connect_wip_sensor_to_assembly_line(version_number=version_number)
 
-        relations = [relation.type for relation in semantic_header.relations]
-        relations_to_be_constructed_later = ["PART_OF_PIZZA_PACK", "PART_OF_PACK_BOX", "PART_OF_BOX_PALLET"]
-
-        oced_pg.create_relations(list(set(relations) - set(relations_to_be_constructed_later)))
+        oced_pg.create_relations()
 
         df_discovery = DFDiscoveryModule()
         df_edges_to_be_created = [
