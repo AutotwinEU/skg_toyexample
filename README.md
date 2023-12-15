@@ -29,30 +29,23 @@ Install [Neo4j](https://neo4j.com/download/):
 ### Save the preprocessed data sets
 
 All the preprocessed datasets can be found at [NextCloud Data](https://autotwin.cloud68.co/s/Mqpd4s8RJ6ajAFk).
-The complete folder `ToyExampleV3` should be put under `/data/`. Hence, in the end, your file structure for `S1.csv` should be e.g. `/data/ToyExampleV3/S1.csv`.
+The complete folder `ToyExampleV3` should be put under `/data/`. 
+For example your file structure for `S1.csv` should be e.g. `/data/ToyExampleV3/S1.csv`.
 
 ### Schema
 
 The schema can be found at [Nextcloud Schema v3.6](https://autotwin.cloud68.co/f/43488).
 
-## How to use
-----------
+The schema is described in the following files:
+- ToyExampleV3.json - a description of which Entities (Pizza, Sensors, Station, ...), need to be created:
+The main script uses this information to construct the EKG.
+- ToyExamplev3_DS.json - a description of the different data sets. It describes which labels the records should receive (e.g. :Event, :Location, :Activity) and what properties records have
 
-For data import
+### How to use
 
 1. start the Neo4j server
 2. Set `local = True` and the version number to 3 in `main.py` (line 29).
 1. run `main.py`
-
-## Data set & scripts
-The data set should be added by the user.
-
-#### Datasets
-- The data set should be added by the user.
-#### JSON files
-- ToyExampleV3.json - a description of which Entities (Pizza, Sensors, Station, ...), need to be created:
-The main script uses this information to construct the EKG.
-- ToyExamplev3_DS.json - a description of the different data sets. It describes which labels the records should receive (e.g. :Event, :Location, :Activity) and what properties records have
 
 ## Getting Stuck??
 If you're getting stuck (or you have questions), feel free to reach out to me at a.j.e.swevels@tue.nl.
