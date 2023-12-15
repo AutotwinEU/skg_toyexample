@@ -1,4 +1,4 @@
-# Using Graph Databases to Create Toy Example for Auto Twin
+# Using Graph Databases to Create Toy Example V3.6 for Auto Twin
 
 ## Installation
 ### PromG
