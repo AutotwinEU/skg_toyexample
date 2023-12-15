@@ -94,10 +94,10 @@ class CustomCypherQueryLibrary:
         query_str = '''
         MATCH (e:Event:$version_number) - [:OCCURRED_AT] -> (:Station:$version_number {sysId: '$stationId'})
         MATCH (e) - [df:DF_SENSOR] -> (f)
-        MATCH (e) - [:ACTS_ON] -> (:Entity:$version_number) - [:FOLLOWS] -> (pp1:ProductionPlan)
-        MATCH (f) - [:ACTS_ON] -> (:Entity:$version_number) - [:FOLLOWS] -> (pp2:ProductionPlan)
-        WITH CASE pp2.code
-            WHEN pp1.code THEN FALSE
+        MATCH (e) - [:ACTS_ON] -> (:Entity:$version_number) - [:IS_OF_TYPE] -> (et:EntityType)
+        MATCH (f) - [:ACTS_ON] -> (:Entity:$version_number) - [:IS_OF_TYPE] -> (et2:EntityType)
+        WITH CASE et.code
+            WHEN et2.code THEN FALSE
             ELSE TRUE END as change, f
         SET f.tempPPChanged = change
         '''
@@ -159,10 +159,12 @@ class CustomCypherQueryLibrary:
     def get_determine_number_in_run_range_of_exit_stations_query(station_id, version_number):
         query_str = '''
             MATCH (f:Event:$version_number) - [:OCCURRED_AT] -> (:Station:$version_number {sysId: '$stationId'})
-            MATCH  (f) - [:ACTS_ON] -> (:Entity:$version_number:$exit_entity_label) - [:FOLLOWS] -> (pp:ProductionPlan)
+            MATCH  (f) - [:ACTS_ON] -> (:Entity:$version_number:$exit_entity_label) - [:IS_OF_TYPE] -> (
+            et:EntityType) <- [:OUTPUT] - (composition:CompositionOperation)
             MATCH (f) - [:EXECUTED_BY] -> (sensor:Sensor:$version_number {type: "EXIT"})
             WHERE NOT EXISTS ((:Event) - [:DF_CONTROL_FLOW_ITEM] -> (f))
-            SET f.tempNumRange =  range(f.tempNumberInRun*pp.$quantity, (f.tempNumberInRun+1)*pp.$quantity-1)
+            SET f.tempNumRange =  range(f.tempNumberInRun*composition.inputQuantity, 
+            (f.tempNumberInRun+1)*composition.inputQuantity-1)
         '''
 
         return Query(query_str=query_str,
@@ -178,12 +180,14 @@ class CustomCypherQueryLibrary:
         query_str = '''
             MATCH (e:Event:$version_number) - [:OCCURRED_AT] 
                 -> (packingStation:Station:$version_number {sysId: '$stationId'})
-            MATCH  (e) - [:ACTS_ON] -> (:Entity:$version_number:$enter_entity_label) - [:FOLLOWS] -> (pp:ProductionPlan)
+            MATCH  (e) - [:ACTS_ON] -> (:Entity:$version_number:$enter_entity_label) - [:IS_OF_TYPE] -> (et:EntityType) 
+                - [:INPUT] -> (composition:CompositionOperation)
             MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor:$version_number {type: "ENTER"})
             WHERE NOT EXISTS ((e) - [:DF_CONTROL_FLOW_ITEM] -> (:Event))
-            CALL {WITH e, packingStation, pp
+            CALL {WITH e, packingStation, composition
                   MATCH (f:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
-                  MATCH  (f) - [:ACTS_ON] -> (:Entity:$version_number:$exit_entity_label) - [:FOLLOWS] -> (pp)
+                  MATCH  (f) - [:ACTS_ON] -> (:Entity:$version_number:$exit_entity_label) 
+                    - [:IS_OF_TYPE] -> (et2:EntityType) <- [:OUTPUT] - (composition)
                   WHERE f.timestamp > e.timestamp AND e.tempNumberInRun in f.tempNumRange
                   RETURN f
                   ORDER BY f.timestamp ASC
@@ -252,6 +256,7 @@ class CustomCypherQueryLibrary:
                          "version_number": version_number,
                          "stationId": station_id
                      })
+
     @staticmethod
     def get_merge_sensor_events_query(version_number):
         query_str = '''
