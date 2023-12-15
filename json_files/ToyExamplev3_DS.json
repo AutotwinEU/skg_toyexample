@@ -17,7 +17,7 @@
       "PizzaRecord",
       "SensorEventRecord",
       "SensorRecord",
-      "ProductionPlanRecord"
+      "EntityTypeRecord"
     ],
     "seperator": ";",
     "attributes": [
@@ -37,7 +37,6 @@
           {
             "name": "pizzaId",
             "dtype": "str",
-            "range_start": 3,
             "range_end": 7
           }
         ]
@@ -56,7 +55,7 @@
         "columns": [
           {
             "name": "timestamp",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
         "optional": false
@@ -75,7 +74,7 @@
       "SensorEventRecord",
       "SensorRecord",
       "PizzaQualityAttributeRecord",
-      "ProductionPlanRecord"
+      "EntityTypeRecord"
     ],
     "seperator": ";",
     "attributes": [
@@ -95,7 +94,6 @@
           {
             "name": "pizzaId",
             "dtype": "str",
-            "range_start": 3,
             "range_end": 7
           }
         ]
@@ -114,7 +112,7 @@
         "columns": [
           {
             "name": "timestamp",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
         "optional": false
@@ -145,7 +143,7 @@
       "PackRecord",
       "SensorEventRecord",
       "SensorRecord",
-      "ProductionPlanRecord"
+      "EntityTypeRecord"
     ],
     "seperator": ";",
     "attributes": [
@@ -165,7 +163,6 @@
           {
             "name": "packId",
             "dtype": "str",
-            "range_start": 5,
             "range_end": 9
           }
         ]
@@ -184,7 +181,7 @@
         "columns": [
           {
             "name": "timestamp",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
         "optional": false
@@ -203,7 +200,7 @@
       "BoxRecord",
       "SensorEventRecord",
       "SensorRecord",
-      "ProductionPlanRecord"
+      "EntityTypeRecord"
     ],
     "seperator": ";",
     "attributes": [
@@ -223,7 +220,6 @@
           {
             "name": "boxId",
             "dtype": "str",
-            "range_start": 4,
             "range_end": 8
           }
         ]
@@ -242,7 +238,7 @@
         "columns": [
           {
             "name": "timestamp",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
         "optional": false
@@ -279,6 +275,16 @@
         "optional": false
       },
       {
+        "name": "code",
+        "columns": [
+          {
+            "name": "palletId",
+            "dtype": "str",
+            "range_end": 3
+          }
+        ]
+      },
+      {
         "name": "sensorId",
         "columns": [
           {
@@ -292,7 +298,7 @@
         "columns": [
           {
             "name": "timestamp",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
         "optional": false
@@ -369,7 +375,10 @@
     ],
     "labels": [
       "Record",
-      "ProductionPlanRecord"
+      "EntityTypeRecord",
+      "TimeDistributionRecord",
+      "CompositionRecord",
+      "StationRecord"
     ],
     "attributes": [
       {
@@ -383,81 +392,91 @@
         "optional": false
       },
       {
+        "name": "outputCode",
+        "columns": [
+          {
+            "name": "outputCode",
+            "dtype": "str"
+          }
+        ],
+        "optional": true
+      },
+      {
         "name": "diameter",
         "columns": [
           {
             "name": "diameter",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
-        "optional": false
+        "optional": true
       },
       {
         "name": "height",
         "columns": [
           {
             "name": "height",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
-        "optional": false
+        "optional": true
       },
       {
         "name": "weight",
         "columns": [
           {
             "name": "weight",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
-        "optional": false
+        "optional": true
       },
       {
-        "name": "packCount",
+        "name": "inputQuantity",
         "columns": [
           {
-            "name": "packCount",
-            "dtype": "int"
+            "name": "inputQuantity",
+            "dtype": "Int64"
           }
         ],
-        "optional": false
+        "optional": true
       },
       {
-        "name": "boxCount",
+        "name": "outputQuantity",
         "columns": [
           {
-            "name": "boxCount",
-            "dtype": "int"
+            "name": "outputQuantity",
+            "dtype": "Int64"
           }
         ],
-        "optional": false
-      },
-      {
-        "name": "boxQuantity",
-        "columns": [
-          {
-            "name": "boxQuantity",
-            "dtype": "int"
-          }
-        ],
-        "optional": false
+        "optional": true
       },
       {
         "name": "interval",
         "columns": [
           {
             "name": "interval",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
-        "optional": false
+        "optional": true
       },
       {
         "name": "intervalDelta",
         "columns": [
           {
             "name": "intervalDelta",
-            "dtype": "int"
+            "dtype": "Int64"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "stationName",
+        "columns": [
+          {
+            "name": "stationName",
+            "dtype": "str"
           }
         ],
         "optional": false
@@ -483,7 +502,7 @@
         "columns": [
           {
             "name": "timestamp",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
         "optional": false
@@ -530,7 +549,7 @@
         "columns": [
           {
             "name": "timestamp",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
         "optional": false
@@ -576,7 +595,7 @@
         "columns": [
           {
             "name": "timestamp",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
         "optional": false
@@ -596,7 +615,7 @@
         "columns": [
           {
             "name": "amount",
-            "dtype": "int"
+            "dtype": "Int64"
           }
         ],
         "optional": false

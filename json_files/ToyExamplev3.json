@@ -8,9 +8,12 @@
     "(record:EntityRecord:BoxRecord:V3 {boxId})",
     "(record:EntityRecord:PalletRecord:V3 {palletId})",
     "(record:EntityRecord:SensorRecord:V3 {sensorId, OPTIONAL sensorType})",
-    "(record:EntityRecord:StationRecord:V3 {stationName, stationType})",
+    "(record:EntityRecord:StationRecord:V3 {stationName, OPTIONAL stationType})",
     "(record:EntityRecord:AssemblyLineRecord:V3 {assemblyName})",
-    "(record:ProductionPlanRecord:V3 {code, OPTIONAL diameter, OPTIONAL height, OPTIONAL weight, OPTIONAL packCount, OPTIONAL boxCount, OPTIONAL boxQuantity, OPTIONAL interval, OPTIONAL intervalDelta})",
+    "(record:EntityTypeRecord:V3 {code, OPTIONAL diameter, OPTIONAL height, OPTIONAL weight})",
+    "(record:EntityTypeRecord:OutputEntityTypeRecord:V3 {outputCode})",
+    "(record:TimeDistributionRecord:TriangularDistributionRecord:V3 {interval, intervalDelta})",
+    "(record:CompositionRecord:V3 {inputQuantity, outputQuantity})",
     "(record:EntityRecord:PizzaQualityAttributeRecord:V3 {exceededCookingTime})",
     "(record:EntityRecord:OperatorRecord:V3 {operatorId})",
     "(record:EventRecord:OperatorEventRecord:OperatorStartEventRecord:V3 WHERE record.hasBreak = true {timestamp, hasBreak})",
@@ -155,17 +158,20 @@
     {
       "type": "SensorReading",
       "constructor": [
-        {"prevalent_record": "(record:LockStatusRecord WHERE record.locked = true)",
+        {
+          "prevalent_record": "(record:LockStatusRecord WHERE record.locked = true)",
           "result": "(ls:EntityAttribute:SensorReading:V3 {status: \"locked\"})",
           "infer_corr_from_event_record": true,
           "corr_type": "CREATES"
         },
-        {"prevalent_record": "(record:LockStatusRecord WHERE record.locked = false)",
+        {
+          "prevalent_record": "(record:LockStatusRecord WHERE record.locked = false)",
           "result": "(ls:EntityAttribute:SensorReading:V3 {status: \"not locked\"})",
           "infer_corr_from_event_record": true,
           "corr_type": "CREATES"
         },
-        {"prevalent_record": "(record:WIPRecord)",
+        {
+          "prevalent_record": "(record:WIPRecord)",
           "result": "(ls:EntityAttribute:SensorReading:V3 {status:\"WIP amount \" + record.amount})",
           "infer_corr_from_event_record": true,
           "corr_type": "CREATES"
@@ -177,7 +183,7 @@
       "constructor": [
         {
           "prevalent_record": "(record:StationRecord:V3)",
-          "result": "(v:Entity:Resource:Station:Location:V3 {sysId: record.stationName, type: record.stationType})",
+          "result": "(v:Entity:Resource:Station:Location:V3 {sysId: record.stationName, OPTIONAL type: record.stationType})",
           "infer_corr_from_event_record": true,
           "corr_type": "OCCURRED_AT"
         }
@@ -187,6 +193,7 @@
       "merge_duplicate_df": true
     },
     {
+      "include": false,
       "type": "AssemblyLine",
       "constructor": [
         {
@@ -196,11 +203,37 @@
       ]
     },
     {
-      "type": "ProductionPlan",
+      "type": "EntityType",
       "constructor": [
         {
-          "prevalent_record": "(record:ProductionPlanRecord:V3)",
-          "result": "(v:ProductionPlan:V3 {code: record.code, OPTIONAL diameter: record.diameter, OPTIONAL height: record.height, OPTIONAL weight: record.weight, OPTIONAL packCount: record.packCount, OPTIONAL boxCount: record.boxCount, OPTIONAL boxQuantity: record.boxQuantity, OPTIONAL interval: record.interval, OPTIONAL intervalDelta: record.intervalDelta})",
+          "prevalent_record": "(record:EntityTypeRecord:V3)",
+          "result": "(v:EntityType:V3 {code: record.code, OPTIONAL diameter: record.diameter, OPTIONAL height: record.height, OPTIONAL weight: record.weight})",
+          "infer_corr_from_event_record": false
+        },
+
+        {
+          "prevalent_record": "(record:OutputEntityTypeRecord:V3)",
+          "result": "(v:EntityType:V3 {code: record.outputCode})",
+          "infer_corr_from_event_record": false
+        }
+      ]
+    },
+    {
+      "type": "TimeDistribution",
+      "constructor": [
+        {
+          "prevalent_record": "(record:TriangularDistributionRecord:V3)",
+          "result": "(v:TimeDistribution:V3 {mode: record.interval, lowerLimit: record.interval-record.intervalDelta, upperLimit: record.interval+record.intervalDelta, type:\"triangular distribution\"})",
+          "infer_corr_from_event_record": false
+        }
+      ]
+    },
+    {
+      "type": "CompositionOperation",
+      "constructor": [
+        {
+          "prevalent_record": "(record:CompositionRecord:V3)",
+          "result": "(v:CompositionOperation:V3 {inputCode: record.code, inputQuantity: record.inputQuantity, outputQuantity: record.outputQuantity})",
           "infer_corr_from_event_record": false
         }
       ]
@@ -255,34 +288,34 @@
       }
     },
     {
-      "type": "FOLLOWS_PIZZA",
+      "type": "IS_OF_TYPE_PIZZA",
       "constructor": {
-        "prevalent_record": "(record:ProductionPlanRecord:PizzaRecord:V3)",
+        "prevalent_record": "(record:EntityTypeRecord:PizzaRecord:V3)",
         "from_node": "(pizza: Pizza:V3)",
-        "to_node": "(description: ProductionPlan:V3)",
-        "result": "(pizza) - [:FOLLOWS] -> (description)",
+        "to_node": "(entityType:EntityType:V3)",
+        "result": "(pizza) - [:IS_OF_TYPE] -> (entityType)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
     },
     {
-      "type": "FOLLOWS_PACK",
+      "type": "IS_OF_TYPE_PACK",
       "constructor": {
-        "prevalent_record": "(record:ProductionPlanRecord:PackRecord:V3)",
-        "from_node": "(pack: Pack:V3)",
-        "to_node": "(description: ProductionPlan:V3)",
-        "result": "(pack) - [:FOLLOWS] -> (description)",
+        "prevalent_record": "(record:EntityTypeRecord:PackRecord:V3)",
+        "from_node": "(pack:Pack:V3)",
+        "to_node": "(entityType:EntityType:V3)",
+        "result": "(pack) - [:IS_OF_TYPE] -> (entityType)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
     },
     {
-      "type": "FOLLOWS_BOX",
+      "type": "IS_OF_TYPE_BOX",
       "constructor": {
-        "prevalent_record": "(record:ProductionPlanRecord:BoxRecord)",
-        "from_node": "(box: Box:V3)",
-        "to_node": "(description: ProductionPlan:V3)",
-        "result": "(box) - [:FOLLOWS] -> (description)",
+        "prevalent_record": "(record:EntityTypeRecord:BoxRecord)",
+        "from_node": "(box:Box:V3)",
+        "to_node": "(entityType:EntityType:V3)",
+        "result": "(box) - [:IS_OF_TYPE] -> (entityType)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
       }
@@ -299,6 +332,63 @@
       }
     },
     {
+      "type": "HAS_PROPERTY_TD",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:TimeDistributionRecord:V3)",
+        "from_node": "(entityType:EntityType:V3 {code:record.code})",
+        "to_node": "(dist:TimeDistribution:V3)",
+        "result": "(entityType) - [:HAS_PROPERTY] -> (dist)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "INPUT",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:CompositionRecord:V3)",
+        "from_node": "(entityType:EntityType:V3 {code:record.code})",
+        "to_node": "(operation:CompositionOperation:V3)",
+        "result": "(entityType) - [:INPUT] -> (operation)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "OUTPUT",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:CompositionRecord:V3)",
+        "from_node": "(operation:CompositionOperation:V3)",
+        "to_node": "(entityType:EntityType:V3 {code:record.outputCode})",
+        "result": "(entityType) <- [:OUTPUT] - (operation)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "FOLLOWS",
+      "constructor": {
+        "prevalent_record": "(record:StationRecord:TimeDistributionRecord:V3)",
+        "from_node": "(s:Station:V3)",
+        "to_node": "(dist:TimeDistribution:V3)",
+        "result": "(s) - [:FOLLOWS] -> (dist)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+
+    {
+      "type": "FOLLOWS_COMP",
+      "constructor": {
+        "prevalent_record": "(record:StationRecord:CompositionRecord:V3)",
+        "from_node": "(s:Station:V3)",
+        "to_node": "(operation:CompositionOperation:V3)",
+        "result": "(s) - [:FOLLOWS] -> (operation)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "include": false,
       "type": "PART_OF_STATION_ASSEMBLYLINE",
       "constructor": {
         "prevalent_record": "(record:AssemblyLineRecord:StationRecord:V3)",
@@ -336,45 +426,6 @@
         "result": "(a) - [:OCCURS_AT] -> (station)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
-      }
-    },
-    {
-      "type": "PART_OF_PIZZA_PACK",
-      "constructor": {
-        "relations": [
-          "(pizza:Pizza:V3) <- [:ACTS_ON] - (e:Event:V3)",
-          "(pack:Pack:V3) <- [:ACTS_ON] - (e)"
-        ],
-        "from_node": "(pizza: Pizza:V3)",
-        "to_node": "(pack: Pack:V3)",
-        "result": "(pizza) - [:PART_OF] -> (pack)",
-        "model_as_node": false
-      }
-    },
-    {
-      "type": "PART_OF_PACK_BOX",
-      "constructor": {
-        "relations": [
-          "(pack:Pack:V3) <- [:ACTS_ON] - (e:Event:V3)",
-          "(box:Box:V3) <- [:ACTS_ON] - (e)"
-        ],
-        "from_node": "(pack: Pack:V3)",
-        "to_node": "(box: Box:V3)",
-        "result": "(pack) - [:PART_OF] -> (box)",
-        "model_as_node": false
-      }
-    },
-    {
-      "type": "PART_OF_BOX_PALLET",
-      "constructor": {
-        "relations": [
-          "(box:Box:V3) <- [:ACTS_ON] - (e:Event:V3)",
-          "(pallet:Pallet:V3) <- [:ACTS_ON] - (e)"
-        ],
-        "from_node": "(box: Box:V3)",
-        "to_node": "(pallet: Pallet:V3)",
-        "result": "(box) - [:PART_OF] -> (pallet)",
-        "model_as_node": false
       }
     }
   ]
