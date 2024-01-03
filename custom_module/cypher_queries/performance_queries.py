@@ -2,6 +2,7 @@ from promg import Query
 
 
 class PerformanceQueryLibrary:
+    # creates all the high-level performance nodes
     @staticmethod
     def create_main_performance_nodes():
         # language=sql
@@ -12,6 +13,7 @@ class PerformanceQueryLibrary:
             (n4),(n1)-[:HAS_PERFORMANCE]->(n5)'''
         return Query(query_str=query_str)
 
+    # removes all the performance nodes. used before adding performance to SKG.
     @staticmethod
     def delete_all_performance_nodes():
         # language=sql
