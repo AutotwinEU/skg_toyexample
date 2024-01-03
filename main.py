@@ -32,12 +32,10 @@ semantic_header_path = Path(f'json_files/{dataset_name}.json')
 config_path = Path(f'json_files/config.json')
 use_sample = False
 
-semantic_header = SemanticHeader.create_semantic_header(semantic_header_path)
 perf_path = os.path.join("..", "perf", dataset_name, f"{dataset_name}Performance.csv")
 number_of_steps = 100
 
 ds_path = Path(f'json_files/{dataset_name}_DS.json')
-datastructures = DatasetDescriptions(ds_path)
 
 step_clear_db = True
 step_populate_graph = True
@@ -50,11 +48,14 @@ verbose = False
 use_local = True
 
 
-def main() -> None:
+def main(semantic_header_p, ds_p) -> None:
     """
     Main function, read all the logs, clear and create the graph, perform checks
     @return: None
     """
+    semantic_header = SemanticHeader.create_semantic_header(semantic_header_p)
+    datastructures = DatasetDescriptions(ds_p)
+
     _step_clear_db = step_clear_db
     if not use_local:
         number_str = str(randint).zfill(4)
@@ -149,4 +150,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(semantic_header_path, ds_path)
