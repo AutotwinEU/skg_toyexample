@@ -19,3 +19,40 @@ class PerformanceQueryLibrary:
         # language=sql
         query_str = '''MATCH(c:Performance) detach delete c'''
         return Query(query_str=query_str)
+
+    # retrieves a lists with input sensors and correspondig output sensor(s)
+    @staticmethod
+    def retrieve_sensor_connections():
+        # language=sql
+        query_str = '''match (s1:Sensor) match (s1)-[:CONN]->(s2) 
+                       return s1.sysId as input, collect(s2.sysId) as outputs'''
+        return Query(query_str=query_str)
+
+    # retrieves a lists with input sensors and correspondig output sensor, which are all full path
+    @staticmethod
+    def retrieve_sensor_connections_full_path():
+        # language=sql
+        query_str = ''' match (s1:Sensor) match (s1)-[:CONN*]->(s2)
+                where not exists ((:Sensor)-[:CONN]->(s1)) and not exists ((s2)-[:CONN]->(:Sensor))
+                return s1.sysId as input, collect(s2.sysId) as outputs'''
+        return Query(query_str=query_str)
+
+    # retrieves for a sensor, all the pizza and its activity that takes place on it
+    @staticmethod
+    def execution_times_between_sensors(isensor, osensor):
+        query_str = '''MATCH path=(ev:Event)- [:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET*]->(g:Event)
+                MATCH (ev)-[:ACTS_ON]->(p:Pizza)
+                WHERE NOT EXISTS((:Event)-[:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET]->(ev))
+                AND NOT EXISTS((g)-[:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET]->(:Event))
+                UNWIND nodes(path) as e1
+                UNWIND nodes(path) as e2
+                WITH p,e1,e2
+                match (e1)-[:EXECUTED_BY]->(s1)
+                match (e2)-[:EXECUTED_BY]->(s2)
+                WHERE s1.sysId="$isensor" and s2.sysId="$osensor" and s1.sysId is not null and s2.sysId is not null 
+                WITH COLLECT (e2.timestamp-e1.timestamp) as times
+                return times'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"isensor": isensor,
+                                                 "osensor": osensor}
+                     )
