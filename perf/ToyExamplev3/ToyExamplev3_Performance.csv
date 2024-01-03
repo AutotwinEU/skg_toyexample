@@ -1,0 +1,136 @@
+;name;start;end;duration
+0;clear_db;13:01:17;13:01:20;2,62495756149292
+0;set_constraints;13:01:20;13:01:20;0,037996768951416016
+0;_import_nodes_from_data for S1.csv;13:01:20;13:01:21;0,8506252765655518
+0;_import_nodes_from_data for S2.csv;13:01:21;13:01:22;0,6220827102661133
+0;_import_nodes_from_data for S3.csv;13:01:22;13:01:22;0,5790231227874756
+0;_import_nodes_from_data for S4.csv;13:01:22;13:01:23;0,5489852428436279
+0;_import_nodes_from_data for S5.csv;13:01:23;13:01:23;0,4885082244873047
+0;_import_nodes_from_data for S6.csv;13:01:23;13:01:24;0,474550724029541
+0;_import_nodes_from_data for S101.csv;13:01:24;13:01:24;0,0209958553314209
+0;_import_nodes_from_data for S105.csv;13:01:24;13:01:24;0,013523340225219727
+0;_filter_nodes for ToyExamplePizzaSensors;13:01:24;13:01:24;0,0029478073120117188
+0;_finalize_import;13:01:24;13:01:24;0,42211151123046875
+0;_import_nodes_from_data for S100.csv;13:01:24;13:01:24;0,07446169853210449
+0;_filter_nodes for ToyExamplePizzaSensorsExceededCookingTime;13:01:24;13:01:24;0,0031366348266601562
+0;_finalize_import;13:01:24;13:01:24;0,024030447006225586
+0;_import_nodes_from_data for S7.csv;13:01:24;13:01:25;0,3688318729400635
+0;_import_nodes_from_data for S8.csv;13:01:25;13:01:25;0,28063201904296875
+0;_import_nodes_from_data for S102.csv;13:01:25;13:01:25;0,01731276512145996
+0;_import_nodes_from_data for S104.csv;13:01:25;13:01:25;0,014424324035644531
+0;_filter_nodes for ToyExamplePackSensors;13:01:25;13:01:25;0,0025064945220947266
+0;_finalize_import;13:01:25;13:01:25;0,03084731101989746
+0;_import_nodes_from_data for S9.csv;13:01:25;13:01:25;0,11652874946594238
+0;_import_nodes_from_data for S10.csv;13:01:25;13:01:25;0,10623836517333984
+0;_import_nodes_from_data for S103.csv;13:01:25;13:01:25;0,03840208053588867
+0;_filter_nodes for ToyExampleBoxSensors;13:01:25;13:01:25;0,0014710426330566406
+0;_finalize_import;13:01:25;13:01:25;0,019104957580566406
+0;_import_nodes_from_data for S11.csv;13:01:25;13:01:25;0,04787588119506836
+0;_import_nodes_from_data for S12.csv;13:01:25;13:01:25;0,03568243980407715
+0;_import_nodes_from_data for S13.csv;13:01:25;13:01:25;0,0316014289855957
+0;_import_nodes_from_data for S14.csv;13:01:25;13:01:25;0,02975916862487793
+0;_import_nodes_from_data for S15.csv;13:01:25;13:01:25;0,028603076934814453
+0;_import_nodes_from_data for S16.csv;13:01:25;13:01:25;0,03088855743408203
+0;_filter_nodes for ToyExamplePizzaPalletSensors;13:01:25;13:01:25;0,0
+0;_finalize_import;13:01:25;13:01:25;0,011259794235229492
+0;_import_nodes_from_data for stations.csv;13:01:25;13:01:26;0,11762475967407227
+0;_filter_nodes for ToyExampleStations;13:01:26;13:01:26;0,0020046234130859375
+0;_finalize_import;13:01:26;13:01:26;0,013417720794677734
+0;_import_nodes_from_data for production_plan.csv;13:01:26;13:01:26;0,04957699775695801
+0;_filter_nodes for ToyExampleProductionPlan;13:01:26;13:01:26;0,009005308151245117
+0;_finalize_import;13:01:26;13:01:26;0,013150215148925781
+0;_import_nodes_from_data for opBox_onBreak.csv;13:01:26;13:01:26;0,22828149795532227
+0;_import_nodes_from_data for opPack_onBreak.csv;13:01:26;13:01:26;0,15929675102233887
+0;_filter_nodes for ToyExampleOperators;13:01:26;13:01:26;0,002001047134399414
+0;_finalize_import;13:01:26;13:01:26;0,015538454055786133
+0;_import_nodes_from_data for In1_distanceLock.csv;13:01:26;13:01:26;0,44225621223449707
+0;_import_nodes_from_data for In1_policyLock.csv;13:01:26;13:01:27;0,4488518238067627
+0;_filter_nodes for ToyExampleLockStatus;13:01:27;13:01:27;0,0
+0;_finalize_import;13:01:27;13:01:27;0,04332733154296875
+0;_import_nodes_from_data for wip.csv;13:01:27;13:01:27;0,45424842834472656
+0;_filter_nodes for ToyExampleLockStatus;13:01:27;13:01:27;0,0
+0;_finalize_import;13:01:27;13:01:27;0,028954505920410156
+0;"_create_node_by_record for (e:Event:SensorEvent:V3 {timestamp: record.timestamp, activity: ""Pass Sensor "" + record.sensorId})";13:01:27;13:01:29;1,4881553649902344
+0;"_create_node_by_record for (e:Event:OperatorEvent:V3 {timestamp: record.timestamp, activity: ""Start Break""})";13:01:29;13:01:29;0,19198131561279297
+0;"_create_node_by_record for (e:Event:OperatorEvent:V3 {timestamp: record.timestamp, activity: ""Stop Break""})";13:01:29;13:01:29;0,1644132137298584
+0;"_create_node_by_record for (e:Event:SensorReadingEvent:V3 {timestamp: record.timestamp, activity: ""Read Lock Status""})";13:01:29;13:01:30;0,3685586452484131
+0;"_create_node_by_record for (e:Event:SensorReadingEvent:V3 {timestamp: record.timestamp, activity: ""Read WIP amount""})";13:01:30;13:01:30;0,18982887268066406
+0;"_create_node_by_record for (a:Activity:V3 {activity: ""Pass Sensor "" + record.sensorId})";13:01:30;13:01:31;1,367434024810791
+0;"_create_node_by_record for (a:Activity:V3 {activity: ""Start Break""})";13:01:31;13:01:31;0,13308358192443848
+0;"_create_node_by_record for (a:Activity:V3 {activity: ""Stop Break""})";13:01:31;13:01:31;0,1329357624053955
+0;"_create_node_by_record for (a:Activity:V3 {activity: ""Read Lock Status""})";13:01:31;13:01:32;0,2800607681274414
+0;"_create_node_by_record for (a:Activity:V3 {activity: ""Read WIP amount""})";13:01:32;13:01:32;0,2064952850341797
+0;_create_node_by_record for (v:Entity:Pizza:V3 {sysId: record.pizzaId});13:01:32;13:01:35;3,5246448516845703
+0;_create_node_by_record for (v:EntityAttribute:PizzaQualityAttribute:V3 {burned: record.exceededCookingTime});13:01:35;13:01:36;0,12452936172485352
+0;_create_node_by_record for (v:Entity:Pack:V3 {sysId: record.packId});13:01:36;13:01:36;0,7203094959259033
+0;_create_node_by_record for (v:Entity:Box:V3 {sysId: record.boxId});13:01:36;13:01:38;1,5606756210327148
+0;_create_node_by_record for (v:Entity:Pallet:V3 {sysId: record.palletId});13:01:38;13:01:38;0,39668846130371094
+0;_create_node_by_record for (v:Entity:Resource:MachinePart:Sensor:V3 {sysId: record.sensorId});13:01:38;13:01:40;1,5118868350982666
+0;"_create_node_by_record for (ls:EntityAttribute:SensorReading:V3 {status: ""locked""})";13:01:40;13:01:40;0,16289901733398438
+0;"_create_node_by_record for (ls:EntityAttribute:SensorReading:V3 {status: ""not locked""})";13:01:40;13:01:40;0,3971986770629883
+0;"_create_node_by_record for (ls:EntityAttribute:SensorReading:V3 {status: ""WIP amount "" + record.amount})";13:01:40;13:01:41;0,26050829887390137
+0;_create_node_by_record for (v:Entity:Resource:Station:Location:V3 {sysId: record.stationName, type: record.stationType});13:01:41;13:01:41;0,14080095291137695
+0;_create_node_by_record for (v:Entity:Resource:AssemblyLine:V3 {sysId: record.assemblyName});13:01:41;13:01:41;0,11152458190917969
+0;_create_node_by_record for (v:ProductionPlan:V3 {code: record.code});13:01:41;13:01:42;0,7975316047668457
+0;_create_node_by_record for (v:Entity:Resource:HumanResource:Operator:V3 {sysId: record.operatorId});13:01:42;13:01:42;0,16819047927856445
+0;merge_sensor_events;13:01:42;13:01:42;0,025604724884033203
+0;connect_wip_sensor_to_assembly_line;13:01:42;13:01:42;0,04850125312805176
+0;_create_relations_using_record for (pizza ) - [:HAS_PROPERTY] -> (quality );13:01:42;13:01:42;0,1390998363494873
+0;_create_relations_using_record for (sensor ) - [:HAS_VALUE] -> (ls );13:01:42;13:01:42;0,24375152587890625
+0;_create_relations_using_record for (sensor ) - [:HAS_VALUE] -> (ls );13:01:42;13:01:42;0,18489718437194824
+0;_create_relations_using_record for (pizza ) - [:FOLLOWS] -> (description );13:01:42;13:01:43;0,4228701591491699
+0;_create_relations_using_record for (pack ) - [:FOLLOWS] -> (description );13:01:43;13:01:43;0,1634676456451416
+0;_create_relations_using_record for (box ) - [:FOLLOWS] -> (description );13:01:43;13:01:43;0,10802578926086426
+0;_create_relations_using_record for (sensor ) - [:PART_OF] -> (station );13:01:43;13:01:43;0,08449721336364746
+0;_create_relations_using_record for (station ) - [:PART_OF] -> (assembly );13:01:43;13:01:43;0,09656310081481934
+0;_create_relations_using_relation for (e ) - [:OCCURRED_AT] -> (station );13:01:43;13:01:44;0,5472152233123779
+0;_create_relations_using_relation for (a ) - [:OCCURS_AT] -> (station );13:01:44;13:01:44;0,1076042652130127
+0;_create_df_edges_for_entity for (:Entity:Pizza:V3);13:01:44;13:01:45;0,6206488609313965
+0;_create_df_edges_for_entity for (:Entity:Pack:V3);13:01:45;13:01:45;0,1353592872619629
+0;_create_df_edges_for_entity for (:Entity:Box:V3);13:01:45;13:01:45;0,10206890106201172
+0;_create_df_edges_for_entity for (:Entity:Pallet:V3);13:01:45;13:01:45;0,08967709541320801
+0;_create_df_edges_for_entity for (:Entity:Resource:MachinePart:Sensor:V3);13:01:45;13:01:46;0,6060965061187744
+0;_create_df_edges_for_entity for (:Entity:Resource:Station:Location:V3);13:01:46;13:01:46;0,5327725410461426
+0;_create_df_edges_for_entity for (:Entity:Resource:HumanResource:Operator:V3);13:01:46;13:01:46;0,09272933006286621
+0;_merge_duplicate_df_for_node for (:Entity:Pizza:V3);13:01:46;13:01:46;0,1205747127532959
+0;_merge_duplicate_df_for_node for (:Entity:Pack:V3);13:01:46;13:01:46;0,08470010757446289
+0;_merge_duplicate_df_for_node for (:Entity:Box:V3);13:01:46;13:01:46;0,057839393615722656
+0;_merge_duplicate_df_for_node for (:Entity:Pallet:V3);13:01:46;13:01:46;0,053689002990722656
+0;_merge_duplicate_df_for_node for (:Entity:Resource:MachinePart:Sensor:V3);13:01:46;13:01:47;0,1252727508544922
+0;_merge_duplicate_df_for_node for (:Entity:Resource:Station:Location:V3);13:01:47;13:01:47;0,11516022682189941
+0;_merge_duplicate_df_for_node for (:Entity:Resource:HumanResource:Operator:V3);13:01:47;13:01:47;0,048947811126708984
+0;complete_corr;13:01:47;13:01:59;12,05847978591919
+0;delete_df_edges;13:01:59;13:01:59;0,24750709533691406
+0;complete_quality;13:01:59;13:01:59;0,17402076721191406
+0;connect_operators_to_station;13:01:59;13:01:59;0,06553220748901367
+0;_create_relations_using_relation for (pizza ) - [:PART_OF] -> (pack );13:01:59;13:01:59;0,1287827491760254
+0;_create_relations_using_relation for (pack ) - [:PART_OF] -> (box );13:01:59;13:02:00;0,09243464469909668
+0;_create_relations_using_relation for (box ) - [:PART_OF] -> (pallet );13:02:00;13:02:00;0,06407928466796875
+0;_create_df_edges_for_entity for (:Entity:Pizza:V3);13:02:00;13:02:00;0,35863757133483887
+0;_create_df_edges_for_entity for (:Entity:Pack:V3);13:02:00;13:02:00;0,06724143028259277
+0;_create_df_edges_for_entity for (:Entity:Box:V3);13:02:00;13:02:00;0,024756431579589844
+0;_create_df_edges_for_entity for (:Entity:Pallet:V3);13:02:00;13:02:00;0,012317180633544922
+0;_create_df_edges_for_entity for (:Entity:Resource:MachinePart:Sensor:V3);13:02:00;13:02:00;0,21363377571105957
+0;_create_df_edges_for_entity for (:Entity:Resource:Station:Location:V3);13:02:00;13:02:00;0,14351511001586914
+0;_create_df_edges_for_entity for (:Entity:Resource:HumanResource:Operator:V3);13:02:00;13:02:00;0,011209726333618164
+0;_merge_duplicate_df_for_node for (:Entity:Pizza:V3);13:02:00;13:02:01;0,0738828182220459
+0;_merge_duplicate_df_for_node for (:Entity:Pack:V3);13:02:01;13:02:01;0,013543844223022461
+0;_merge_duplicate_df_for_node for (:Entity:Box:V3);13:02:01;13:02:01;0,0065174102783203125
+0;_merge_duplicate_df_for_node for (:Entity:Pallet:V3);13:02:01;13:02:01;0,004015684127807617
+0;_merge_duplicate_df_for_node for (:Entity:Resource:MachinePart:Sensor:V3);13:02:01;13:02:01;0,05062270164489746
+0;_merge_duplicate_df_for_node for (:Entity:Resource:Station:Location:V3);13:02:01;13:02:01;0,052036285400390625
+0;_merge_duplicate_df_for_node for (:Entity:Resource:HumanResource:Operator:V3);13:02:01;13:02:01;0,007006168365478516
+0;_create_df_process_model for (:Entity:Pizza:V3);13:02:01;13:02:01;0,14635872840881348
+0;_create_df_process_model for (:Entity:Pack:V3);13:02:01;13:02:01;0,06375837326049805
+0;_create_df_process_model for (:Entity:Box:V3);13:02:01;13:02:01;0,05159330368041992
+0;_create_df_process_model for (:Entity:Pallet:V3);13:02:01;13:02:01;0,05237913131713867
+0;connect_stations_and_sensors;13:02:01;13:02:01;0,19210433959960938
+0;_create_df_edges_for_entity for (:Entity:Resource:Station:Location:V3);13:02:01;13:02:01;0,13125967979431152
+0;_merge_duplicate_df_for_node for (:Entity:Pizza:V3);13:02:01;13:02:01;0,05733799934387207
+0;_merge_duplicate_df_for_node for (:Entity:Pack:V3);13:02:01;13:02:01;0,012691259384155273
+0;_merge_duplicate_df_for_node for (:Entity:Box:V3);13:02:01;13:02:01;0,008509635925292969
+0;_merge_duplicate_df_for_node for (:Entity:Pallet:V3);13:02:01;13:02:01;0,006254673004150391
+0;_merge_duplicate_df_for_node for (:Entity:Resource:MachinePart:Sensor:V3);13:02:01;13:02:01;0,08788204193115234
+0;_merge_duplicate_df_for_node for (:Entity:Resource:Station:Location:V3);13:02:01;13:02:02;0,0509183406829834
+0;_merge_duplicate_df_for_node for (:Entity:Resource:HumanResource:Operator:V3);13:02:02;13:02:02;0,00421905517578125
+0;total;13:01:17;13:02:02;44,17579793930054

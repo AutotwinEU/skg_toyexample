@@ -3,7 +3,9 @@
 ## Installation
 ### PromG
 The library can be installed in Pyhton using pip
-`pip install promg`.
+`pip install promg==0.1.40`.
+
+Make sure to install version 0.1.40. 
 
 The source code for PromG can be found [PromG Core Github repository](https://github.com/PromG-dev/promg-core).
 
