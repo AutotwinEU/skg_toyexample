@@ -1,6 +1,7 @@
 from matplotlib import pyplot
+import time
 
-class plot:
+class Plot:
     def __init__(self,xs,ys,title,sensors):
         self.__xs=xs
         self.__ys=ys
@@ -26,8 +27,15 @@ class plot:
     def return_sensors(self):
         return self.__sensors
     
-    def to_file(self,filename):
+    def to_file(self, filename):
         pyplot.clf()
         pyplot.plot(self.__xs,self.__ys)
         pyplot.title(self.__title)
         pyplot.savefig(filename, dpi=200, format="svg")
+
+    def to_screen(self):
+        time.sleep(1)
+        pyplot.clf()
+        pyplot.plot(self.__xs,self.__ys)
+        pyplot.title(self.__title)
+        pyplot.show()

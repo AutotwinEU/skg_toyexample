@@ -2,7 +2,8 @@ from matplotlib import pyplot
 import random
 import numpy as np
 from functools import reduce
-import pickle 
+import pickle
+import time
 
 
 # an Ecdf represented by a set of values and a legend
@@ -308,6 +309,7 @@ class Ecdf_visualize:
         return pyplot
 
     def plot_to_screen(ecdfc:Ecdf_collection,max=9999999):
+        time.sleep(1)
         pp=Ecdf_visualize.plot(ecdfc,max)
         pp.show()
 

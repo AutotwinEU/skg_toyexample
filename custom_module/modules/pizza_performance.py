@@ -19,10 +19,16 @@ class PizzaPerformanceModule:
         for ecdfc in ppecdfs.return_ecdfcs():
             Ecdf_visualize.plot_to_screen(ecdfc)
 
+    def __add_queues_to_skg(self):
+        ppqueue = PizzaPerformanceModuleEcdfs()
+        for queueplot in ppqueue.return_plots():
+            queueplot.to_screen()
+
     def add_performance_to_skg(self):
         print("add_performance_to_skg")
         self.__delete_all_performance_nodes()
         self.__add_main_performance_nodes()
         self.__add_ecdfs_to_skg()
+        self.__add_queues_to_skg()
 
 

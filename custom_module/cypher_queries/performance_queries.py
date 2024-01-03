@@ -20,7 +20,7 @@ class PerformanceQueryLibrary:
         query_str = '''MATCH(c:Performance) detach delete c'''
         return Query(query_str=query_str)
 
-    # retrieves a lists with input sensors and correspondig output sensor(s)
+    # retrieves a lists with input sensors and corresponding output sensor(s)
     @staticmethod
     def retrieve_sensor_connections():
         # language=sql
@@ -28,7 +28,7 @@ class PerformanceQueryLibrary:
                        return s1.sysId as input, collect(s2.sysId) as outputs'''
         return Query(query_str=query_str)
 
-    # retrieves a lists with input sensors and correspondig output sensor, which are all full path
+    # retrieves a lists with input sensors and corresponding output sensors, which are all full path
     @staticmethod
     def retrieve_sensor_connections_full_path():
         # language=sql
@@ -37,7 +37,7 @@ class PerformanceQueryLibrary:
                 return s1.sysId as input, collect(s2.sysId) as outputs'''
         return Query(query_str=query_str)
 
-    # retrieves for a sensor, all the pizza and its activity that takes place on it
+    # retrieves for a sensor pair, all the execution times between them
     @staticmethod
     def execution_times_between_sensors(isensor, osensor):
         query_str = '''MATCH path=(ev:Event)- [:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET*]->(g:Event)
@@ -55,4 +55,21 @@ class PerformanceQueryLibrary:
         return Query(query_str=query_str,
                      template_string_parameters={"isensor": isensor,
                                                  "osensor": osensor}
+                     )
+
+    # retrieves for a sensor, all the execution times on which activity takes place
+    @staticmethod
+    def timestamps_for_a_sensor(sensor):
+        query_str = '''MATCH path=(ev:Event)- [:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET*]->(g:Event)
+                MATCH (ev)-[:ACTS_ON]->(p:Pizza)
+                WHERE NOT EXISTS((:Event)-[:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET]->(ev))
+                AND NOT EXISTS((g)-[:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET]->(:Event))
+                UNWIND nodes(path) as e
+                WITH p,e
+                match (e)-[:EXECUTED_BY]->(s)
+                WHERE s.sysId="$sensor"
+                WITH COLLECT(e.timestamp) as times
+                return times'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"sensor": sensor}
                      )
