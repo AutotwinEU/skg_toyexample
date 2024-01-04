@@ -2,6 +2,7 @@ from promg import DatabaseConnection
 from custom_module.cypher_queries.performance_queries import PerformanceQueryLibrary as pfql
 from custom_module.modules.pizza_performance_ecdfs import *
 from custom_module.modules.ecdf_library import *
+from custom_module.modules.store_in_db import *
 
 
 class PizzaPerformanceModule:

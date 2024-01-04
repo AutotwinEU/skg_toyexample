@@ -73,3 +73,31 @@ class PerformanceQueryLibrary:
         return Query(query_str=query_str,
                      template_string_parameters={"sensor": sensor}
                      )
+
+    # stores a performance artifact of a certain kind with a value in the database
+    @staticmethod
+    def store_in_db(kind, name, value):
+        query_str = '''create(n1:$kind:Performance{name:"$name",val:"$value"})
+                with n1
+                match(n2:Main$kind)
+                CREATE(n2)-[:HAS_PERFORMANCE]->(n1)
+                RETURN id(n1)'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"kind": kind, "name":name, "value": value}
+                     )
+
+    # retrieves a performance artifact based on a name
+    @staticmethod
+    def retrieve_from_db(name):
+        query_str = '''match(n:Performance{{name:"$name"}}) return n.val'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"name": name}
+                     )
+
+    # retrieves a list of performance artifact names from the db
+    @staticmethod
+    def retrieve_performance_artifacts_from_db(kind):
+        query_str = '''match(n: $kind:Performance) return n.name as names'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"kind": kind}
+                     )
