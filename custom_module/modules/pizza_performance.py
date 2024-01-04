@@ -18,12 +18,19 @@ class PizzaPerformanceModule:
     def __add_ecdfs_to_skg(self):
         ppecdfs = PizzaPerformanceModuleEcdfs()
         for ecdfc in ppecdfs.return_ecdfcs():
-            Ecdf_visualize.plot_to_screen(ecdfc)
+            ecdfcstore = Store_in_db("", ecdfc.return_title(), "Latency")
+            id1 = ecdfcstore.store()
+            self.connection.exec_query(pfql.connect_performance_artifact_to_its_main, **{"kind": "Latency", "id1": id1[0]["id"]})
+            for ecdf in ecdfc.return_ecdfs():
+                ecdfstore = Store_in_db(ecdf, ecdf.legend(), "LatencyECDF")
+                id2 = ecdfstore.store()
+                self.connection.exec_query(pfql.connect_performance_artifacts, **{"id1": id1[0]["id"], "id2": id2[0]["id"]})
+                self.connection.exec_query(pfql.connect_performance_artifact_to_its_main, **{"kind": "Latency", "id1": id2[0]["id"]})
 
     def __add_queues_to_skg(self):
         ppqueue = PizzaPerformanceModuleEcdfs()
-        for queueplot in ppqueue.return_queue_plots():
-            queueplot.to_screen()
+        #for queueplot in ppqueue.return_queue_plots():
+
 
     def add_performance_to_skg(self):
         print("add_performance_to_skg")

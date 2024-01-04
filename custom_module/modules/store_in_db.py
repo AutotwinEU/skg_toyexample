@@ -1,6 +1,6 @@
 from promg import DatabaseConnection
 from custom_module.cypher_queries.performance_queries import PerformanceQueryLibrary as pfql
-from ecdf_library import *
+from custom_module.modules.ecdf_library import *
 import pickle
 import codecs
 import gzip
@@ -18,8 +18,8 @@ class Store_in_db:
         step1=pickle.dumps(step0)
         step2=gzip.compress(step1)
         step3=codecs.encode(step2, "base64").decode()
-        id=self.connection.exec_query(pfql.store_in_db, **{"kind": self.__kind, "name": self.__kind, "value": step3})
-        return id[0]
+        id=self.connection.exec_query(pfql.store_in_db, **{"kind": self.__kind, "name": self.__name, "value": step3})
+        return id
 
     def retrieve(self, name):
         ret=self.connection.exec_query(pfql.retrieve_from_db, **{"name": name})

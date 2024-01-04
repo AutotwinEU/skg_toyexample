@@ -78,10 +78,7 @@ class PerformanceQueryLibrary:
     @staticmethod
     def store_in_db(kind, name, value):
         query_str = '''create(n1:$kind:Performance{name:"$name",val:"$value"})
-                with n1
-                match(n2:Main$kind)
-                CREATE(n2)-[:HAS_PERFORMANCE]->(n1)
-                RETURN id(n1)'''
+                RETURN id(n1) as id'''
         return Query(query_str=query_str,
                      template_string_parameters={"kind": kind, "name":name, "value": value}
                      )
@@ -100,4 +97,25 @@ class PerformanceQueryLibrary:
         query_str = '''match(n: $kind:Performance) return n.name as names'''
         return Query(query_str=query_str,
                      template_string_parameters={"kind": kind}
+                     )
+
+    # connects two performance artifacts
+    @staticmethod
+    def connect_performance_artifacts(id1, id2):
+        query_str = '''MATCH(n1) MATCH(n2)
+                    WHERE ID(n1) = $id1 AND ID(n2) = $id2
+                    CREATE(n1) - [: HAS_PERFORMANCE]->(n2)'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"id1": id1, "id2": id2}
+                     )
+
+    # connects a performance artifact to its main artifact
+    @staticmethod
+    def connect_performance_artifact_to_its_main(id1, kind):
+        query_str = '''MATCH (p1:Main$kind) 
+                       MATCH (p2)
+                       WHERE ID(p2) = $id1 
+                       CREATE(p1) - [: HAS_PERFORMANCE]->(p2)'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"id1": id1, "kind": kind}
                      )
