@@ -129,3 +129,18 @@ class PerformanceQueryLibrary:
         return Query(query_str=query_str,
                      template_string_parameters={"id1": id1, "sensor": sensor}
                      )
+
+    # returns a list of all sensor and pizza combinations
+    @staticmethod
+    def all_sensor_pizza_combinations():
+        query_str = '''MATCH path=(ev:Event)- [:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET*]->(g:Event)
+                    MATCH (ev)-[:ACTS_ON]->(p:Pizza)
+                    WHERE NOT EXISTS((:Event)-[:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET]->(ev))
+                    AND NOT EXISTS((g)-[:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET]->(:Event))
+                    UNWIND nodes(path) as e
+                    MATCH (e)-[:ACTS_ON]->(n) 
+                    WITH e, collect(n.sysId) as actsonids, p
+                    match (e)-[:EXECUTED_BY]->(s)
+                    return {activity:s.sysId,pizzaId:p.sysId} as trace
+                    order by p.sysID, s.sysId'''
+        return Query(query_str=query_str)
