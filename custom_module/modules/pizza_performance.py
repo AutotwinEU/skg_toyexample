@@ -21,7 +21,7 @@ class PizzaPerformanceModule:
 
     def __add_queues_to_skg(self):
         ppqueue = PizzaPerformanceModuleEcdfs()
-        for queueplot in ppqueue.return_plots():
+        for queueplot in ppqueue.return_queue_plots():
             queueplot.to_screen()
 
     def add_performance_to_skg(self):

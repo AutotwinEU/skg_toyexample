@@ -25,9 +25,6 @@ class PizzaPerformanceModuleEcdfs:
                 ecdfcs.append(self.ecdfc_latency_between_sensors(sensors["input"], osensor))
         return ecdfcs
 
-    def create_ecdf_collections_for_queues(self):
-        return []
-
     # returns one queue plot for an isensor and corresponding osensor(s)
     def retrieve_plot_with_queue_size_at_timestamp(self, iosensors):
         timestampsi = self.connection.exec_query(pfql.timestamps_for_a_sensor, **{"sensor": iosensors["input"]})[0]["times"]
@@ -48,15 +45,33 @@ class PizzaPerformanceModuleEcdfs:
 
     # returns the queue plots for all the isensors and corresponding osensors
     def retrieve_all_plots_and_sensors(self):
-        plots = []
-        for iosensors in self.connection.exec_query(pfql.retrieve_sensor_connections):
-            plot = self.retrieve_plot_with_queue_size_at_timestamp(iosensors)
-            if plot.all_positive_values():
-                plots.append(plot)
-        return plots
+        return [self.retrieve_plot_with_queue_size_at_timestamp(iosensors)
+                for iosensors in self.connection.exec_query(pfql.retrieve_sensor_connections)]
+
+    # returns one Ecdfc plot for an isensor and corresponding osensor(s)
+    # the timestamps are neglected, only the change of the queue size is considered
+    def retrieve_ecdf_of_queue_sizes(self, iosensors):
+        timestampsi = self.connection.exec_query(pfql.timestamps_for_a_sensor, **{"sensor": iosensors["input"]})[0]["times"]
+        timestampso = []
+        for osensor in iosensors["outputs"]:
+            timestampso += self.connection.exec_query(pfql.timestamps_for_a_sensor, **{"sensor": osensor})[0]["times"]
+
+        queues = []
+        queue = 0
+        for timestamp in sorted(timestampsi + timestampso):
+            queue += timestampsi.count(timestamp)
+            queue -= timestampso.count(timestamp)
+            queues.append(queue)
+        return Ecdf_collection([Ecdf(queues, "Ecdf of the queue size of " + iosensors["input"],
+                                     [iosensors["input"]] + iosensors["outputs"])],
+                                     "Ecdfc of the queue size of " + iosensors["input"])
+
+    def create_ecdf_collections_for_queues(self):
+        return [self.retrieve_ecdf_of_queue_sizes(iosensors)
+                for iosensors in self.connection.exec_query(pfql.retrieve_sensor_connections)]
 
     def return_ecdfcs(self):
         return self.create_ecdf_collections_for_latencies() + self.create_ecdf_collections_for_queues()
 
-    def return_plots(self):
+    def return_queue_plots(self):
         return self.retrieve_all_plots_and_sensors()
