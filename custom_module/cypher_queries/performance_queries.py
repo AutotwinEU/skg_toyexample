@@ -119,3 +119,13 @@ class PerformanceQueryLibrary:
         return Query(query_str=query_str,
                      template_string_parameters={"id1": id1, "kind": kind}
                      )
+
+    # connects a performance artifact to a sensor
+    @staticmethod
+    def connect_performance_artifact_to_sensor(id1, sensor):
+        query_str = '''MATCH (p) MATCH (se:Sensor)
+                       WHERE ID(p)=$id1 and se.sysId="$sensor"
+                       create (p)-[:PERFORMED_BY]->(se)'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"id1": id1, "sensor": sensor}
+                     )
