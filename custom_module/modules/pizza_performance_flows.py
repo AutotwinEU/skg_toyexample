@@ -1,12 +1,20 @@
 from promg import DatabaseConnection
 from custom_module.cypher_queries.performance_queries import PerformanceQueryLibrary as pfql
+import pydot
 
 class Graph:
-    def __init__(self,dot):
+    def __init__(self, dot, title):
         self.__dot = dot
+        self.__title = title
 
-    def return_dot(self,dot):
+    def return_title(self):
+        return self.__title
+
+    def return_dot(self):
         return self.__dot
+
+    def to_file(self,filename):
+        pydot.graph_from_dot_data(self.__dot)[0].write_svg(filename)
 
 class PizzaPerformanceModuleFlows:
     def __init__(self,working_dir):
@@ -22,9 +30,11 @@ class PizzaPerformanceModuleFlows:
         dictedges = {}
 
         for counter in range(0, len(traces) - 1):
-            if traces[counter]["trace"]["pizzaId"] == traces[counter + 1]["trace"]["pizzaId"]:
-                activity1 = traces[counter]["trace"]["activity"]
-                activity2 = traces[counter + 1]["trace"]["activity"]
+            trace1 = traces[counter]["trace"]
+            trace2 = traces[counter+1]["trace"]
+            if trace1["pizzaId"] == trace2["pizzaId"]:
+                activity1 = trace1["activity"]
+                activity2 = trace2["activity"]
                 if (activity1, activity2) not in dictedges.keys():
                     dictedges[(activity1, activity2)] = 1
                 else:
@@ -57,7 +67,7 @@ class PizzaPerformanceModuleFlows:
             ret+=("d"+str(dictnodes[x])+"[label=\""+x+"\"];")
 
         ret+=("}")
-        return Graph(ret)
+        return Graph(ret,"flow frequency")
 
     def ecdf_flow_graph(self,working_dir) -> str:
         dictnodes=self.return_dictnodes()
@@ -74,4 +84,4 @@ class PizzaPerformanceModuleFlows:
             ret+=("d"+str(dictnodes[x])+"[label=\""+x+"\", shape=box];")
 
         ret+=("}")
-        return Graph(ret)
+        return Graph(ret, "flow ecdf")

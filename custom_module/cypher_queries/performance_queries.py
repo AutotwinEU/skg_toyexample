@@ -86,7 +86,7 @@ class PerformanceQueryLibrary:
     # retrieves a performance artifact based on a name
     @staticmethod
     def retrieve_from_db(name):
-        query_str = '''match(n:Performance{{name:"$name"}}) return n.val'''
+        query_str = '''match(n:Performance{name:"$name"}) return n.val as value'''
         return Query(query_str=query_str,
                      template_string_parameters={"name": name}
                      )
@@ -141,6 +141,13 @@ class PerformanceQueryLibrary:
                     MATCH (e)-[:ACTS_ON]->(n) 
                     WITH e, collect(n.sysId) as actsonids, p
                     match (e)-[:EXECUTED_BY]->(s)
-                    return {activity:s.sysId,pizzaId:p.sysId} as trace
-                    order by p.sysID, s.sysId'''
+                    return {activity:s.sysId,pizzaId:p.sysId} as trace'''
         return Query(query_str=query_str)
+
+    # returns all the ecdfs belonging to an ecdfc
+    @staticmethod
+    def all_ecdfs_of_an_ecdfc(name):
+        query_str = '''MATCH(n:Performance:Latency{name:"$name"})-[:HAS_PERFORMANCE]->(ecdf) RETURN ecdf.name as ecdf'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"name": name}
+                     )

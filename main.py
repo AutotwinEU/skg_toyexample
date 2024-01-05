@@ -48,7 +48,7 @@ verbose = False
 use_local = True
 
 
-def main(semantic_header_p, ds_p) -> None:
+def main(semantic_header_p, ds_p, working_dir) -> None:
     """
     Main function, read all the logs, clear and create the graph, perform checks
     @return: None
@@ -140,9 +140,9 @@ def main(semantic_header_p, ds_p) -> None:
         # graph.custom_module.write_attributes(graph=process_model_graph)
 
     if performance_analysis:
-        perf_module = PizzaPerformanceModule()
+        perf_module = PizzaPerformanceModule(working_dir)
         perf_module.add_performance_to_skg()
-        perf_module.retrieve_performance_from_skg("d:/temp2")
+        perf_module.retrieve_performance_from_skg()
 
     performance.finish_and_save()
     db_manager.print_statistics()
@@ -151,4 +151,5 @@ def main(semantic_header_p, ds_p) -> None:
 
 
 if __name__ == "__main__":
-    main(semantic_header_path, ds_path)
+    working_dir="d:/temp2" # a website with performance results will be written to this path
+    main(semantic_header_path, ds_path, working_dir)

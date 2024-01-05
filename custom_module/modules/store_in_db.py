@@ -21,13 +21,17 @@ class Store_in_db:
         id=self.connection.exec_query(pfql.store_in_db, **{"kind": self.__kind, "name": self.__name, "value": step3})
         return id
 
-    def retrieve(self, name):
-        ret=self.connection.exec_query(pfql.retrieve_from_db, **{"name": name})
-        step0=ret[0]
+    @staticmethod
+    def retrieve(name):
+        connection=DatabaseConnection()
+        ret=connection.exec_query(pfql.retrieve_from_db, **{"name": name})
+        step0=ret[0]["value"]
         step1=codecs.decode(step0.encode(), "base64")
         step2=gzip.decompress(step1)
         step3=pickle.loads(step2)
         return step3
-    
-    def retrieve_names(self, kind):
-        return self.connection.exec_query(pfql.retrieve_performance_artifacts_from_db, **{"kind": kind})
+
+    @staticmethod
+    def retrieve_names(kind):
+        connection = DatabaseConnection()
+        return connection.exec_query(pfql.retrieve_performance_artifacts_from_db, **{"kind": kind})
