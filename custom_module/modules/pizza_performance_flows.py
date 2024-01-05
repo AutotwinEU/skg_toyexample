@@ -1,14 +1,21 @@
 from promg import DatabaseConnection
 from custom_module.cypher_queries.performance_queries import PerformanceQueryLibrary as pfql
 
-class Flow:
+class Graph:
+    def __init__(self,dot):
+        self.__dot = dot
+
+    def return_dot(self,dot):
+        return self.__dot
+
+class PizzaPerformanceModuleFlows:
     def __init__(self,working_dir):
         self.connection = DatabaseConnection()
         self.__working_dir = working_dir
         self.__traces = self.connection.exec_query(pfql.all_sensor_pizza_combinations)
 
     def return_flows(self):
-        return self.ecdf_flow_graph(self.__working_dir)+self.frequency_graph()
+        return [self.ecdf_flow_graph(self.__working_dir)]+[self.frequency_graph()]
 
     def return_dictedges(self):
         traces = self.__traces
@@ -50,7 +57,7 @@ class Flow:
             ret+=("d"+str(dictnodes[x])+"[label=\""+x+"\"];")
 
         ret+=("}")
-        return ret
+        return Graph(ret)
 
     def ecdf_flow_graph(self,working_dir) -> str:
         dictnodes=self.return_dictnodes()
@@ -67,4 +74,4 @@ class Flow:
             ret+=("d"+str(dictnodes[x])+"[label=\""+x+"\", shape=box];")
 
         ret+=("}")
-        return ret
+        return Graph(ret)

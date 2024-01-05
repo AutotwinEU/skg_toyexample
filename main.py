@@ -142,6 +142,7 @@ def main(semantic_header_p, ds_p) -> None:
     if performance_analysis:
         perf_module = PizzaPerformanceModule()
         perf_module.add_performance_to_skg()
+        perf_module.retrieve_performance_from_skg("d:/temp2")
 
     performance.finish_and_save()
     db_manager.print_statistics()
