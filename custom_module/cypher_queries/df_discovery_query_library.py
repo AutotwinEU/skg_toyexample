@@ -2,13 +2,11 @@ from string import Template
 
 from promg import Query
 from promg.data_managers.semantic_header import ConstructedNodes
-
-
 class DFDiscoveryQueryLibrary:
 
     @staticmethod
     def get_create_df_compound_events_query(entity_type: str, cor_type: str, event_label: str, df_label: str,
-                                            include_sys_id: bool, version_number: str) -> Query:
+                                            include_sys_id: bool) -> Query:
         # find the specific entities and events with a certain label correlated to that entity
         # order all events by time, order_nr and id grouped by a node n
         # collect the sorted nodes as a list
@@ -18,12 +16,11 @@ class DFDiscoveryQueryLibrary:
         # language=sql
         include_sys_id_string = "SET df.entityId = n.sysId" if include_sys_id else ""
         cor_relation = f"[:{cor_type}]" if cor_type is not None else ""
-        version_number = f":{version_number}" if version_number is not None else ""
 
         # language=sql
         query_str = '''
                      CALL apoc.periodic.iterate(
-                     'MATCH (n:$entity_type$version_number) <-$cor_relation - (e:$event_label)
+                     'MATCH (n:$entity_type) <-$cor_relation - (e:$event_label)
                      CALL {
                         WITH e
                         MATCH (e) - [:CONSISTS_OF] -> (single_event:Event)
@@ -49,13 +46,12 @@ class DFDiscoveryQueryLibrary:
                          "corr_type_string": cor_type,
                          "event_label": event_label,
                          "df_label": df_label,
-                         "entity_type": entity_type,
-                         "version_number": version_number
+                         "entity_type": entity_type
                      })
 
     @staticmethod
     def get_create_df_atomic_events_query(entity_type: str, event_label: str, df_label: str,
-                                          include_sys_id: bool, cor_type: str, version_number: str) -> Query:
+                                          include_sys_id: bool, cor_type: str) -> Query:
         # find the specific entities and events with a certain label correlated to that entity
         # order all events by time, order_nr and id grouped by a node n
         # collect the sorted nodes as a list
@@ -65,12 +61,11 @@ class DFDiscoveryQueryLibrary:
         # language=sql
         include_sys_id_string = "SET df.entityId = n.sysId" if include_sys_id else ""
         cor_relation = f"[:{cor_type}]" if cor_type is not None else ""
-        version_number = f":{version_number}" if version_number is not None else ""
 
         # language=sql
         query_str = '''
                  CALL apoc.periodic.iterate(
-                    'MATCH (n:$entity_type$version_number) <- $cor_relation - (e:$event_label)
+                    'MATCH (n:$entity_type) <- $cor_relation - (e:$event_label)
                     WITH n , e as nodes ORDER BY e.timestamp, ID(e)
                     WITH n , collect (nodes) as nodeList
                     UNWIND range(0,size(nodeList)-2) AS i
@@ -90,16 +85,14 @@ class DFDiscoveryQueryLibrary:
                          "entity_type": entity_type,
                          "corr_type_string": cor_type,
                          "event_label": event_label,
-                         "df_label": df_label,
-                         "version_number": version_number
+                         "df_label": df_label
                      })
 
     @staticmethod
-    def get_merge_duplicate_df_entity_query(node_type: str, df_label: str, version_number: str) -> Query:
-        version_number = f":{version_number}" if version_number is not None else ""
+    def get_merge_duplicate_df_entity_query(node_type: str, df_label: str) -> Query:
         # language=sql
         query_str = '''
-                            MATCH (n1:Event$version_number)-[r:$df_label {entityType: '$entity_type'}]->(n2:Event)
+                            MATCH (n1:Event)-[r:$df_label {entityType: '$entity_type'}]->(n2:Event)
                             WITH n1, n2, collect(r) AS rels
                             WHERE size(rels) > 1
                             // only include this and the next line if you want to remove the existing relationships
@@ -112,8 +105,7 @@ class DFDiscoveryQueryLibrary:
         return Query(query_str=query_str,
                      template_string_parameters={
                          "entity_type": node_type,
-                         "df_label": df_label,
-                         "version_number": version_number
+                         "df_label": df_label
                      })
 
     @staticmethod
@@ -134,18 +126,16 @@ class DFDiscoveryQueryLibrary:
                      parameters={})
 
     @staticmethod
-    def get_delete_df_query(df_label: str, entity_type: str = None, version_number: str = None):
-        version_number = f":{version_number}" if version_number is not None else ""
+    def get_delete_df_query(df_label: str, entity_type: str = None):
         entity_type = f"{{entityType: '{entity_type}'}}" if entity_type is not None else ""
 
         query_str = '''
-            MATCH (e:Event $version_number) - [df:$df_label $entity_type] -> (f:Event:$version_number)
+            MATCH (e:Event) - [df:$df_label $entity_type] -> (f:Event)
             DELETE df
         '''
 
         return Query(query_str=query_str,
                      template_string_parameters={
-                         "version_number": version_number,
                          "df_label": df_label,
                          "entity_type": entity_type
                      })
