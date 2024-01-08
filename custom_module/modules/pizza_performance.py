@@ -42,6 +42,8 @@ class PizzaPerformanceModule:
             self.connection.exec_query(pfql.connect_performance_artifact_to_its_main,
                                        **{"kind": "Flow", "id1": id1[0]["id"]})
             counter+=1
+            for sensor in flow.return_sensors():
+                self.connection.exec_query(pfql.connect_performance_artifact_to_sensor, **{"id1": id1[0]["id"], "sensor": sensor})
 
     def __add_utils_to_skg(self):
         return

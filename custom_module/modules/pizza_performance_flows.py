@@ -3,15 +3,19 @@ from custom_module.cypher_queries.performance_queries import PerformanceQueryLib
 import pydot
 
 class Graph:
-    def __init__(self, dot, title):
+    def __init__(self, dot, title, sensors):
         self.__dot = dot
         self.__title = title
+        self.__sensors = sensors
 
     def return_title(self):
         return self.__title
 
     def return_dot(self):
         return self.__dot
+
+    def return_sensors(self):
+        return self.__sensors
 
     def to_file(self,filename):
         pydot.graph_from_dot_data(self.__dot)[0].write_svg(filename)
@@ -57,21 +61,24 @@ class PizzaPerformanceModuleFlows:
     def frequency_graph(self) -> str:
         dictnodes=self.return_dictnodes()
         dictedges=self.return_dictedges()
+        sensors=[]
         ret="digraph {"
 
         for (fromedge,toedge) in dictedges:
             fe=dictnodes[fromedge]
             te=dictnodes[toedge]
             ret+=("d"+str(fe)+"->"+"d"+str(te)+"[label=\""+str(dictedges[(fromedge,toedge)])+"\"];")
-        for x in dictnodes:
-            ret+=("d"+str(dictnodes[x])+"[label=\""+x+"\"];")
+        for dictnode in dictnodes:
+            ret+=("d"+str(dictnodes[dictnode])+"[label=\""+dictnode+"\"];")
+            sensors.append(dictnode)
 
         ret+=("}")
-        return Graph(ret,"flow frequency")
+        return Graph(ret,"flow frequency", sensors)
 
     def ecdf_flow_graph(self,working_dir) -> str:
         dictnodes=self.return_dictnodes()
         dictedges=self.return_dictedges()
+        sensors=[]
         ret = "digraph {"
 
         for (fromedge,toedge) in dictedges:
@@ -80,8 +87,9 @@ class PizzaPerformanceModuleFlows:
             ret+=("d"+str(fe)+"->"+fromedge+"_"+toedge+";")
             ret+=(fromedge+"_"+toedge+"->d"+str(te)+"[label=\""+str(dictedges[(fromedge,toedge)])+"\"];")
             ret+=(fromedge+"_"+toedge+"[image=\""+working_dir+"/"+fromedge+" "+toedge+".svg\", label=\"\", shape=box]")
-        for x in dictnodes:
-            ret+=("d"+str(dictnodes[x])+"[label=\""+x+"\", shape=box];")
+        for dictnode in dictnodes:
+            ret+=("d"+str(dictnodes[dictnode])+"[label=\""+dictnode+"\", shape=box];")
+            sensors.append(dictnode)
 
         ret+=("}")
-        return Graph(ret, "flow ecdf")
+        return Graph(ret, "flow ecdf", sensors)

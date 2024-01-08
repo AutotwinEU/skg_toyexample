@@ -15,6 +15,7 @@ from promg.modules.db_management import DBManagement
 from promg.modules.process_discovery import ProcessDiscovery
 from promg.modules.exporter import Exporter
 
+from custom_module.modules.pizza_simulation import create_simulated_data
 from custom_module.modules.pizza_line import PizzaLineModule
 from custom_module.modules.pizza_performance import PizzaPerformanceModule
 from tts_credentials import remote
@@ -41,20 +42,25 @@ step_clear_db = True
 step_populate_graph = True
 step_analysis = True
 
-performance_analysis = True
+perform_simulation = True        # perform a fresh simulation before generating the SKG?
+performance_analysis = True     # add performance analysis to the SKG?
 
 use_preprocessed_files = False  # if false, read/import files instead
 verbose = False
 use_local = True
 
 
-def main(semantic_header_p, ds_p, working_dir) -> None:
+def main(semantic_header_p, ds_p, html_output_dir, simulator_dir, config_filename, data_dir,
+         production_plan_and_stations_dir, headers_dir) -> None:
     """
     Main function, read all the logs, clear and create the graph, perform checks
     @return: None
     """
     semantic_header = SemanticHeader.create_semantic_header(semantic_header_p)
     datastructures = DatasetDescriptions(ds_p)
+
+    if perform_simulation:
+        create_simulated_data(simulator_dir,config_filename,data_dir,production_plan_and_stations_dir,headers_dir)
 
     _step_clear_db = step_clear_db
     if not use_local:
@@ -140,7 +146,7 @@ def main(semantic_header_p, ds_p, working_dir) -> None:
         # graph.custom_module.write_attributes(graph=process_model_graph)
 
     if performance_analysis:
-        perf_module = PizzaPerformanceModule(working_dir)
+        perf_module = PizzaPerformanceModule(html_output_dir)
         perf_module.add_performance_to_skg()
         perf_module.retrieve_performance_from_skg()
 
@@ -151,5 +157,15 @@ def main(semantic_header_p, ds_p, working_dir) -> None:
 
 
 if __name__ == "__main__":
-    working_dir="d:/temp2" # a website with performance results will be written to this path
-    main(semantic_header_path, ds_path, working_dir)
+    # only needs to be set when simulation is enabled (otherwise neglected)
+    simulator_dir = "Q:/PizzaLineComplete_V3.7_2023_11_17" # the TTS simulator directory
+    config_filename = "runargsnogui.ini" # assumed to be located in the simulator dir
+    data_dir = "R:/git/data/ToyExampleV3" # the target directory of the simulation results and starting point of building the SKG
+    production_plan_and_stations_dir = "R:/git/data/ToyExampleV3.ava" # a directory with production_plan.csv and stations.csv
+    headers_dir = "R:/git/data/ToyExampleV3.ava" # a processed data directory to "steal" the headers from
+
+    # only needs to be set when performance analysis is enabled (otherwise neglected)
+    html_output_dir="d:/temp2" # a website with performance results will be written to this path
+
+    main(semantic_header_path, ds_path, html_output_dir, simulator_dir, config_filename, data_dir,
+         production_plan_and_stations_dir, headers_dir)
