@@ -1,15 +1,4 @@
-from typing import Optional, List
-
-import promg.cypher_queries.process_discovery_ql
-from promg.data_managers.semantic_header import ConstructedNodes
 from promg.database_managers.db_connection import Query
-
-entity_df_info = {
-    'PackStation': {'enter_entity': 'Pizza', 'exit_entity': 'Pack', 'quantity': 'packCount'},
-    'BoxStation': {'enter_entity': 'Pack', 'exit_entity': 'Box', 'quantity': 'boxCount'},
-    'PalletStation': {'enter_entity': 'Box', 'exit_entity': 'Pallet', 'quantity': 'boxQuantity'}
-}
-
 
 class AnalysisQueryLibrary:
 

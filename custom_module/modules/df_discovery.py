@@ -15,7 +15,7 @@ class DFDiscoveryModule:
 
     @Performance.track("entity_type")
     def create_df_edges_for_entity(self, entity_type: str, df_label: str, include_sys_id: bool = False,
-                                   cor_type: str = None, event_label: str = None, version_number: str = None):
+                                   cor_type: str = None, event_label: str = None):
         if event_label is None:
             event_label = "Event"
 
@@ -26,8 +26,7 @@ class DFDiscoveryModule:
                                            "cor_type": cor_type,
                                            "event_label": event_label,
                                            "df_label": df_label,
-                                           "include_sys_id": include_sys_id,
-                                           "version_number": version_number
+                                           "include_sys_id": include_sys_id
                                        })
         else:
             self.connection.exec_query(dfql.get_create_df_atomic_events_query,
@@ -36,25 +35,22 @@ class DFDiscoveryModule:
                                            "cor_type": cor_type,
                                            "event_label": event_label,
                                            "df_label": df_label,
-                                           "include_sys_id": include_sys_id,
-                                           "version_number": version_number
+                                           "include_sys_id": include_sys_id
                                        })
 
     @Performance.track("node")
-    def merge_duplicate_df_for_node(self, node_type: str, df_label: str, version_number: str = None):
+    def merge_duplicate_df_for_node(self, node_type: str, df_label: str):
         self.connection.exec_query(dfql.get_merge_duplicate_df_entity_query, **{
             "node_type": node_type,
-            "df_label": df_label,
-            "version_number": version_number
+            "df_label": df_label
         })
 
     @Performance.track()
-    def delete_df_edges(self, df_label: str, entity_type: str, version_number: str):
+    def delete_df_edges(self, df_label: str, entity_type: str):
         self.connection.exec_query(dfql.get_delete_df_query,
                                    **{
                                        "df_label": df_label,
-                                       "entity_type": entity_type,
-                                       "version_number": version_number
+                                       "entity_type": entity_type
                                    })
 
     # def delete_parallel_dfs_derived(self):

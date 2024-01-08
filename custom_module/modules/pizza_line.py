@@ -20,107 +20,82 @@ class PizzaLineModule:
                                    **{"entity_type": entity_type})
 
     @Performance.track()
-    def infer_part_of_relation(self, version_number, station_id):
+    def infer_part_of_relation(self, station_id):
         # depending on station, we first need to prepare the batching policy
         if station_id in ["PackStation", "BoxStation"]:
-            self._determine_pp_changed_property(version_number=version_number, station_id=station_id)
-            self._determine_part_of_property(version_number=version_number, station_id=station_id)
-            self._determine_number_in_run(version_number=version_number, station_id=station_id)
-            self._create_part_of_relation_fifo_batch(version_number=version_number, station_id=station_id)
-            self._delete_temp_properties(version_number=version_number, station_id=station_id)
+            self._determine_pp_changed_property(station_id=station_id)
+            self._determine_part_of_property(station_id=station_id)
+            self._determine_number_in_run(station_id=station_id)
+            self._create_part_of_relation_fifo_batch(station_id=station_id)
+            self._delete_temp_properties(station_id=station_id)
         elif station_id in ["PalletStation"]:
-            self._create_part_of_relation_fifo(version_number=version_number, station_id=station_id)
+            self._create_part_of_relation_fifo(station_id=station_id)
 
-    def _determine_pp_changed_property(self, version_number, station_id):
+    def _determine_pp_changed_property(self, station_id):
         self.connection.exec_query(ccql.get_set_pp_changed_property_query,
                                    **{
-                                       "version_number": version_number,
                                        "station_id": station_id
                                    }
                                    )
         self.connection.exec_query(ccql.get_determine_pp_changed_query,
                                    **{
-                                       "version_number": version_number,
                                        "station_id": station_id
                                    }
                                    )
 
-    def _determine_part_of_property(self, version_number, station_id):
+    def _determine_part_of_property(self, station_id):
         self.connection.exec_query(ccql.get_determine_entity_part_of_query,
                                    **{
-                                       "version_number": version_number,
                                        "station_id": station_id
                                    }
                                    )
 
-    def _determine_number_in_run(self, version_number, station_id):
+    def _determine_number_in_run(self, station_id):
         self.connection.exec_query(ccql.get_determine_number_in_run_query,
                                    **{
-                                       "version_number": version_number,
                                        "station_id": station_id
                                    }
                                    )
         self.connection.exec_query(ccql.get_determine_number_in_run_range_of_exit_stations_query,
                                    **{
-                                       "version_number": version_number,
                                        "station_id": station_id
                                    }
                                    )
 
-    def _create_part_of_relation_fifo_batch(self, version_number, station_id):
+    def _create_part_of_relation_fifo_batch(self, station_id):
         self.connection.exec_query(ccql.get_create_part_of_relation,
                                    **{
-                                       "version_number": version_number,
                                        "station_id": station_id
                                    })
 
-    def _create_part_of_relation_fifo(self, version_number, station_id):
-        self.connection.exec_query(ccql.get_create_part_of_FIFO_query,
+    def _create_part_of_relation_fifo(self, station_id):
+        self.connection.exec_query(ccql.get_create_part_of_fifo_query,
                                    **{
-                                       "version_number": version_number,
                                        "station_id": station_id
                                    })
 
-    def _delete_temp_properties(self, version_number, station_id):
+    def _delete_temp_properties(self, station_id):
         self.connection.exec_query(ccql.get_delete_temp_properties_query,
                                    **{
-                                       "version_number": version_number,
                                        "station_id": station_id
                                    })
 
     @Performance.track()
-    def merge_sensor_events(self, version_number):
-        self.connection.exec_query(ccql.get_merge_sensor_events_query,
-                                   **{
-                                       "version_number": version_number
-                                   })
+    def merge_sensor_events(self):
+        self.connection.exec_query(ccql.get_merge_sensor_events_query)
 
     @Performance.track()
-    def connect_wip_sensor_to_assembly_line(self, version_number):
-        self.connection.exec_query(ccql.get_connect_wip_sensor_to_assembly_line_query,
-                                   **{
-                                       "version_number": version_number
-                                   })
+    def connect_wip_sensor_to_assembly_line(self):
+        self.connection.exec_query(ccql.get_connect_wip_sensor_to_assembly_line_query)
 
     @Performance.track()
-    def complete_quality(self, version_number):
-        self.connection.exec_query(ccql.get_complete_quality_query,
-                                   **{
-                                       "version_number": version_number
-                                   })
-        self.connection.exec_query(ccql.get_create_quality_for_pizzas_query,
-                                   **{
-                                       "version_number": version_number
-                                   }
-                                   )
-        self.connection.exec_query(ccql.get_create_qualifier_rel_to_pizza_quality_query,
-                                   **{
-                                       "version_number": version_number
-                                   }
-                                   )
+    def complete_quality(self):
+        self.connection.exec_query(ccql.get_complete_quality_query)
+        self.connection.exec_query(ccql.get_create_quality_for_pizzas_query)
+        self.connection.exec_query(ccql.get_create_qualifier_rel_to_pizza_quality_query)
 
     @Performance.track()
-    def connect_operators_to_station(self, version_number):
+    def connect_operators_to_station(self):
         mappings = [
             {
                 "operator": 'opBox_onBreak', "station": "BoxStation"
@@ -133,8 +108,7 @@ class PizzaLineModule:
             self.connection.exec_query(ccql.get_connect_operators_to_station_query,
                                        **{
                                            "operator": mapping["operator"],
-                                           "station": mapping["station"],
-                                           "version_number": version_number
+                                           "station": mapping["station"]
                                        })
 
     @Performance.track()

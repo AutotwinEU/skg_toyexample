@@ -1,16 +1,13 @@
 import os
 from datetime import datetime
-import time
 from pathlib import Path
 import random
 
-import numpy as np
 from promg import SemanticHeader, OcedPg
 from promg import DatabaseConnection
 from promg import DatasetDescriptions
 from promg import Performance
 from promg import authentication
-from promg.database_managers.authentication import Credentials
 from promg.modules.db_management import DBManagement
 from custom_module.modules.process_model_discovery import ProcessDiscovery
 from promg.modules.exporter import Exporter
@@ -22,13 +19,9 @@ from tts_credentials import remote
 # several steps of import, each can be switch on/off
 from colorama import Fore
 
-from process_discovery.discover_process_model import ProcessDiscoveryLog
-
 randint = random.randint(0, 9999)
 
-number = 3
-dataset_name = f'ToyExamplev{number}'
-version_number = f"V{number}"
+dataset_name = f'ToyExample'
 semantic_header_path = Path(f'json_files/{dataset_name}.json')
 config_path = Path(f'json_files/config.json')
 use_sample = False
@@ -99,9 +92,8 @@ def main() -> None:
         oced_pg.create_nodes_by_records()
 
         pizza_module = PizzaLineModule()
-        if version_number == "V3":
-            pizza_module.merge_sensor_events(version_number=version_number)
-            pizza_module.connect_wip_sensor_to_assembly_line(version_number=version_number)
+        pizza_module.merge_sensor_events()
+        pizza_module.connect_wip_sensor_to_assembly_line()
 
         oced_pg.create_relations()
 
@@ -116,11 +108,10 @@ def main() -> None:
             {"entity_type": "Operator", "df_label": "DF_OPERATOR"}]
 
         for df in df_edges_to_be_created:
-            df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"],
-                                                    version_number=version_number)
+            df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"])
 
         for station_id in ["PackStation", "BoxStation", "PalletStation"]:
-            pizza_module.infer_part_of_relation(version_number=version_number, station_id=station_id)
+            pizza_module.infer_part_of_relation(station_id=station_id)
 
         df_edges_to_be_created = [
             {"entity_type": "PizzaPack", "df_label": "DF_CONTROL_FLOW_ITEM"},
@@ -128,12 +119,10 @@ def main() -> None:
             {"entity_type": "BoxPallet", "df_label": "DF_CONTROL_FLOW_ITEM"}]
 
         for df in df_edges_to_be_created:
-            df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"],
-                                                    version_number=version_number)
+            df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"])
 
-        if version_number == "V3":
-            pizza_module.complete_quality(version_number=version_number)
-            pizza_module.connect_operators_to_station(version_number=version_number)
+        pizza_module.complete_quality()
+        pizza_module.connect_operators_to_station()
 
         process_discoverer = ProcessDiscovery()
         process_discoverer.create_df_process_model(df_label="DF_CONTROL_FLOW_ITEM", df_a_label="DF_A_CONTROL_FLOW_ITEM")
