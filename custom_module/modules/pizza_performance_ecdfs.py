@@ -32,9 +32,9 @@ class PizzaPerformanceModuleEcdfs:
         for osensor in iosensors["outputs"]:
             timestampso += self.connection.exec_query(pfql.timestamps_for_a_sensor, **{"sensor": osensor})[0]["times"]
 
-        queue_size = 0
-        xs = [0]
-        ys = [0]
+        queue_size=0
+        xs=[]
+        ys=[]
         for timestamp in sorted(timestampsi + timestampso):
             queue_size += timestampsi.count(timestamp)
             queue_size -= timestampso.count(timestamp)
