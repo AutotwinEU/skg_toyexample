@@ -42,7 +42,7 @@ step_clear_db = True
 step_populate_graph = True
 step_analysis = True
 
-perform_simulation = True       # perform a fresh simulation before generating the SKG?
+perform_simulation = False      # perform a fresh simulation before generating the SKG?
 performance_analysis = True     # add performance analysis to the SKG?
 
 use_preprocessed_files = False  # if false, read/import files instead

@@ -32,10 +32,16 @@ class PizzaPerformanceModuleEcdfs:
         for osensor in iosensors["outputs"]:
             timestampso += self.connection.exec_query(pfql.timestamps_for_a_sensor, **{"sensor": osensor})[0]["times"]
 
+        timestampso1 = self.connection.exec_query(pfql.timestamps_for_a_sensor, **{"sensor": iosensors["outputs"][0]})[0]["times"]
+        if len(iosensors["outputs"])>1:
+            timestampso2 = self.connection.exec_query(pfql.timestamps_for_a_sensor, **{"sensor": iosensors["outputs"][1]})[0]["times"]
+
+        ts=sorted(timestampsi + timestampso)
+
         queue_size=0
         xs=[]
         ys=[]
-        for timestamp in sorted(timestampsi + timestampso):
+        for timestamp in sorted(list(set(timestampsi + timestampso))):
             queue_size += timestampsi.count(timestamp)
             queue_size -= timestampso.count(timestamp)
             xs.append(timestamp)
@@ -58,7 +64,7 @@ class PizzaPerformanceModuleEcdfs:
 
         queues = []
         queue = 0
-        for timestamp in sorted(timestampsi + timestampso):
+        for timestamp in sorted(list(set(timestampsi + timestampso))):
             queue += timestampsi.count(timestamp)
             queue -= timestampso.count(timestamp)
             queues.append(queue)
