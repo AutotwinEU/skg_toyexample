@@ -19,11 +19,11 @@ class PizzaLineModule:
         self.connection.exec_query(ccql.get_create_processing_stations_aggregation_query,
                                    **{"entity_type": entity_type})
 
-    @Performance.track()
+    @Performance.track('station_id')
     def infer_part_of_relation(self, station_id):
         # depending on station, we first need to prepare the batching policy
         if station_id in ["PackStation", "BoxStation"]:
-            self._determine_pp_changed_property(station_id=station_id)
+            self._determine_start_and_terminor_nodes(station_id=station_id)
             self._determine_part_of_property(station_id=station_id)
             self._determine_number_in_run(station_id=station_id)
             self._create_part_of_relation_fifo_batch(station_id=station_id)
@@ -31,7 +31,7 @@ class PizzaLineModule:
         elif station_id in ["PalletStation"]:
             self._create_part_of_relation_fifo(station_id=station_id)
 
-    def _determine_pp_changed_property(self, station_id):
+    def _determine_start_and_terminor_nodes(self, station_id):
         self.connection.exec_query(ccql.get_set_pp_changed_property_query,
                                    **{
                                        "station_id": station_id
@@ -43,6 +43,12 @@ class PizzaLineModule:
                                    }
                                    )
 
+        self.connection.exec_query(ccql.get_set_start_and_terminator_label_based_on_temp_prop_query)
+        self.connection.exec_query(ccql.get_set_terminator_label_based_on_end_query,
+                                   **{
+                                       "station_id": station_id
+                                   })
+
     def _determine_part_of_property(self, station_id):
         self.connection.exec_query(ccql.get_determine_entity_part_of_query,
                                    **{
@@ -51,11 +57,7 @@ class PizzaLineModule:
                                    )
 
     def _determine_number_in_run(self, station_id):
-        self.connection.exec_query(ccql.get_determine_number_in_run_query,
-                                   **{
-                                       "station_id": station_id
-                                   }
-                                   )
+        self.connection.exec_query(ccql.get_determine_number_in_run_query)
         self.connection.exec_query(ccql.get_determine_number_in_run_range_of_exit_stations_query,
                                    **{
                                        "station_id": station_id

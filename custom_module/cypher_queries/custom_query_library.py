@@ -107,6 +107,34 @@ class CustomCypherQueryLibrary:
                      })
 
     @staticmethod
+    def get_set_start_and_terminator_label_based_on_temp_prop_query():
+        # determine when new production run changed on event level
+        query_str = '''
+            MATCH (e:Event {tempPPChanged:TRUE})
+            SET e:StartNode
+            WITH e
+            OPTIONAL MATCH (f:Event) - [:DF_SENSOR] -> (e)
+            SET f:TerminatorNode
+        '''
+
+        return Query(query_str=query_str)
+
+    @staticmethod
+    def get_set_terminator_label_based_on_end_query(station_id):
+        # determine when new production run changed on event level
+        query_str = '''
+            MATCH (e:Event) - [:OCCURRED_AT] -> (:Station {sysId: '$stationId'})
+            WHERE  NOT EXISTS((e) - [:DF_SENSOR] -> (:Event))
+            SET e:TerminatorNode
+
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "stationId": station_id
+                     })
+
+    @staticmethod
     def get_determine_entity_part_of_query(station_id):
         # determine whether entity should be part of another entity
         query_str = '''
@@ -126,15 +154,14 @@ class CustomCypherQueryLibrary:
                      })
 
     @staticmethod
-    def get_determine_number_in_run_query(station_id):
+    def get_determine_number_in_run_query():
         query_str = '''
-            MATCH p = (e:Event {tempPPChanged:TRUE}) - [:DF_SENSOR*] -> (f:Event)
-            MATCH (e) - [:OCCURRED_AT] -> (:Station {sysId: '$stationId'})
-            WHERE (EXISTS ((f) - [:DF_SENSOR] -> (:Event {tempPPChanged:TRUE})) 
-                    OR NOT EXISTS((f) - [:DF_SENSOR] -> (:Event))) 
-            AND all(event in nodes(p)[1..] WHERE event.tempPPChanged = False)
-            CALL {WITH p
-                WITH nodes(p) as eventPaths
+            MATCH (start_event:Event:StartNode)
+            CALL apoc.path.expandConfig(start_event, {relationshipFilter: "DF_SENSOR>", 
+            labelFilter:"+Event|/TerminatorNode"})
+            YIELD path
+            CALL {WITH path
+                WITH nodes(path) as eventPaths
                 UNWIND range(0,size(eventPaths)) AS i
                 WITH i, eventPaths[i] as e
                 WITH e, 
@@ -146,10 +173,7 @@ class CustomCypherQueryLibrary:
             }
         '''
 
-        return Query(query_str=query_str,
-                     template_string_parameters={
-                         "stationId": station_id
-                     })
+        return Query(query_str=query_str)
 
     @staticmethod
     def get_determine_number_in_run_range_of_exit_stations_query(station_id):
@@ -173,12 +197,11 @@ class CustomCypherQueryLibrary:
     @staticmethod
     def get_create_part_of_relation(station_id):
         query_str = '''
-            MATCH (e:Event) - [:OCCURRED_AT] 
+            MATCH (e:Event {tempPartOf:TRUE}) - [:OCCURRED_AT] 
                 -> (packingStation:Station {sysId: '$stationId'})
             MATCH  (e) - [:ACTS_ON] -> (:Entity:$enter_entity_label) - [:IS_OF_TYPE] -> (et:EntityType) 
                 - [:INPUT] -> (composition:CompositionOperation)
             MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor {type: "ENTER"})
-            WHERE NOT EXISTS ((e) - [:DF_CONTROL_FLOW_ITEM] -> (:Event))
             CALL {WITH e, packingStation, composition
                   MATCH (f:Event) - [:OCCURRED_AT] -> (packingStation)
                   MATCH  (f) - [:ACTS_ON] -> (:Entity:$exit_entity_label) 
@@ -241,7 +264,7 @@ class CustomCypherQueryLibrary:
     def get_delete_temp_properties_query(station_id):
         query_str = '''
                     MATCH (e:Event) - [:OCCURRED_AT] -> (packingStation {sysId:'$stationId'})
-                    REMOVE e.tempPPChanged, e.tempPartOf, e.tempNumberInRun, e.tempNumRange
+                    REMOVE e.tempPPChanged, e.tempPartOf, e.tempNumberInRun, e.tempNumRange, e:StartNode, e:TerminatorNode
                 '''
 
         return Query(query_str=query_str,
