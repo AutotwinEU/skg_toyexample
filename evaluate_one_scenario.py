@@ -24,33 +24,7 @@ from tts_credentials import remote
 from colorama import Fore
 
 from process_discovery.discover_process_model import ProcessDiscoveryLog
-randint = random.randint(0, 9999)
-
-number = 3
-dataset_name = f'ToyExamplev{number}'
-version_number = f"V{number}"
-semantic_header_path = Path(f'json_files/{dataset_name}.json')
-config_path = Path(f'json_files/config.json')
-use_sample = False
-
-perf_path = os.path.join("..", "perf", dataset_name, f"{dataset_name}Performance.csv")
-number_of_steps = 100
-
-ds_path = Path(f'json_files/{dataset_name}_DS.json')
-
-step_clear_db = True
-step_populate_graph = True
-step_analysis = True
-
-perform_simulation = False      # perform a fresh simulation before generating the SKG?
-performance_analysis = True     # add performance analysis to the SKG?
-
-use_preprocessed_files = False  # if false, read/import files instead
-verbose = False
-use_local = True
-
-
-def main(db_name,
+def evaluate_one_scenario(db_name,
          semantic_header_p, ds_p,
          html_output_dir,
          simulator_dir, config_filename, data_dir, production_plan_and_stations_dir, headers_dir) -> None:
@@ -58,6 +32,25 @@ def main(db_name,
     Main function, read all the logs, clear and create the graph, perform checks
     @return: None
     """
+    randint = random.randint(0, 9999)
+
+    config_path = Path(f'json_files/config.json')
+    use_sample = False
+
+    perf_path = os.path.join("..", "perf", "ToyExamplev3", f"ToyExamplev3Performance.csv")
+    number_of_steps = 100
+
+    step_clear_db = True
+    step_populate_graph = True
+    step_analysis = True
+
+    perform_simulation = False  # perform a fresh simulation before generating the SKG?
+    performance_analysis = True  # add performance analysis to the SKG?
+
+    use_preprocessed_files = False  # if false, read/import files instead
+    verbose = False
+    use_local = True
+
     semantic_header = SemanticHeader.create_semantic_header(semantic_header_p)
     datastructures = DatasetDescriptions(ds_p)
 
@@ -88,7 +81,7 @@ def main(db_name,
 
     # performance class to measure performance
 
-    performance = Performance.set_up_performance(dataset_name=dataset_name, use_sample=use_sample)
+    performance = Performance.set_up_performance(dataset_name="ToyExamplev3", use_sample=use_sample)
     db_connection = DatabaseConnection.set_up_connection(credentials=credentials,
                                                          verbose=verbose,db_name=db_name)
 
@@ -108,9 +101,9 @@ def main(db_name,
 
         oced_pg.load()
         oced_pg.create_nodes_by_records()
-        if version_number == "V3":
-            pizza_module.merge_sensor_events(version_number=version_number)
-            pizza_module.connect_wip_sensor_to_assembly_line(version_number=version_number)
+
+        pizza_module.merge_sensor_events(version_number="V3")
+        pizza_module.connect_wip_sensor_to_assembly_line(version_number="V3")
 
         relations = [relation.type for relation in semantic_header.relations]
         relations_to_be_constructed_later = ["PART_OF_PIZZA_PACK", "PART_OF_PACK_BOX", "PART_OF_BOX_PALLET"]
@@ -118,12 +111,11 @@ def main(db_name,
         oced_pg.create_relations(list(set(relations) - set(relations_to_be_constructed_later)))
 
         oced_pg.create_df_edges()
-        pizza_module.complete_corr(version_number=version_number)
-        pizza_module.delete_df_edges(version_number=version_number)
+        pizza_module.complete_corr(version_number="V3")
+        pizza_module.delete_df_edges(version_number="V3")
 
-        if version_number == "V3":
-            pizza_module.complete_quality(version_number=version_number)
-            pizza_module.connect_operators_to_station(version_number=version_number)
+        pizza_module.complete_quality(version_number="V3")
+        pizza_module.connect_operators_to_station(version_number="V3")
 
         oced_pg.create_relations(relations_to_be_constructed_later)
 
@@ -158,18 +150,20 @@ def main(db_name,
     db_connection.close_connection()
 
 
-if __name__ == "__main__":
-    # only needs to be set when simulation is enabled (otherwise neglected)
-    simulator_dir = "Q:/PizzaLineComplete_V3.7_2023_11_17" # the TTS simulator directory
-    config_filename = "runargsnogui.ini" # assumed to be located in the simulator dir
-    data_dir = "R:/git/data/ToyExampleV3" # the target directory of the simulation results and starting point of building the SKG
-    production_plan_and_stations_dir = "R:/git/data/ToyExampleV3.ava" # a directory with production_plan.csv and stations.csv
-    headers_dir = "R:/git/data/ToyExampleV3.ava" # a processed data directory to "steal" the headers from
+# only needs to be set when simulation is enabled (otherwise neglected)
+simulator_dir = "Q:/PizzaLineComplete_V3.7_2023_11_17" # the TTS simulator directory
+config_filename = "runargsnogui.ini" # assumed to be located in the simulator dir
+data_dir = "R:/git/data/ToyExampleV3" # the target directory of the simulation results and starting point of building the SKG
+production_plan_and_stations_dir = "R:/git/data/ToyExampleV3.ava" # a directory with production_plan.csv and stations.csv
+headers_dir = "R:/git/data/ToyExampleV3.ava" # a processed data directory to "steal" the headers from
 
-    # only needs to be set when performance analysis is enabled (otherwise neglected)
-    html_output_dir="d:/temp2" # a website with performance results will be written to this path
+# only needs to be set when performance analysis is enabled (otherwise neglected)
+html_output_dir="d:/temp2" # a website with performance results will be written to this path
 
-    db_name="freek2"
+db_name="freek2"
 
-    main(db_name, semantic_header_path, ds_path, html_output_dir, simulator_dir, config_filename, data_dir,
-         production_plan_and_stations_dir, headers_dir)
+semantic_header_path = Path(f'json_files/ToyExamplev3.json')
+ds_path = Path(f'json_files/ToyExamplev3_DS.json')
+
+evaluate_one_scenario(db_name, semantic_header_path, ds_path, html_output_dir, simulator_dir, config_filename, data_dir,
+     production_plan_and_stations_dir, headers_dir)

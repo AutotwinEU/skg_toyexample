@@ -1,5 +1,7 @@
 import itertools as it
 from pizza_simulation import create_simulated_data
+import shutil
+from evaluate_one_scenario import evaluate_one_scenario
 
 # the complete design space.
 # mostly for illustration, viz., contains 3^9=19683 design instances.
@@ -66,19 +68,20 @@ def pizza_config(d_instance):
 def write_design_instances_to_output_dir(d_space):
     d_instances_dir = "Q:/PizzaLineComplete_V3.7_2023_11_17/design_instances"
     simulator_dir = "Q:/PizzaLineComplete_V3.7_2023_11_17" # the TTS simulator directory
-    #data_dir = "R:/git/data/ToyExampleV3" # the target directory of the simulation results and starting point of building the SKG
+    data_dir = "R:/git/data/ToyExampleV3" # the target directory of the simulation results and starting point of building the SKG
     production_plan_and_stations_dir = "R:/git/data/ToyExampleV3.ava" # a directory with production_plan.csv and stations.csv
     headers_dir = "R:/git/data/ToyExampleV3.ava" # a processed data directory to "steal" the headers from
 
     for d_instance in d_space:
         filename='_'.join(map(str,d_instance))
         path=d_instances_dir+"/"+filename+".ini"
-        data_dir=d_instances_dir+"/"+filename
         f = open(path,"w")
         f.write(pizza_config(d_instance))
         f.close()
         create_simulated_data(simulator_dir,path,data_dir,production_plan_and_stations_dir,headers_dir)
-
+        input("press any key...")
+        shutil.rmtree(data_dir)
+        input("press any key...")
 
 
 dspace=design_space_different_on_one_dimension()
