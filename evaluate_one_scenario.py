@@ -40,11 +40,11 @@ def evaluate_one_scenario(db_name,
     perf_path = os.path.join("..", "perf", "ToyExamplev3", f"ToyExamplev3Performance.csv")
     number_of_steps = 100
 
-    step_clear_db = True
+    step_clear_db = False
     step_populate_graph = True
     step_analysis = True
 
-    perform_simulation = False  # perform a fresh simulation before generating the SKG?
+    perform_simulation = False   # perform a fresh simulation before generating the SKG?
     performance_analysis = True  # add performance analysis to the SKG?
 
     use_preprocessed_files = False  # if false, read/import files instead
@@ -162,8 +162,8 @@ html_output_dir="d:/temp2" # a website with performance results will be written 
 
 db_name="freek2"
 
-semantic_header_path = Path(f'json_files/ToyExamplev3.json')
-ds_path = Path(f'json_files/ToyExamplev3_DS.json')
+semantic_header_path = Path(f'R:/git/json_files/ToyExamplev3.json')
+ds_path = Path(f'R:/git/json_files/ToyExamplev3_DS.json')
 
-evaluate_one_scenario(db_name, semantic_header_path, ds_path, html_output_dir, simulator_dir, config_filename, data_dir,
-     production_plan_and_stations_dir, headers_dir)
+#evaluate_one_scenario(db_name, semantic_header_path, ds_path, html_output_dir, simulator_dir, config_filename, data_dir,
+#     production_plan_and_stations_dir, headers_dir)
