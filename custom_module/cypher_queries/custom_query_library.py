@@ -149,7 +149,6 @@ class CustomCypherQueryLibrary:
 
         return Query(query_str=query_str,
                      template_string_parameters={
-                         "df_enter_entity_label": "DF_" + station_info[station_id]["enter_entity"].upper(),
                          "stationId": station_id
                      })
 
