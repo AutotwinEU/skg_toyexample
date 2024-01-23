@@ -48,7 +48,9 @@ def main() -> None:
     @return: None
     """
     _step_clear_db = step_clear_db
-    if not use_local:  # swap
+    if use_local:
+        credentials = authentication.connections_map[authentication.Connections.LOCAL]
+    else:
         number_str = str(randint).zfill(4)
         request_permission = input(
             f"You are going to make changes to the TTS instance. Is this your intention? Type {number_str} for Yes or "
@@ -63,8 +65,6 @@ def main() -> None:
         else:
             print("Invalid input")
             return
-    else:
-        credentials = authentication.connections_map[authentication.Connections.LOCAL]
 
     print("Started at =", datetime.now().strftime("%H:%M:%S"))
     if use_preprocessed_files:
