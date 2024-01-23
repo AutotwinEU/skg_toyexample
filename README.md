@@ -3,9 +3,9 @@
 ## Installation
 ### PromG
 The library can be installed in Pyhton using pip
-`pip install promg==0.1.40`.
+`pip install promg==1.0.1`.
 
-Ensure you have installed the correct version (version 0.1.40).
+Ensure you have installed the correct version (version 1.0.1).
 
 The source code for PromG can be found [PromG Core Github repository](https://github.com/PromG-dev/promg-core).
 
@@ -33,6 +33,34 @@ Install [Neo4j](https://neo4j.com/download/):
 All the preprocessed datasets can be found at [NextCloud Data](https://autotwin.cloud68.co/f/44738).
 The complete folder `ToyExampleV3` should be put under `/data/`. 
 For example your file structure for `S1.csv` should be e.g. `/data/ToyExampleV3/S1.csv`.
+
+### Create config file
+
+Create a `config.yaml` file and store in the root directory.
+The file should be formatted as follows:
+```yaml
+# Database Credentials and Information
+db_name: "<DATABASE NAME>" # e.g. "neo4j"
+uri: "<URI OF DATABASE SERVER>" # e.g. bolt://localhost:7687"
+user: "<USER>" # e.g. "neo4j"
+password: "<PASSWORD>" # e.g. "12345678"
+import_directory:  "<IMPORT DIRECTORY>" # see note 1
+
+# Dataset information
+dataset_name: "ToyExample"
+semantic_header_path: "json_files/ToyExample.json"
+dataset_description_path: "json_files/ToyExample_DS.json"
+use_sample: false
+
+# Import settings
+verbose: false
+batch_size: 10000
+use_preprocessed_files: false
+```
+
+> **_NOTE:_**  You can determine the import directory as follows: 
+> 1) Select the Neo4j Server in Neo4j Desktop > Click the three dots > Select Open Folder > Select Import
+> 2) This opens the import directory, so now you can copy the directory.
 
 ### Schema
 
