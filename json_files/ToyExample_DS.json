@@ -261,7 +261,8 @@
       "Record",
       "PalletRecord",
       "SensorEventRecord",
-      "SensorRecord"
+      "SensorRecord",
+      "EntityTypeRecord"
     ],
     "seperator": ";",
     "attributes": [

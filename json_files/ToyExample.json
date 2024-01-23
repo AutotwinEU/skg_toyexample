@@ -321,6 +321,17 @@
       }
     },
     {
+      "type": "IS_OF_TYPE_PALLET",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:PalletRecord)",
+        "from_node": "(pallet:Pallet)",
+        "to_node": "(entityType:EntityType)",
+        "result": "(pallet) - [:IS_OF_TYPE] -> (entityType)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
       "type": "PART_OF_SENSOR_STATION",
       "constructor": {
         "prevalent_record": "(record:SensorRecord:StationRecord)",
