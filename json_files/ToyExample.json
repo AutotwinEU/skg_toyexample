@@ -1,11 +1,27 @@
 {
   "name": "ToyExample",
-  "version": "1.0.0",
-
+  "version": "3.6.1",
   "records": [
-    "(record:SensorEventRecord {timestamp, sensorId}",
-    "(record:PizzaRecord {pizzaId})",
-    "(record:SensorRecord {sensorId})"
+    "(record:EventRecord:SensorEventRecord {timestamp, sensorId})",
+    "(record:EntityRecord:PizzaRecord {pizzaId})",
+    "(record:EntityRecord:PackRecord {packId})",
+    "(record:EntityRecord:BoxRecord {boxId})",
+    "(record:EntityRecord:PalletRecord {palletId})",
+    "(record:EntityRecord:SensorRecord {sensorId, OPTIONAL sensorType})",
+    "(record:EntityRecord:StationRecord {stationName, OPTIONAL stationType})",
+    "(record:EntityRecord:AssemblyLineRecord {assemblyName})",
+    "(record:EntityTypeRecord {code, OPTIONAL diameter, OPTIONAL height, OPTIONAL weight})",
+    "(record:EntityTypeRecord:OutputEntityTypeRecord {outputCode})",
+    "(record:TimeDistributionRecord:TriangularDistributionRecord {interval, intervalDelta})",
+    "(record:CompositionRecord {inputQuantity, outputQuantity})",
+    "(record:EntityRecord:PizzaQualityAttributeRecord {exceededCookingTime})",
+    "(record:EntityRecord:OperatorRecord {operatorId})",
+    "(record:EventRecord:OperatorEventRecord:OperatorStartEventRecord WHERE record.hasBreak = true {timestamp, hasBreak})",
+    "(record:EventRecord:OperatorEventRecord:OperatorCompleteEventRecord WHERE record.hasBreak = false {timestamp, hasBreak})",
+    "(record:EventRecord:StatusEventRecord {timestamp, locked})",
+    "(record:EventRecord:LockStatusRecord {locked})",
+    "(record:EventRecord:WIPRecord {amount})",
+    "(record:EventRecord:WIPEventRecord {timestamp, amount})"
   ],
   "nodes": [
     {
@@ -13,7 +29,23 @@
       "constructor": [
         {
           "prevalent_record": "(record:SensorEventRecord)",
-          "result": "(e:Event {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
+          "result": "(e:Event:SensorEvent {timestamp:record.timestamp, activity: \"Pass Sensor \" + record.sensorId})"
+        },
+        {
+          "prevalent_record": "(record:OperatorStartEventRecord)",
+          "result": "(e:Event:OperatorEvent {timestamp:record.timestamp, activity: \"Start Break\"})"
+        },
+        {
+          "prevalent_record": "(record:OperatorCompleteEventRecord)",
+          "result": "(e:Event:OperatorEvent {timestamp:record.timestamp, activity: \"Stop Break\"})"
+        },
+        {
+          "prevalent_record": "(record:StatusEventRecord)",
+          "result": "(e:Event:SensorReadingEvent {timestamp:record.timestamp, activity: \"Read Lock Status\"})"
+        },
+        {
+          "prevalent_record": "(record:WIPEventRecord)",
+          "result": "(e:Event:SensorReadingEvent {timestamp:record.timestamp, activity: \"Read WIP amount\"})"
         }
       ]
     },
@@ -24,6 +56,22 @@
           "prevalent_record": "(record:SensorEventRecord)",
           "result": "(a:Activity {activity: \"Pass Sensor \" + record.sensorId})",
           "infer_observed": true
+        },
+        {
+          "prevalent_record": "(record:OperatorStartEventRecord)",
+          "result": "(a:Activity {activity: \"Start Break\"})"
+        },
+        {
+          "prevalent_record": "(record:OperatorCompleteEventRecord)",
+          "result": "(a:Activity {activity: \"Stop Break\"})"
+        },
+        {
+          "prevalent_record": "(record:StatusEventRecord)",
+          "result": "(a:Activity {activity: \"Read Lock Status\"})"
+        },
+        {
+          "prevalent_record": "(record:WIPEventRecord)",
+          "result": "(a:Activity {activity: \"Read WIP amount\"})"
         }
       ]
     },
@@ -42,11 +90,63 @@
       "merge_duplicate_df": true
     },
     {
+      "type": "pizzaQualityAttribute",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PizzaQualityAttributeRecord)",
+          "result": "(v:EntityAttribute:PizzaQualityAttribute {burned: record.exceededCookingTime})",
+          "infer_corr_from_event_record": false
+        }
+      ]
+    },
+    {
+      "type": "Pack",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PackRecord)",
+          "result": "(v:Entity:Pack {sysId: record.packId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Box",
+      "constructor": [
+        {
+          "prevalent_record": "(record:BoxRecord)",
+          "result": "(v:Entity:Box {sysId: record.boxId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "type": "Pallet",
+      "constructor": [
+        {
+          "prevalent_record": "(record:PalletRecord)",
+          "result": "(v:Entity:Pallet {sysId: record.palletId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "ACTS_ON"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
       "type": "Sensor",
       "constructor": [
         {
           "prevalent_record": "(record:SensorRecord)",
-          "result": "(v:Entity:Resource:MachinePart:Sensor {sysId: record.sensorId})",
+          "result": "(v:Entity:Resource:MachinePart:Sensor {sysId: record.sensorId, OPTIONAL type:record.sensorType})",
           "infer_corr_from_event_record": true,
           "corr_type": "EXECUTED_BY"
         }
@@ -55,9 +155,289 @@
       "include_label_in_df": true,
       "merge_duplicate_df": true
     },
+    {
+      "type": "SensorReading",
+      "constructor": [
+        {
+          "prevalent_record": "(record:LockStatusRecord WHERE record.locked = true)",
+          "result": "(ls:EntityAttribute:SensorReading {status: \"locked\"})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "CREATES"
+        },
+        {
+          "prevalent_record": "(record:LockStatusRecord WHERE record.locked = false)",
+          "result": "(ls:EntityAttribute:SensorReading {status: \"not locked\"})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "CREATES"
+        },
+        {
+          "prevalent_record": "(record:WIPRecord)",
+          "result": "(ls:EntityAttribute:SensorReading {status:\"WIP amount \" + record.amount})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "CREATES"
+        }
+      ]
+    },
+    {
+      "type": "Station",
+      "constructor": [
+        {
+          "prevalent_record": "(record:StationRecord)",
+          "result": "(v:Entity:Resource:Station:Location {sysId: record.stationName, OPTIONAL type: record.stationType})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "OCCURRED_AT"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    },
+    {
+      "include": false,
+      "type": "AssemblyLine",
+      "constructor": [
+        {
+          "prevalent_record": "(record:AssemblyLineRecord)",
+          "result": "(v:Entity:Resource:AssemblyLine {sysId: record.assemblyName})"
+        }
+      ]
+    },
+    {
+      "type": "EntityType",
+      "constructor": [
+        {
+          "prevalent_record": "(record:EntityTypeRecord)",
+          "result": "(v:EntityType {code: record.code, OPTIONAL diameter: record.diameter, OPTIONAL height: record.height, OPTIONAL weight: record.weight})",
+          "infer_corr_from_event_record": false
+        },
+
+        {
+          "prevalent_record": "(record:OutputEntityTypeRecord)",
+          "result": "(v:EntityType {code: record.outputCode})",
+          "infer_corr_from_event_record": false
+        }
+      ]
+    },
+    {
+      "type": "TimeDistribution",
+      "constructor": [
+        {
+          "prevalent_record": "(record:TriangularDistributionRecord)",
+          "result": "(v:TimeDistribution {mode: record.interval, lowerLimit: record.interval-record.intervalDelta, upperLimit: record.interval+record.intervalDelta, type:\"triangular distribution\"})",
+          "infer_corr_from_event_record": false
+        }
+      ]
+    },
+    {
+      "type": "CompositionOperation",
+      "constructor": [
+        {
+          "prevalent_record": "(record:CompositionRecord)",
+          "result": "(v:CompositionOperation {inputCode: record.code, inputQuantity: record.inputQuantity, outputQuantity: record.outputQuantity})",
+          "infer_corr_from_event_record": false
+        }
+      ]
+    },
+    {
+      "type": "Operator",
+      "constructor": [
+        {
+          "prevalent_record": "(record:OperatorRecord)",
+          "result": "(v:Entity:Resource:HumanResource:Operator {sysId: record.operatorId})",
+          "infer_corr_from_event_record": true,
+          "corr_type": "INITIATED_BY"
+        }
+      ],
+      "infer_df": true,
+      "include_label_in_df": true,
+      "merge_duplicate_df": true
+    }
+  ],
+  "relations": [
+    {
+      "type": "HAS_PROPERTY",
+      "constructor": {
+        "prevalent_record": "(record:PizzaQualityAttributeRecord:PizzaRecord)",
+        "from_node": "(pizza: Pizza)",
+        "to_node": "(quality: PizzaQualityAttribute)",
+        "result": "(pizza) - [:HAS_PROPERTY] -> (quality)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "HAS_VALUE",
+      "constructor": {
+        "prevalent_record": "(record:LockStatusRecord:SensorRecord)",
+        "from_node": "(sensor:Sensor)",
+        "to_node": "(ls:SensorReading)",
+        "result": "(sensor) - [:HAS_VALUE] -> (ls)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "HAS_VALUE",
+      "constructor": {
+        "prevalent_record": "(record:WIPRecord:SensorRecord)",
+        "from_node": "(sensor:Sensor)",
+        "to_node": "(ls:SensorReading)",
+        "result": "(sensor) - [:HAS_VALUE] -> (ls)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "IS_OF_TYPE_PIZZA",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:PizzaRecord)",
+        "from_node": "(pizza: Pizza)",
+        "to_node": "(entityType:EntityType)",
+        "result": "(pizza) - [:IS_OF_TYPE] -> (entityType)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "IS_OF_TYPE_PACK",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:PackRecord)",
+        "from_node": "(pack:Pack)",
+        "to_node": "(entityType:EntityType)",
+        "result": "(pack) - [:IS_OF_TYPE] -> (entityType)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "IS_OF_TYPE_BOX",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:BoxRecord)",
+        "from_node": "(box:Box)",
+        "to_node": "(entityType:EntityType)",
+        "result": "(box) - [:IS_OF_TYPE] -> (entityType)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "IS_OF_TYPE_PALLET",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:PalletRecord)",
+        "from_node": "(pallet:Pallet)",
+        "to_node": "(entityType:EntityType)",
+        "result": "(pallet) - [:IS_OF_TYPE] -> (entityType)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "PART_OF_SENSOR_STATION",
+      "constructor": {
+        "prevalent_record": "(record:SensorRecord:StationRecord)",
+        "from_node": "(sensor: Sensor)",
+        "to_node": "(station: Station)",
+        "result": "(sensor) - [:PART_OF] -> (station)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "HAS_PROPERTY_TD",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:TimeDistributionRecord)",
+        "from_node": "(entityType:EntityType {code:record.code})",
+        "to_node": "(dist:TimeDistribution)",
+        "result": "(entityType) - [:HAS_PROPERTY] -> (dist)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "INPUT",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:CompositionRecord)",
+        "from_node": "(entityType:EntityType {code:record.code})",
+        "to_node": "(operation:CompositionOperation)",
+        "result": "(entityType) - [:INPUT] -> (operation)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "OUTPUT",
+      "constructor": {
+        "prevalent_record": "(record:EntityTypeRecord:CompositionRecord)",
+        "from_node": "(operation:CompositionOperation)",
+        "to_node": "(entityType:EntityType {code:record.outputCode})",
+        "result": "(entityType) <- [:OUTPUT] - (operation)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "FOLLOWS",
+      "constructor": {
+        "prevalent_record": "(record:StationRecord:TimeDistributionRecord)",
+        "from_node": "(s:Station)",
+        "to_node": "(dist:TimeDistribution)",
+        "result": "(s) - [:FOLLOWS] -> (dist)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
 
     {
-      "type": "Station"
+      "type": "FOLLOWS_COMP",
+      "constructor": {
+        "prevalent_record": "(record:StationRecord:CompositionRecord)",
+        "from_node": "(s:Station)",
+        "to_node": "(operation:CompositionOperation)",
+        "result": "(s) - [:FOLLOWS] -> (operation)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "include": false,
+      "type": "PART_OF_STATION_ASSEMBLYLINE",
+      "constructor": {
+        "prevalent_record": "(record:AssemblyLineRecord:StationRecord)",
+        "from_node": "(station: Station)",
+        "to_node": "(assembly: AssemblyLine)",
+        "result": "(station) - [:PART_OF] -> (assembly)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "type": "OCCURRED_AT",
+      "constructor": {
+        "relations": [
+          "(e:Event) - [:EXECUTED_BY] -> (sensor:Sensor)",
+          "(sensor) - [:PART_OF] -> (station:Station)"
+        ],
+        "from_node": "(e:Event)",
+        "to_node": "(station:Station)",
+        "result": "(e) - [:OCCURRED_AT] -> (station)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "include": true,
+      "type": "OCCURS_AT",
+      "constructor": {
+        "relations": [
+          "(e:Event) <- [:OBSERVED] - (a:Activity)",
+          "(e) - [:OCCURRED_AT] -> (station:Station)"
+        ],
+        "from_node": "(a:Activity)",
+        "to_node": "(station:Station)",
+        "result": "(a) - [:OCCURS_AT] -> (station)",
+        "model_as_node": false,
+        "infer_corr_from_reified_parents": false
+      }
     }
   ]
 }

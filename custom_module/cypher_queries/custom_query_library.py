@@ -5,6 +5,12 @@ from string import Template
 
 from promg import Query
 
+station_info = {
+    'PackStation': {'enter_entity': 'Pizza', 'exit_entity': 'Pack', 'quantity': 'packCount'},
+    'BoxStation': {'enter_entity': 'Pack', 'exit_entity': 'Box', 'quantity': 'boxCount'},
+    'PalletStation': {'enter_entity': 'Box', 'exit_entity': 'Pallet', 'quantity': 'boxQuantity'}
+}
+
 
 class CustomCypherQueryLibrary:
 
@@ -70,131 +76,269 @@ class CustomCypherQueryLibrary:
                      template_string_parameters={"df_a_type": f"DF_A_{entity_type.upper()}"})
 
     @staticmethod
-    def get_complete_corr_query(version_number):
+    def get_set_pp_changed_property_query(station_id):
         query_str = '''
-            MATCH (p:Entity:$version_number) <-[:ACTS_ON] - (e:Event:$version_number) - [:OCCURRED_AT] -> (s:Station:$version_number)
-            WITH s, apoc.coll.flatten(collect (distinct labels(p))) as labels
-            CALL {
-                WITH s, labels
-                UNWIND labels as _label
-                WITH s, _label
-                WHERE _label = "Pizza" or _label = "Pack" or _label = "Box" or _label = "Pallet"
-                WITH s, collect(distinct _label) as unique_labels 
-                WHERE size(unique_labels) > 1
-                RETURN s as packingStation, unique_labels
-            }
-            MATCH (e:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
-            MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor:$version_number {type: "ENTER"})
-            WHERE NOT EXISTS ((e) - [:DF_PIZZA|DF_PACK|DF_BOX] -> (:Event))
-            CALL {WITH e, packingStation
-                  MATCH (f:Event:$version_number) - [:OCCURRED_AT] -> (packingStation)
-                  MATCH (f) - [:EXECUTED_BY] -> (sensor:Sensor {type: "EXIT"})
-                  WHERE f.timestamp > e.timestamp
-                  RETURN f
-                  ORDER BY f.timestamp ASC
-                  LIMIT 1
-                  }
-            MATCH (e) - [:ACTS_ON] -> (n)
-            MERGE (f) - [:ACTS_ON] -> (n)
-        '''
-
-        return Query(query_str=query_str,
-                     template_string_parameters={"version_number": version_number
-                     })
-
-    @staticmethod
-    def get_delete_df_query(version_number):
-        query_str = '''
-            MATCH (e:Event:$version_number) - [df:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET] -> (f:Event:$version_number)
-            DELETE df
+            MATCH (e:Event) - [:OCCURRED_AT] -> (:Station {sysId: '$stationId'})
+            SET e.tempPPChanged = True
         '''
 
         return Query(query_str=query_str,
                      template_string_parameters={
-                         "version_number": version_number
+                         "stationId": station_id
                      })
 
     @staticmethod
-    def get_merge_sensor_events_query(version_number):
+    def get_determine_pp_changed_query(station_id):
+        # determine when new production run changed on event level
         query_str = '''
-            MATCH (e:SensorStatusEvent:$version_number)
+        MATCH (e:Event) - [:OCCURRED_AT] -> (:Station {sysId: '$stationId'})
+        MATCH (e) - [df:DF_SENSOR] -> (f)
+        MATCH (e) - [:ACTS_ON] -> (:Entity) - [:IS_OF_TYPE] -> (et:EntityType)
+        MATCH (f) - [:ACTS_ON] -> (:Entity) - [:IS_OF_TYPE] -> (et2:EntityType)
+        WITH CASE et.code
+            WHEN et2.code THEN FALSE
+            ELSE TRUE END as change, f
+        SET f.tempPPChanged = change
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "stationId": station_id
+                     })
+
+    @staticmethod
+    def get_set_start_and_terminator_label_based_on_temp_prop_query():
+        # determine when new production run changed on event level
+        query_str = '''
+            MATCH (e:Event {tempPPChanged:TRUE})
+            SET e:StartNode
+            WITH e
+            OPTIONAL MATCH (f:Event) - [:DF_SENSOR] -> (e)
+            SET f:TerminatorNode
+        '''
+
+        return Query(query_str=query_str)
+
+    @staticmethod
+    def get_set_terminator_label_based_on_end_query(station_id):
+        # determine when new production run changed on event level
+        query_str = '''
+            MATCH (e:Event) - [:OCCURRED_AT] -> (:Station {sysId: '$stationId'})
+            WHERE  NOT EXISTS((e) - [:DF_SENSOR] -> (:Event))
+            SET e:TerminatorNode
+
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "stationId": station_id
+                     })
+
+    @staticmethod
+    def get_determine_entity_part_of_query(station_id):
+        # determine whether entity should be part of another entity
+        query_str = '''
+            MATCH (e:Event) - [:OCCURRED_AT] -> (:Station {sysId: '$stationId'})
+            MATCH (e) - [:EXECUTED_BY] -> (s:Sensor {type:"ENTER"})
+            WITH e, CASE
+                WHEN EXISTS((e) - [:DF_CONTROL_FLOW_ITEM] -> (:Event)) THEN false
+                ELSE true
+                END AS partOf
+            set e.tempPartOf = partOf 
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "stationId": station_id
+                     })
+
+    @staticmethod
+    def get_determine_number_in_run_query():
+        query_str = '''
+            MATCH (start_event:Event:StartNode)
+            CALL apoc.path.expandConfig(start_event, {relationshipFilter: "DF_SENSOR>", 
+            labelFilter:"+Event|/TerminatorNode"})
+            YIELD path
+            CALL {WITH path
+                WITH nodes(path) as eventPaths
+                UNWIND range(0,size(eventPaths)) AS i
+                WITH i, eventPaths[i] as e
+                WITH e, 
+                    CASE e.tempPartOf
+                    WHEN true THEN i
+                    WHEN false then -1
+                    ELSE i END as counter
+                SET e.tempNumberInRun = counter
+            }
+        '''
+
+        return Query(query_str=query_str)
+
+    @staticmethod
+    def get_determine_number_in_run_range_of_exit_stations_query(station_id):
+        query_str = '''
+            MATCH (f:Event) - [:OCCURRED_AT] -> (:Station {sysId: '$stationId'})
+            MATCH  (f) - [:ACTS_ON] -> (:Entity:$exit_entity_label) - [:IS_OF_TYPE] -> (
+            et:EntityType) <- [:OUTPUT] - (composition:CompositionOperation)
+            MATCH (f) - [:EXECUTED_BY] -> (sensor:Sensor WHERE sensor.type STARTS WITH "EXIT")
+            WHERE NOT EXISTS ((:Event) - [:DF_CONTROL_FLOW_ITEM] -> (f))
+            SET f.tempNumRange =  range(f.tempNumberInRun*composition.inputQuantity, 
+            (f.tempNumberInRun+1)*composition.inputQuantity-1)
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "exit_entity_label": station_info[station_id]["exit_entity"],
+                         "quantity": station_info[station_id]["quantity"],
+                         "stationId": station_id
+                     })
+
+    @staticmethod
+    def get_create_part_of_relation(station_id):
+        query_str = '''
+            MATCH (e:Event {tempPartOf:TRUE}) - [:OCCURRED_AT] 
+                -> (packingStation:Station {sysId: '$stationId'})
+            MATCH  (e) - [:ACTS_ON] -> (:Entity:$enter_entity_label) - [:IS_OF_TYPE] -> (et:EntityType) 
+                - [:INPUT] -> (composition:CompositionOperation)
+            MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor {type: "ENTER"})
+            CALL {WITH e, packingStation, composition
+                  MATCH (f:Event) - [:OCCURRED_AT] -> (packingStation)
+                  MATCH  (f) - [:ACTS_ON] -> (:Entity:$exit_entity_label) 
+                    - [:IS_OF_TYPE] -> (et2:EntityType) <- [:OUTPUT] - (composition)
+                  WHERE f.timestamp > e.timestamp AND e.tempNumberInRun in f.tempNumRange
+                  RETURN f
+                  ORDER BY f.timestamp ASC
+                  LIMIT 1
+                  }
+            MATCH (e) - [:ACTS_ON] -> (enter:Entity:$enter_entity_label)
+            MATCH (f) - [:ACTS_ON] -> (exit:Entity:$exit_entity_label)
+            MERGE (enter) - [:PART_OF] -> (exit)
+            MERGE (enter) - [:FROM] -> (combo:$enter_exit_combo) - [:TO] -> (exit)
+            MERGE (e) - [:ACTS_ON] -> (combo)
+            MERGE (f) - [:ACTS_ON] -> (combo)
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "enter_entity_label": station_info[station_id]["enter_entity"],
+                         "exit_entity_label": station_info[station_id]["exit_entity"],
+                         "enter_exit_combo": station_info[station_id]["enter_entity"] + station_info[station_id][
+                             "exit_entity"],
+                         "quantity": station_info[station_id]["quantity"],
+                         "stationId": station_id
+                     })
+
+    @staticmethod
+    def get_create_part_of_fifo_query(station_id):
+        query_str = '''
+            MATCH (e:Event) - [:OCCURRED_AT] -> (packingStation {sysId:'$stationId'})
+            MATCH (e) - [:EXECUTED_BY] -> (sensor:Sensor {type: "ENTER"})
+            WHERE NOT EXISTS ((e) - [:DF_CONTROL_FLOW_ITEM] -> (:Event))
+            CALL {WITH e, packingStation
+                  MATCH (f:Event) - [:OCCURRED_AT] -> (packingStation)
+                  MATCH  (f) - [:ACTS_ON] -> (:Entity:$exit_entity_label)
+                  WHERE e.timestamp < f.timestamp
+                  RETURN f
+                  ORDER BY f.timestamp ASC
+                  LIMIT 1
+                  }
+            MATCH (e) - [:ACTS_ON] -> (enter:Entity:$enter_entity_label)
+            MATCH (f) - [:ACTS_ON] -> (exit:Entity:$exit_entity_label)
+            MERGE (enter) - [:PART_OF] -> (exit)
+            MERGE (enter) - [:FROM] -> (combo:$enter_exit_combo) - [:TO] -> (exit)
+            MERGE (e) - [:ACTS_ON] -> (combo)
+            MERGE (f) - [:ACTS_ON] -> (combo)
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "enter_entity_label": station_info[station_id]["enter_entity"],
+                         "enter_exit_combo": station_info[station_id]["enter_entity"] + station_info[station_id][
+                             "exit_entity"],
+                         "exit_entity_label": station_info[station_id]["exit_entity"],
+                         "stationId": station_id
+                     })
+
+    @staticmethod
+    def get_delete_temp_properties_query(station_id):
+        query_str = '''
+                    MATCH (e:Event) - [:OCCURRED_AT] -> (packingStation {sysId:'$stationId'})
+                    REMOVE e.tempPPChanged, e.tempPartOf, e.tempNumberInRun, e.tempNumRange, e:StartNode, e:TerminatorNode
+                '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "stationId": station_id
+                     })
+
+    @staticmethod
+    def get_merge_sensor_events_query():
+        query_str = '''
+            MATCH (e:SensorStatusEvent)
             WITH e.timestamp as timestamp, e.activity as activity, collect(e) as batchedEvents
             CALL apoc.refactor.mergeNodes(batchedEvents, {properties:"combine", mergeRels: true})
             YIELD node
             return count(*)
         '''
 
-        return Query(query_str=query_str,
-                     template_string_parameters={"version_number": version_number})
+        return Query(query_str=query_str)
 
     @staticmethod
-    def get_connect_wip_sensor_to_assembly_line_query(version_number):
+    def get_connect_wip_sensor_to_assembly_line_query():
         query_str = '''
-            MATCH (record:AssemblyLineRecord&SensorRecord&$version_number&!StationRecord)
+            MATCH (record:AssemblyLineRecord&SensorRecord&!StationRecord)
             MATCH (a:AssemblyLine) - [:EXTRACTED_FROM] -> (record)
             MATCH (s:Sensor) - [:EXTRACTED_FROM] -> (record)
             MERGE (s) - [:PART_OF] -> (a)
         '''
 
-        return Query(query_str=query_str,
-                     template_string_parameters={"version_number": version_number})
+        return Query(query_str=query_str)
 
     @staticmethod
-    def get_complete_quality_query(version_number):
+    def get_complete_quality_query():
         query_str = '''
-                MATCH (p:PizzaQualityAttribute:$version_number)
+                MATCH (p:PizzaQualityAttribute)
                 SET p.defective = NOT(p.burned)
             '''
 
-        return Query(query_str=query_str,
-                     template_string_parameters={
-                         "version_number": version_number
-                     })
+        return Query(query_str=query_str)
 
     @staticmethod
-    def get_connect_operators_to_station_query(version_number, operator, station):
+    def get_connect_operators_to_station_query(operator, station):
         query_str = '''
-            MATCH (operator:Operator:$version_number {sysId: $operator})
-            MATCH (station:Station:$version_number {sysId: $station})
+            MATCH (operator:Operator {sysId: $operator})
+            MATCH (station:Station {sysId: $station})
             MERGE (operator) - [:OPERATES] -> (station)
         '''
 
         return Query(query_str=query_str,
-                     template_string_parameters={
-                         "version_number": version_number
-                     },
                      parameters={
                          "operator": operator,
                          "station": station
                      })
 
     @staticmethod
-    def get_create_quality_for_pizzas_query(version_number):
+    def get_create_quality_for_pizzas_query():
         query_str = '''
-                MATCH (p:Pizza:$version_number)
-                WHERE NOT EXISTS ((p) - [:HAS_PROPERTY] -> (:PizzaQualityAttribute:$version_number))
-                CREATE (q:EntityAttribute:PizzaQualityAttribute:$version_number {burned: false, defective: false})
+                MATCH (p:Pizza)
+                WHERE NOT EXISTS ((p) - [:HAS_PROPERTY] -> (:PizzaQualityAttribute))
+                CREATE (q:EntityAttribute:PizzaQualityAttribute {burned: false, defective: false})
                 CREATE (p) - [:HAS_PROPERTY] -> (q)
             '''
 
-        return Query(query_str=query_str,
-                     template_string_parameters={
-                         "version_number": version_number
-                     })
+        return Query(query_str=query_str)
 
     @staticmethod
-    def get_create_qualifier_rel_to_pizza_quality_query(version_number):
+    def get_create_qualifier_rel_to_pizza_quality_query():
         query_str = '''
-                    MATCH (q:PizzaQualityAttribute:$version_number) <- [:HAS_PROPERTY] - (p:Pizza:$version_number) <- [:ACTS_ON] - (e:Event)
-                    MATCH (e) - [:EXECUTED_BY] -> (:Sensor:$version_number {type: "EXIT"}) 
-                        - [:PART_OF] -> (:Station:$version_number {sysId: "Oven"})
+                    MATCH (q:PizzaQualityAttribute) <- [:HAS_PROPERTY] - (p:Pizza) <- 
+                    [:ACTS_ON] - (e:Event)
+                    MATCH (e) - [:EXECUTED_BY] -> (:Sensor {type: "EXIT"}) 
+                        - [:PART_OF] -> (:Station {sysId: "Oven"})
                     CREATE (e) - [:CREATES] -> (q)
                 '''
 
-        return Query(query_str=query_str,
-                     template_string_parameters={
-                         "version_number": version_number
-                     })
+        return Query(query_str=query_str)
 
     @staticmethod
     def get_reset_used_prop_query(batch_size):
@@ -247,7 +391,7 @@ class CustomCypherQueryLibrary:
     def get_connect_sensors_queries():
         # language=sql
         query_str = '''
-            MATCH (s1:Sensor) <- [:EXECUTED_BY] - (e1:Event) - [df:DF_PIZZA|DF_PACK|DF_BOX|DF_PALLET] -> (e2:Event) - 
+            MATCH (s1:Sensor) <- [:EXECUTED_BY] - (e1:Event) - [df:DF_CONTROL_FLOW_ITEM] -> (e2:Event) - 
             [:EXECUTED_BY] -> (s2:Sensor) 
             WHERE s1 <> s2
             WITH DISTINCT s1, s2, df.entityType as movedEntity

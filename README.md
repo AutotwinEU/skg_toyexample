@@ -1,11 +1,11 @@
-# Using Graph Databases to Create Toy Example for Auto Twin
+# Using Graph Databases to Create Toy Example V3.6 for Auto Twin
 
 ## Installation
 ### PromG
 The library can be installed in Pyhton using pip
 `pip install promg==0.1.40`.
 
-Make sure to install version 0.1.40. 
+Ensure you have installed the correct version (version 0.1.40).
 
 The source code for PromG can be found [PromG Core Github repository](https://github.com/PromG-dev/promg-core).
 
@@ -28,25 +28,26 @@ Install [Neo4j](https://neo4j.com/download/):
 - the script expects the `Neo4j APOC library` to be installed as a plugin, see https://neo4j.com/labs/apoc/
 
 
-### Store the preprocessed data sets
+### Save the preprocessed data sets
 
-The preprocessed datasets (S1-S7.csv) should be stored in the following directory `/data/ToyExampleV2/` or `/data/ToyExampleV3/` respectively. 
+All the preprocessed datasets can be found at [NextCloud Data](https://autotwin.cloud68.co/f/44738).
+The complete folder `ToyExampleV3` should be put under `/data/`. 
+For example your file structure for `S1.csv` should be e.g. `/data/ToyExampleV3/S1.csv`.
 
-How to use
-----------
+### Schema
 
-For data import
+The schema can be found at [Nextcloud Schema v3.6](https://autotwin.cloud68.co/f/43488).
+
+The schema is described in the following files:
+- ToyExampleV3.json - a description of which Entities (Pizza, Sensors, Station, ...), need to be created:
+The main script uses this information to construct the EKG.
+- ToyExamplev3_DS.json - a description of the different data sets. It describes which labels the records should receive (e.g. :Event, :Location, :Activity) and what properties records have
+
+### How to use
 
 1. start the Neo4j server
-2. Set `local = True` and the version number (either 2 or 3) in `main.py`.
+2. Set `local = True` and the version number to 3 in `main.py` (line 29).
 1. run `main.py`
 
-## Data set & scripts
-The data set should be added by the user.
-
-#### Datasets
-- The data set should be added by the user.
-#### JSON files
-- ToyExample.json - a description of which Entities (Pizza, Sensors, Station), Classes need to be created:
-The main script uses this information to construct the EKG.
-- ToyExample_DS.json - a description of the different data sets. It describes which labels the records should receive (e.g. :Event, :Location, :Activity) and what properties records have
+## Getting Stuck??
+If you're getting stuck (or you have questions), feel free to reach out to me at a.j.e.swevels@tue.nl.

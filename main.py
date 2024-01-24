@@ -1,32 +1,27 @@
 import os
 from datetime import datetime
-import time
 from pathlib import Path
 import random
 
-import numpy as np
 from promg import SemanticHeader, OcedPg
 from promg import DatabaseConnection
 from promg import DatasetDescriptions
 from promg import Performance
 from promg import authentication
-from promg.database_managers.authentication import Credentials
 from promg.modules.db_management import DBManagement
-from promg.modules.process_discovery import ProcessDiscovery
+from custom_module.modules.process_model_discovery import ProcessDiscovery
 from promg.modules.exporter import Exporter
 
+from custom_module.modules.df_discovery import DFDiscoveryModule
 from custom_module.modules.pizza_line import PizzaLineModule
 from tts_credentials import remote
 
 # several steps of import, each can be switch on/off
 from colorama import Fore
 
-from process_discovery.discover_process_model import ProcessDiscoveryLog
 randint = random.randint(0, 9999)
 
-number = 3
-dataset_name = f'ToyExamplev{number}'
-version_number = f"V{number}"
+dataset_name = f'ToyExample'
 semantic_header_path = Path(f'json_files/{dataset_name}.json')
 config_path = Path(f'json_files/config.json')
 use_sample = False
@@ -44,7 +39,7 @@ step_analysis = True
 
 use_preprocessed_files = False  # if false, read/import files instead
 verbose = False
-use_local = False
+use_local = True
 
 
 def main() -> None:
@@ -53,7 +48,9 @@ def main() -> None:
     @return: None
     """
     _step_clear_db = step_clear_db
-    if not use_local:
+    if use_local:
+        credentials = authentication.connections_map[authentication.Connections.LOCAL]
+    else:
         number_str = str(randint).zfill(4)
         request_permission = input(
             f"You are going to make changes to the TTS instance. Is this your intention? Type {number_str} for Yes or "
@@ -68,8 +65,6 @@ def main() -> None:
         else:
             print("Invalid input")
             return
-    else:
-        credentials = authentication.connections_map[authentication.Connections.LOCAL]
 
     print("Started at =", datetime.now().strftime("%H:%M:%S"))
     if use_preprocessed_files:
@@ -92,40 +87,47 @@ def main() -> None:
         oced_pg = OcedPg(dataset_descriptions=datastructures,
                          use_sample=use_sample,
                          use_preprocessed_files=use_preprocessed_files)
-        pizza_module = PizzaLineModule()
 
         oced_pg.load()
         oced_pg.create_nodes_by_records()
-        if version_number == "V3":
-            pizza_module.merge_sensor_events(version_number=version_number)
-            pizza_module.connect_wip_sensor_to_assembly_line(version_number=version_number)
 
-        relations = [relation.type for relation in semantic_header.relations]
-        relations_to_be_constructed_later = ["PART_OF_PIZZA_PACK", "PART_OF_PACK_BOX", "PART_OF_BOX_PALLET"]
+        pizza_module = PizzaLineModule()
+        pizza_module.merge_sensor_events()
+        pizza_module.connect_wip_sensor_to_assembly_line()
 
-        oced_pg.create_relations(list(set(relations) - set(relations_to_be_constructed_later)))
+        oced_pg.create_relations()
 
-        oced_pg.create_df_edges()
-        pizza_module.complete_corr(version_number=version_number)
-        pizza_module.delete_df_edges(version_number=version_number)
+        df_discovery = DFDiscoveryModule()
+        df_edges_to_be_created = [
+            {"entity_type": "Pizza", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "Pack", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "Box", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "Pallet", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "Sensor", "df_label": "DF_SENSOR"},
+            {"entity_type": "Station", "df_label": "DF_STATION"},
+            {"entity_type": "Operator", "df_label": "DF_OPERATOR"}]
 
-        if version_number == "V3":
-            pizza_module.complete_quality(version_number=version_number)
-            pizza_module.connect_operators_to_station(version_number=version_number)
+        for df in df_edges_to_be_created:
+            df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"])
 
-        oced_pg.create_relations(relations_to_be_constructed_later)
+        for station_id in ["PackStation", "BoxStation", "PalletStation"]:
+            pizza_module.infer_part_of_relation(station_id=station_id)
 
-        oced_pg.create_df_edges()
+        df_edges_to_be_created = [
+            {"entity_type": "PizzaPack", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "PackBox", "df_label": "DF_CONTROL_FLOW_ITEM"},
+            {"entity_type": "BoxPallet", "df_label": "DF_CONTROL_FLOW_ITEM"}]
+
+        for df in df_edges_to_be_created:
+            df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"])
+
+        pizza_module.complete_quality()
+        pizza_module.connect_operators_to_station()
 
         process_discoverer = ProcessDiscovery()
+        process_discoverer.create_df_process_model(df_label="DF_CONTROL_FLOW_ITEM", df_a_label="DF_A_CONTROL_FLOW_ITEM")
 
-        process_discoverer.create_df_process_model(entity_type="Pizza")
-        process_discoverer.create_df_process_model(entity_type="Pack")
-        process_discoverer.create_df_process_model(entity_type="Box")
-        process_discoverer.create_df_process_model(entity_type="Pallet")
         pizza_module.connect_stations_and_sensors()
-
-        oced_pg.create_df_edges(entity_types=["Station"])
 
         exporter = Exporter()
         exporter.save_event_log(entity_type="Pizza")
