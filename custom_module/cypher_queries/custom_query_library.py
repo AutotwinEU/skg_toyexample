@@ -180,7 +180,7 @@ class CustomCypherQueryLibrary:
             MATCH (f:Event) - [:OCCURRED_AT] -> (:Station {sysId: '$stationId'})
             MATCH  (f) - [:ACTS_ON] -> (:Entity:$exit_entity_label) - [:IS_OF_TYPE] -> (
             et:EntityType) <- [:OUTPUT] - (composition:CompositionOperation)
-            MATCH (f) - [:EXECUTED_BY] -> (sensor:Sensor {type: "EXIT"})
+            MATCH (f) - [:EXECUTED_BY] -> (sensor:Sensor WHERE sensor.type STARTS WITH "EXIT")
             WHERE NOT EXISTS ((:Event) - [:DF_CONTROL_FLOW_ITEM] -> (f))
             SET f.tempNumRange =  range(f.tempNumberInRun*composition.inputQuantity, 
             (f.tempNumberInRun+1)*composition.inputQuantity-1)
