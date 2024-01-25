@@ -1,45 +1,39 @@
-import os
 from datetime import datetime
-from pathlib import Path
 import random
 
-from promg import SemanticHeader, OcedPg
-from promg import DatabaseConnection
-from promg import DatasetDescriptions
-from promg import Performance
-from promg import authentication
+from promg import SemanticHeader, OcedPg, DatabaseConnection, DatasetDescriptions, Performance, Configuration
 from promg.modules.db_management import DBManagement
-from custom_module.modules.process_model_discovery import ProcessDiscovery
 from promg.modules.exporter import Exporter
 
+from custom_module.modules.process_model_discovery import ProcessDiscovery
 from custom_module.modules.df_discovery import DFDiscoveryModule
 from custom_module.modules.pizza_line import PizzaLineModule
-from tts_credentials import remote
 
 # several steps of import, each can be switch on/off
 from colorama import Fore
 
-randint = random.randint(0, 9999)
+config = Configuration()
+semantic_header = SemanticHeader.create_semantic_header(config=config)
+dataset_descriptions = DatasetDescriptions(config=config)
 
-dataset_name = f'ToyExample'
-semantic_header_path = Path(f'json_files/{dataset_name}.json')
-config_path = Path(f'json_files/config.json')
-use_sample = False
-
-semantic_header = SemanticHeader.create_semantic_header(semantic_header_path)
-perf_path = os.path.join("..", "perf", dataset_name, f"{dataset_name}Performance.csv")
-number_of_steps = 100
-
-ds_path = Path(f'json_files/{dataset_name}_DS.json')
-datastructures = DatasetDescriptions(ds_path)
-
+# several steps of import, each can be switch on/off
 step_clear_db = True
 step_populate_graph = True
-step_analysis = True
 
-use_preprocessed_files = False  # if false, read/import files instead
-verbose = False
-use_local = True
+
+def check_remote_connection() -> bool:
+    number_str = str(random.randint(0, 9999)).zfill(4)
+    request_permission = input(
+        f"You are going to make changes to {config.uri}. Is this your intention? Type {number_str} for Yes or "
+        f"N [No]")
+    if request_permission.lower().strip() == number_str:
+        return True
+    elif request_permission.lower().strip() == "n" or request_permission.lower().strip() == "no":
+        print(f"As it is not your intention to make changes to {config.uri}, change use_local to True")
+        return False
+    else:
+        print(f"Invalid input")
+        return False
 
 
 def main() -> None:
@@ -47,46 +41,36 @@ def main() -> None:
     Main function, read all the logs, clear and create the graph, perform checks
     @return: None
     """
-    _step_clear_db = step_clear_db
-    if use_local:
-        credentials = authentication.connections_map[authentication.Connections.LOCAL]
-    else:
-        number_str = str(randint).zfill(4)
-        request_permission = input(
-            f"You are going to make changes to the TTS instance. Is this your intention? Type {number_str} for Yes or "
-            f"N [No]")
-        if request_permission.lower().strip() == number_str:
-            _step_clear_db = False
-            credentials = remote
-            pass
-        elif request_permission.lower().strip() == "n" or request_permission.lower().strip() == "no":
-            print("As it is not your intention to make changes to the TTS instance, change use_local to True")
-            return
-        else:
-            print("Invalid input")
-            return
-
     print("Started at =", datetime.now().strftime("%H:%M:%S"))
-    if use_preprocessed_files:
-        print(Fore.RED + '💾 Preloaded files are used!' + Fore.RESET)
+
+    if "bolt://localhost" not in config.uri:
+        use_remote_connection = check_remote_connection()
+        if not use_remote_connection:
+            return
     else:
-        print(Fore.RED + '📝 Importing and creating files' + Fore.RESET)
+        use_remote_connection = False
 
+    db_connection = DatabaseConnection.set_up_connection(config=config)
     # performance class to measure performance
-
-    performance = Performance.set_up_performance(dataset_name=dataset_name, use_sample=use_sample)
-    db_connection = DatabaseConnection.set_up_connection(credentials=credentials,
-                                                         verbose=verbose)
-
+    performance = Performance.set_up_performance(config=config)
     db_manager = DBManagement()
-    if _step_clear_db:
+
+    # only clear db if we are working with local connection
+    if step_clear_db and not use_remote_connection:
+        print(Fore.RED + 'Clearing the database.' + Fore.RESET)
         db_manager.clear_db(replace=True)
         db_manager.set_constraints()
 
     if step_populate_graph:
-        oced_pg = OcedPg(dataset_descriptions=datastructures,
-                         use_sample=use_sample,
-                         use_preprocessed_files=use_preprocessed_files)
+        if config.use_preprocessed_files:
+            print(Fore.RED + '💾 Preloaded files are used!' + Fore.RESET)
+        else:
+            print(Fore.RED + '📝 Importing and creating files' + Fore.RESET)
+
+        oced_pg = OcedPg(dataset_descriptions=dataset_descriptions,
+                         use_sample=config.use_sample,
+                         use_preprocessed_files=config.use_preprocessed_files,
+                         import_directory=config.import_directory)
 
         oced_pg.load()
         oced_pg.create_nodes_by_records()
@@ -131,11 +115,6 @@ def main() -> None:
 
         exporter = Exporter()
         exporter.save_event_log(entity_type="Pizza")
-
-        #
-        # event_log = graph.custom_module.read_log()
-        # process_model_graph = process_discovery.get_discovered_proces_model(event_log)
-        # graph.custom_module.write_attributes(graph=process_model_graph)
 
     performance.finish_and_save()
     db_manager.print_statistics()
