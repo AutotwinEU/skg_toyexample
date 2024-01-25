@@ -69,7 +69,8 @@ def main() -> None:
 
         oced_pg = OcedPg(dataset_descriptions=dataset_descriptions,
                          use_sample=config.use_sample,
-                         use_preprocessed_files=config.use_preprocessed_files)
+                         use_preprocessed_files=config.use_preprocessed_files,
+                         import_directory=config.import_directory)
 
         oced_pg.load()
         oced_pg.create_nodes_by_records()
