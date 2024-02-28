@@ -1,8 +1,12 @@
 from custom_module.modules.pizza_performance_ecdfs import *
+import os
+import numpy
 
 
 class Performance_website:
     def __init__(self, working_dir, ecdfcs, queues, flows, utils):
+        if not os.path.exists(working_dir):
+            os.makedirs(working_dir)
         self.__working_dir = working_dir
         self.__ecdfcs = ecdfcs
         self.__utils = utils
@@ -47,21 +51,95 @@ class Performance_website:
             f.write("<li><a href=\"#fCDF" + str(count) + "\">" + self.__flows[count].return_title() + "</a></li>\n")
 
     def print_performance_objects(self, f):
+        self.print_ecdfcs(f)
+        self.print_utils(f)
+        self.print_queues(f)
+        self.print_flows(f)
+
+    def print_ecdfcs(self,f):
         f.write("<h2>Ecdfcs</h2>\n")
         for count in range(0, len(self.__ecdfcs)):
             f.write("<h4>" + self.__ecdfcs[count].return_title() + "\n")
             f.write("<a id=\"eCDF" + str(count) + "\"></h4><img src=\"" + self.__working_dir + "/" + self.__ecdfcs[
                 count].return_title() + ".svg\"><a href=\"#top\">back to top<a><br>\n")
+            self.print_ecdfc_conformance(self.__ecdfcs[count],f)
+
+    def print_ecdfc_conformance(self,ecdfc:Ecdf_collection,f):
+        connection = DatabaseConnection()
+        size=len(ecdfc.return_ecdfs())
+        sim=np.zeros((size,size))
+        diff=np.zeros((size,size))
+        perf=np.zeros((size,size))
+        for index1 in range(size):
+            for index2 in range(size):
+                ecdf1=ecdfc.return_ecdfs()[index1]
+                ecdf2=ecdfc.return_ecdfs()[index2]
+                sim_diff_perf=connection.exec_query(pfql.similarity_difference_and_performance,
+                                      **{"ecdf_name1": ecdf1.legend(), "ecdf_name2": ecdf2.legend()})
+                if sim_diff_perf is None:
+                    return
+                sim[index1,index2]=sim_diff_perf[0]["sim"]
+                diff[index1,index2]=sim_diff_perf[0]["diff"]
+                perf[index1,index2]=sim_diff_perf[0]["perf"]
+        f.write("<br>Similarity:<br>")
+        self.print_metric_table(sim, ecdfc, f)
+        f.write("<br>Difference:<br>")
+        self.print_metric_table(diff, ecdfc, f)
+        f.write("<br>Performance:<br>")
+        self.print_metric_table(perf, ecdfc, f)
+        self.print_ecdfs_aggregated_data(ecdfc,f)
+
+    def print_metric_table(self,data,ecdfc,f):
+        size=len(ecdfc.return_ecdfs())
+        f.write("<table border=1><tr><td></td>")
+        for index in range(size):
+            f.write("<td><b>"+ecdfc.return_ecdfs()[index].legend()+"</b></td>")
+        for index1 in range(size):
+            f.write("</tr><tr><td><b>"+ecdfc.return_ecdfs()[index1].legend()+"</b></td>")
+            for index2 in range(size):
+                f.write("<td>"+str(round(data[index1][index2],2))+"</td>")
+            f.write("</tr")
+        f.write("</table>")
+
+    def print_ecdfs_aggregated_data(self,ecdfc,f):
+        connection = DatabaseConnection()
+        f.write("<br>Aggregated values:<br>")
+        f.write("<table border=1><tr><td><b>Design</b></td><td><b>Minimum</b></td><td><b>Maximum</b></td><td><b>Average</b></td><td><b>Median</b></td><td><b>Kolmogorov</b></td></tr>")
+        for ecdf in ecdfc.return_ecdfs():
+            min_max_average_median = connection.exec_query(pfql.get_ecdf_properties, **{"name": ecdf.legend()})
+            f.write("<tr><td><b>" + ecdf.legend()+ "</b></td>")
+            f.write("<td>" + str(round(min_max_average_median[0]["min"],2)) + "</td>")
+            f.write("<td>" + str(round(min_max_average_median[0]["max"],2)) + "</td>")
+            f.write("<td>" + str(round(min_max_average_median[0]["average"],2)) + "</td>")
+            f.write("<td>" + str(round(min_max_average_median[0]["median"],2)) + "</td>")
+            f.write("<td>TODO: kolmogorov</td></tr>")
+        f.write("</table>")
+
+    def print_utils(self,f):
         f.write("<h2>Utils</h2>\n")
         for count in range(0, len(self.__utils)):
             f.write("<h4>" + self.__utils[count].return_title() + "\n")
             f.write("<a id=\"uCDF" + str(count) + "\"></h4><img src=" + self.__working_dir + "/u" + str(
                 count) + ".svg><a href=\"#top\">back to top<a><br>\n")
+
+    def print_queues(self,f):
         f.write("<h2>Queues</h2>\n")
         for count in range(0, len(self.__queues)):
             f.write("<h4>" + self.__queues[count].return_title() + "\n")
             f.write("<a id=\"qCDF" + str(count) + "\"></h4><img src=" + self.__working_dir + "/q" + str(
                 count) + ".svg><a href=\"#top\">back to top<a><br>\n")
+            self.print_queues_aggregated_data(self.__queues[count].return_title(),f)
+
+    def print_queues_aggregated_data(self,queue_name,f):
+        connection = DatabaseConnection()
+        min_max_average = connection.exec_query(pfql.get_queue_properties, **{"name": queue_name })
+        f.write("<br>Aggregated values:<br>")
+        f.write("<table border=1><tr><td><b>Minimum</b></td><td><b>Maximum</b></td><td><b>Average</b></td></tr>")
+        f.write("<tr><td>" + str(round(min_max_average[0]["min"], 2)) + "</td>")
+        f.write("<td>" + str(round(min_max_average[0]["max"], 2)) + "</td>")
+        f.write("<td>" + str(round(min_max_average[0]["average"], 2)) + "</td></tr></table>")
+
+    def print_flows(self,f):
         f.write("<h2>Flows</h2>\n")
         for count in range(0, len(self.__flows)):
             f.write("<h4>" + self.__flows[count].return_title() + "\n")

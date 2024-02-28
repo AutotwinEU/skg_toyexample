@@ -5,7 +5,8 @@ from pathlib import Path
 import random
 
 import numpy as np
-from promg import SemanticHeader, OcedPg
+from promg import SemanticHeader
+from promg import OcedPg
 from promg import DatabaseConnection
 from promg import DatasetDescriptions
 from promg import Performance
@@ -42,7 +43,7 @@ step_clear_db = True
 step_populate_graph = True
 step_analysis = True
 
-perform_simulation = False      # perform a fresh simulation before generating the SKG?
+perform_simulation = True       # perform a fresh simulation before generating the SKG?
 performance_analysis = True     # add performance analysis to the SKG?
 
 use_preprocessed_files = False  # if false, read/import files instead
@@ -53,7 +54,7 @@ use_local = True
 def main(db_name,
          semantic_header_p, ds_p,
          html_output_dir,
-         simulator_dir, config_filename, data_dir, production_plan_and_stations_dir, headers_dir) -> None:
+         simulator_dir, config_filename, data_dir, production_plan_and_stations_dir) -> None:
     """
     Main function, read all the logs, clear and create the graph, perform checks
     @return: None
@@ -89,11 +90,10 @@ def main(db_name,
     # performance class to measure performance
 
     performance = Performance.set_up_performance(dataset_name=dataset_name, use_sample=use_sample)
-    db_connection = DatabaseConnection.set_up_connection(credentials=credentials,
-                                                         verbose=verbose,db_name=db_name)
+    db_connection = DatabaseConnection.set_up_connection(credentials=credentials,verbose=verbose,db_name=db_name)
 
     if perform_simulation:
-        create_simulated_data(simulator_dir,config_filename,data_dir,production_plan_and_stations_dir,headers_dir)
+        create_simulated_data(simulator_dir,config_filename,data_dir,production_plan_and_stations_dir)
 
     db_manager = DBManagement()
     if _step_clear_db:
@@ -162,14 +162,14 @@ if __name__ == "__main__":
     # only needs to be set when simulation is enabled (otherwise neglected)
     simulator_dir = "Q:/PizzaLineComplete_V3.7_2023_11_17" # the TTS simulator directory
     config_filename = "runargsnogui.ini" # assumed to be located in the simulator dir
-    data_dir = "R:/git/data/ToyExampleV3" # the target directory of the simulation results and starting point of building the SKG
+    data_dir = "R:/git2/data/ToyExampleV3" # the target directory of the simulation results and starting point of building the SKG
     production_plan_and_stations_dir = "R:/git/data/ToyExampleV3.ava" # a directory with production_plan.csv and stations.csv
-    headers_dir = "R:/git/data/ToyExampleV3.ava" # a processed data directory to "steal" the headers from
+    headers_dir = "R:/git2/data/ToyExampleV3.ava" # a processed data directory to "steal" the headers from
 
     # only needs to be set when performance analysis is enabled (otherwise neglected)
     html_output_dir="d:/temp2" # a website with performance results will be written to this path
 
-    db_name="freek2"
+    db_name="freek667"
 
     main(db_name, semantic_header_path, ds_path, html_output_dir, simulator_dir, config_filename, data_dir,
-         production_plan_and_stations_dir, headers_dir)
+         production_plan_and_stations_dir)

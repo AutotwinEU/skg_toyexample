@@ -5,8 +5,29 @@ class Plot:
     def __init__(self,xs,ys,title,sensors):
         self.__xs=xs
         self.__ys=ys
+        if len(xs)==0:
+            self.__xs.append(0)
+            self.__ys.append(0)
         self.__title=title
         self.__sensors=sensors
+
+    def get_max(self):
+        return max(self.__ys)
+
+    def get_min(self):
+        return min(self.__ys)
+
+    def get_average(self):
+        area=0
+        previous_x=0
+        for index in range(len(self.__xs)):
+            new_x=self.__xs[index]
+            area+=(new_x-previous_x)*self.__ys[index]
+            previous_x=new_x
+        if previous_x>0:
+            return area/previous_x
+        else:
+            return 0
 
     # check if all the values of the plot are positive. if not the plot will be discarded later
     def all_positive_values(self):

@@ -1,3 +1,4 @@
+from custom_module.modules.pizza_performance_add_metrics import add_metrics
 from custom_module.modules.store_in_db import *
 from custom_module.modules.pizza_performance_flows import *
 from custom_module.modules.pizza_performance_create_website import *
@@ -17,8 +18,6 @@ class PizzaPerformanceModule:
     def __add_ecdfcs_to_skg(self):
         for ecdfc in PizzaPerformanceModuleEcdfs().return_ecdfcs():
             id1 = Store_in_db("", ecdfc.return_title(), "Latency").store()
-            self.connection.exec_query(pfql.connect_performance_artifact_to_its_main,
-                                       **{"kind": "Latency", "id1": id1[0]["id"]})
             for ecdf in ecdfc.return_ecdfs():
                 id2 = Store_in_db(ecdf, ecdf.legend(), "LatencyECDF").store()
                 self.connection.exec_query(pfql.connect_performance_artifacts,
@@ -30,8 +29,6 @@ class PizzaPerformanceModule:
     def __add_queues_to_skg(self):
         for queueplot in PizzaPerformanceModuleEcdfs().return_queue_plots():
             id1 = Store_in_db(queueplot, queueplot.return_title(), "Queue").store()
-            self.connection.exec_query(pfql.connect_performance_artifact_to_its_main,
-                                       **{"kind": "Queue", "id1": id1[0]["id"]})
             for sensor in queueplot.return_sensors():
                 self.connection.exec_query(pfql.connect_performance_artifact_to_sensor,
                                            **{"id1": id1[0]["id"], "sensor": sensor})
@@ -40,8 +37,6 @@ class PizzaPerformanceModule:
         counter = 0
         for flow in PizzaPerformanceModuleFlows(self.__working_dir).return_flows():
             id1 = Store_in_db(flow, flow.return_title(), "Flow").store()
-            self.connection.exec_query(pfql.connect_performance_artifact_to_its_main,
-                                       **{"kind": "Flow", "id1": id1[0]["id"]})
             counter += 1
             for sensor in flow.return_sensors():
                 self.connection.exec_query(pfql.connect_performance_artifact_to_sensor,
@@ -68,18 +63,38 @@ class PizzaPerformanceModule:
         return []
 
     def add_performance_to_skg(self):
-        print("add_performance_to_skg")
+        print("start add_performance_to_skg")
         self.__delete_all_performance_nodes()
         self.__add_main_performance_nodes()
         self.__add_ecdfcs_to_skg()
         self.__add_queues_to_skg()
         self.__add_flows_to_skg()
         self.__add_utils_to_skg()
+        add_metrics(None)
+        self.connection.exec_query(pfql.connect_main_performance_nodes_to_children)
+        print("finish add_performance_to_skg")
 
     def retrieve_performance_from_skg(self):
-        print("retrieve_performance_from_skg")
+        print("start retrieve_performance_from_skg")
         ecdfcs = self.__retrieve_ecdfcs_from_skg()
         queues = self.__retrieve_queues_from_skg()
         flows = self.__retrieve_flows_from_skg()
         utils = self.__retrieve_utils_from_skg()
         Performance_website(self.__working_dir, ecdfcs, queues, flows, utils).create()
+        print("finish retrieve_performance_from_skg")
+
+    def retrieve_performance_from_skg_aggregated(self, db_names):
+        ecdfcs = self.__retrieve_ecdfcs_from_skg()
+        ecdfcs = self.transform_legends_of_ecdfs_of_ecdfcs(ecdfcs, db_names)
+        flows = self.__retrieve_flows_from_skg()
+        Performance_website(self.__working_dir, ecdfcs, [], flows, []).create()
+
+    @staticmethod
+    def transform_legends_of_ecdfs_of_ecdfcs(ecdfcs,db_names):
+        for ecdfc in ecdfcs:
+            Legend_counter=0
+            for ecdf in ecdfc.return_ecdfs():
+                if Legend_counter<len(db_names):
+                    ecdf.set_legend(ecdf.legend()+" ("+db_names[Legend_counter]["name"]+")")
+                Legend_counter+=1
+        return ecdfcs

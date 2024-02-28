@@ -109,6 +109,15 @@ class PerformanceQueryLibrary:
                      template_string_parameters={"id1": id1, "id2": id2}
                      )
 
+    @staticmethod
+    def connect_performance_artifacts_by_name(name1, name2):
+        query_str = '''MATCH(n1) MATCH(n2)
+                    WHERE n1.name = "$name1" AND n2.name = "$name2"
+                    CREATE(n1) - [: HAS_PERFORMANCE]->(n2)'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"name1": name1, "name2": name2}
+                     )
+
     # connects a performance artifact to its main artifact
     @staticmethod
     def connect_performance_artifact_to_its_main(id1, kind):
@@ -151,3 +160,132 @@ class PerformanceQueryLibrary:
         return Query(query_str=query_str,
                      template_string_parameters={"name": name}
                      )
+
+    # returns all ecdfs and value of a database
+    @staticmethod
+    def return_all_ecdfs_and_values_of_a_db():
+        query_str = '''match (p:Performance:LatencyECDF) 
+                       match (parent:Latency)-[:HAS_PERFORMANCE]->(p)
+                       return p.name, p.val, COLLECT(parent.name)[0] as parent'''
+        return Query(query_str=query_str)
+
+    # returns all ecdfcs and values of a database
+    @staticmethod
+    def return_all_ecdfcs_and_values_of_a_db():
+        query_str = '''match (p:Performance:Latency) return p.name, p.val'''
+        return Query(query_str=query_str)
+
+    # returns all flows and values of a database
+    @staticmethod
+    def return_all_flows_and_values_of_a_db():
+        query_str = '''match (p:Performance:Flow) return p.name, p.val'''
+        return Query(query_str=query_str)
+
+    # creates a LatencyECDF with name and value
+    @staticmethod
+    def create_latencyecdf_with_name_and_value_and_dbname(name, value, db_name):
+        query_str = '''create (p:Performance:LatencyECDF{name:"$name",val:"$value",dbname:"$dbname"})'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"name": name,"value": value, "dbname": db_name}
+                    )
+
+    @staticmethod
+    def create_latency_with_name_and_value(name,value):
+        query_str = '''create (p:Performance:Latency{name:"$name",val:"$value"})'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"name": name,"value": value}
+                    )
+
+    @staticmethod
+    def create_flow_with_name_and_value(name,value):
+        query_str = '''create (p:Performance:Flow{name:"$name",val:"$value"})'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"name": name,"value": value}
+                    )
+
+    # connects all the performance nodes to the corresponding parent
+    @staticmethod
+    def connect_main_performance_nodes_to_children():
+        query_str = '''match (ml:MainLatency:Performance) match (l:Latency:Performance)
+                create (ml)-[:HAS_PERFORMANCE]->(l)
+                with count(*) as c_ml
+                match (mq:MainQueue:Performance) match (q:Queue:Performance)
+                create (mq)-[:HAS_PERFORMANCE]->(q)
+                with count(*) as c_mq
+                match (mf:MainFlow:Performance) match (f:Flow:Performance)
+                create (mf)-[:HAS_PERFORMANCE]->(f)
+                with count(*) as c_mf
+                match (mu:MainUtilization:Performance) match (u:Utilization:Performance)
+                create (mu)-[:HAS_PERFORMANCE]->(u)'''
+        return Query(query_str)
+
+    # provides a similarity and difference value between two ECDFs for conformance
+    @staticmethod
+    def diffence_and_similarity_between_ecdfs(ecdf_name1, ecdf_name2,difference,similarity,performance,kolmogorov):
+        query_str = '''match(e1: Performance:LatencyECDF{name: "$ecdf_name1"})
+                       match(e2: Performance:LatencyECDF{name: "$ecdf_name2"})
+                       merge(e1) - [: CONFORMANCE {difference: "$difference", similarity: "$similarity", performance: "$performance", kolmogorov: "$kolmogorov"}]->(e2)'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"ecdf_name1": ecdf_name1, "ecdf_name2": ecdf_name2,
+                                "difference": difference, "similarity": similarity, "performance": performance, "kolmogorov": kolmogorov} )
+
+    @staticmethod
+    def similarity_difference_and_performance(ecdf_name1, ecdf_name2):
+        query_str = '''match (e1:Performance:LatencyECDF{name:"$ecdf_name1"})
+                       match (e2:Performance:LatencyECDF{name:"$ecdf_name2"})
+                       match (e1)-[c:CONFORMANCE]->(e2)
+                       return c.similarity as sim, c.difference as diff, c.performance as perf'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"ecdf_name1": ecdf_name1, "ecdf_name2": ecdf_name2} )
+
+    @staticmethod
+    def set_queue_properties(name,min,max,average):
+        query_str = '''MATCH(p: Queue{name: "$name"})
+                       SET p.max = $max
+                       SET p.min = $min
+                       SET p.average = $average
+                       RETURN p'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"name": name, "min": min, "max": max, "average": average} )
+
+    @staticmethod
+    def set_ecdf_properties(name,min,max,average,median):
+        query_str = '''MATCH(p: LatencyECDF{name: "$name"})
+                       SET p.max = $max
+                       SET p.min = $min
+                       SET p.average = $average
+                       SET p.median = $median
+                       RETURN p'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"name": name, "min": min, "max": max, "average": average, "median": median} )
+
+    @staticmethod
+    def get_queue_properties(name):
+        query_str = '''MATCH (p:Queue{name:"$name"}) 
+                              RETURN p.max as max, p.min as min, p.average as average'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"name": name } )
+
+    @staticmethod
+    def get_ecdf_properties(name):
+        query_str = '''MATCH (p:LatencyECDF{name:"$name"}) 
+                       RETURN p.max as max, p.min as min, p.average as average, p.median as median, p.kolmogorov as kolmogorov'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"name": name } )
+
+    @staticmethod
+    def get_overall_performance_query():
+        query_str = '''MATCH (p:Performance:LatencyECDF{name:"Execution time between S1 S15"}) RETURN p.average as average'''
+        return Query(query_str=query_str)
+
+    @staticmethod
+    def get_similarity_of_designs(goal_design):
+        query_str =  '''MATCH (p1:LatencyECDF)
+                        MATCH (p2:LatencyECDF)
+                        MATCH (p1)-[c:CONFORMANCE]->(p2)
+                        WHERE p1.dbname<>p2.dbname
+                        AND p2.dbname="$goal_design"
+                        RETURN p1.dbname as p1db,min(c.similarity) as minsim
+                        ORDER BY minsim DESC'''
+        return Query(query_str=query_str,
+                     template_string_parameters={"goal_design": goal_design})

@@ -5,16 +5,20 @@ from pathlib import Path
 import random
 
 import numpy as np
-from promg import SemanticHeader, OcedPg
+from promg import SemanticHeader
+from promg import OcedPg
 from promg import DatabaseConnection
 from promg import DatasetDescriptions
 from promg import Performance
 from promg import authentication
-from promg.database_managers.authentication import Credentials
 from promg.modules.db_management import DBManagement
 from promg.modules.process_discovery import ProcessDiscovery
 from promg.modules.exporter import Exporter
 
+from custom_module.cypher_queries.db_management_queries import DBManagementQueries as dbmq
+
+from custom_module.modules.pizza_design_space_exploration import d_instance_to_database_name, d_instance_to_filename, \
+    simulator_config
 from custom_module.modules.pizza_simulation import create_simulated_data
 from custom_module.modules.pizza_line import PizzaLineModule
 from custom_module.modules.pizza_performance import PizzaPerformanceModule
@@ -24,35 +28,61 @@ from tts_credentials import remote
 from colorama import Fore
 
 from process_discovery.discover_process_model import ProcessDiscoveryLog
-def evaluate_one_scenario(db_name,
-         semantic_header_p, ds_p,
-         html_output_dir,
-         simulator_dir, config_filename, data_dir, production_plan_and_stations_dir, headers_dir) -> None:
+
+def create_ini_simulation_file_per_d_instance(d_instance, d_instances_dir):
+    # write pizza config
+    filename = d_instance_to_filename(d_instance)
+    ini_file = d_instances_dir + "/" + filename + ".ini"
+    f = open(ini_file, "w")
+    f.write(simulator_config(d_instance))
+    f.close()
+    return ini_file
+
+def create_db(db_name):
+    credentials = authentication.connections_map[authentication.Connections.LOCAL]
+    db_connection = DatabaseConnection.set_up_connection(credentials=credentials, verbose=False)
+    db_connection.exec_query(dbmq.create_db, **{"dbname": db_name})
+
+
+def evaluate_one_instance(d_instance, html_output_dir, simulator_dir, d_instances_dir, data_dir, Headers_dir, json_dir) -> None:
     """
     Main function, read all the logs, clear and create the graph, perform checks
     @return: None
     """
+
+    db_name = d_instance_to_database_name(d_instance)
+    di_file_name = d_instance_to_filename(d_instance)
+    config_filename = create_ini_simulation_file_per_d_instance(d_instance, d_instances_dir)
+    print("Design instance: " + di_file_name)
+    create_db(db_name)
+
     randint = random.randint(0, 9999)
 
-    config_path = Path(f'json_files/config.json')
+    number = 3
+    dataset_name = f'ToyExamplev{number}'
+    version_number = f"V{number}"
+    semantic_header_path = Path(f'{json_dir}/{dataset_name}.json')
+    config_path = Path(f'{json_dir}/config.json')
     use_sample = False
 
-    perf_path = os.path.join("..", "perf", "ToyExamplev3", f"ToyExamplev3Performance.csv")
+    perf_path = os.path.join("..", "perf", dataset_name, f"{dataset_name}Performance.csv")
     number_of_steps = 100
 
-    step_clear_db = False
+    ds_path = Path(f'{json_dir}/{dataset_name}_DS.json')
+
+    step_clear_db = True
     step_populate_graph = True
     step_analysis = True
 
-    perform_simulation = False   # perform a fresh simulation before generating the SKG?
-    performance_analysis = True  # add performance analysis to the SKG?
+    step_perform_simulation = True  # perform a fresh simulation before generating the SKG?
+    step_performance_analysis = True  # add performance analysis to the SKG?
 
     use_preprocessed_files = False  # if false, read/import files instead
     verbose = False
     use_local = True
 
-    semantic_header = SemanticHeader.create_semantic_header(semantic_header_p)
-    datastructures = DatasetDescriptions(ds_p)
+    semantic_header = SemanticHeader.create_semantic_header(semantic_header_path)
+    datastructures = DatasetDescriptions(ds_path)
 
     _step_clear_db = step_clear_db
     if not use_local:
@@ -81,12 +111,12 @@ def evaluate_one_scenario(db_name,
 
     # performance class to measure performance
 
-    performance = Performance.set_up_performance(dataset_name="ToyExamplev3", use_sample=use_sample)
-    db_connection = DatabaseConnection.set_up_connection(credentials=credentials,
-                                                         verbose=verbose,db_name=db_name)
+    performance = Performance.set_up_performance(dataset_name=dataset_name, use_sample=use_sample)
+    db_connection = DatabaseConnection.set_up_connection(credentials=credentials,verbose=verbose,db_name=db_name)
+    db_connection.change_db(db_name)
 
-    if perform_simulation:
-        create_simulated_data(simulator_dir,config_filename,data_dir,production_plan_and_stations_dir,headers_dir)
+    if step_perform_simulation:
+        create_simulated_data(simulator_dir,config_filename,data_dir,Headers_dir)
 
     db_manager = DBManagement()
     if _step_clear_db:
@@ -99,11 +129,12 @@ def evaluate_one_scenario(db_name,
                          use_preprocessed_files=use_preprocessed_files)
         pizza_module = PizzaLineModule()
 
+        os.chdir("R:/git2/")
         oced_pg.load()
         oced_pg.create_nodes_by_records()
-
-        pizza_module.merge_sensor_events(version_number="V3")
-        pizza_module.connect_wip_sensor_to_assembly_line(version_number="V3")
+        if version_number == "V3":
+            pizza_module.merge_sensor_events(version_number=version_number)
+            pizza_module.connect_wip_sensor_to_assembly_line(version_number=version_number)
 
         relations = [relation.type for relation in semantic_header.relations]
         relations_to_be_constructed_later = ["PART_OF_PIZZA_PACK", "PART_OF_PACK_BOX", "PART_OF_BOX_PALLET"]
@@ -111,11 +142,12 @@ def evaluate_one_scenario(db_name,
         oced_pg.create_relations(list(set(relations) - set(relations_to_be_constructed_later)))
 
         oced_pg.create_df_edges()
-        pizza_module.complete_corr(version_number="V3")
-        pizza_module.delete_df_edges(version_number="V3")
+        pizza_module.complete_corr(version_number=version_number)
+        pizza_module.delete_df_edges(version_number=version_number)
 
-        pizza_module.complete_quality(version_number="V3")
-        pizza_module.connect_operators_to_station(version_number="V3")
+        if version_number == "V3":
+            pizza_module.complete_quality(version_number=version_number)
+            pizza_module.connect_operators_to_station(version_number=version_number)
 
         oced_pg.create_relations(relations_to_be_constructed_later)
 
@@ -139,8 +171,8 @@ def evaluate_one_scenario(db_name,
         # process_model_graph = process_discovery.get_discovered_proces_model(event_log)
         # graph.custom_module.write_attributes(graph=process_model_graph)
 
-    if performance_analysis:
-        perf_module = PizzaPerformanceModule(html_output_dir)
+    if step_performance_analysis:
+        perf_module = PizzaPerformanceModule(html_output_dir+"/"+di_file_name)
         perf_module.add_performance_to_skg()
         perf_module.retrieve_performance_from_skg()
 
@@ -149,21 +181,20 @@ def evaluate_one_scenario(db_name,
 
     db_connection.close_connection()
 
+'''
+if __name__ == "__main__":
+    # only needs to be set when simulation is enabled (otherwise neglected)
+    simulator_dir = "Q:/PizzaLineComplete_V3.7_2023_11_17" # the TTS simulator directory
+    config_filename = "runargsnogui.ini" # assumed to be located in the simulator dir
+    data_dir = "R:/git2/data/ToyExampleV3" # the target directory of the simulation results and starting point of building the SKG
+    Headers_dir = "R:/git2/data/ToyExampleV3.ava" # a directory with production_plan.csv and stations.csv, and headers
 
-# only needs to be set when simulation is enabled (otherwise neglected)
-simulator_dir = "Q:/PizzaLineComplete_V3.7_2023_11_17" # the TTS simulator directory
-config_filename = "runargsnogui.ini" # assumed to be located in the simulator dir
-data_dir = "R:/git/data/ToyExampleV3" # the target directory of the simulation results and starting point of building the SKG
-production_plan_and_stations_dir = "R:/git/data/ToyExampleV3.ava" # a directory with production_plan.csv and stations.csv
-headers_dir = "R:/git/data/ToyExampleV3.ava" # a processed data directory to "steal" the headers from
+    # only needs to be set when performance analysis is enabled (otherwise neglected)
+    html_output_dir="d:/temp2" # a website with performance results will be written to this path
 
-# only needs to be set when performance analysis is enabled (otherwise neglected)
-html_output_dir="d:/temp2" # a website with performance results will be written to this path
+    db_name = "freek678"
+    db_name2 = "freek679"
 
-db_name="freek2"
-
-semantic_header_path = Path(f'R:/git/json_files/ToyExamplev3.json')
-ds_path = Path(f'R:/git/json_files/ToyExamplev3_DS.json')
-
-#evaluate_one_scenario(db_name, semantic_header_path, ds_path, html_output_dir, simulator_dir, config_filename, data_dir,
-#     production_plan_and_stations_dir, headers_dir)
+    evaluate_one_instance(db_name, html_output_dir, simulator_dir, config_filename, data_dir, Headers_dir)
+    evaluate_one_instance(db_name2, html_output_dir, simulator_dir, config_filename, data_dir, Headers_dir)
+'''

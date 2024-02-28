@@ -58,7 +58,7 @@ class PizzaPerformanceModuleFlows:
 
         return dictnodes
 
-    def frequency_graph(self) -> str:
+    def frequency_graph(self) -> Graph:
         dictnodes=self.return_dictnodes()
         dictedges=self.return_dictedges()
         sensors=[]
@@ -75,7 +75,7 @@ class PizzaPerformanceModuleFlows:
         ret+=("}")
         return Graph(ret,"flow frequency", sensors)
 
-    def ecdf_flow_graph(self,working_dir) -> str:
+    def ecdf_flow_graph(self,working_dir) -> Graph:
         dictnodes=self.return_dictnodes()
         dictedges=self.return_dictedges()
         sensors=[]
