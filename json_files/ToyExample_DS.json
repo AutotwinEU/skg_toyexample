@@ -19,6 +19,7 @@
       "SensorRecord",
       "EntityTypeRecord"
     ],
+    "add_log": true,
     "seperator": ";",
     "attributes": [
       {
@@ -76,6 +77,7 @@
       "PizzaQualityAttributeRecord",
       "EntityTypeRecord"
     ],
+    "add_log": true,
     "seperator": ";",
     "attributes": [
       {
@@ -145,6 +147,7 @@
       "SensorRecord",
       "EntityTypeRecord"
     ],
+    "add_log": true,
     "seperator": ";",
     "attributes": [
       {
@@ -203,6 +206,7 @@
       "SensorRecord",
       "EntityTypeRecord"
     ],
+    "add_log": true,
     "seperator": ";",
     "attributes": [
       {
@@ -264,6 +268,7 @@
       "SensorRecord",
       "EntityTypeRecord"
     ],
+    "add_log": true,
     "seperator": ";",
     "attributes": [
       {
@@ -319,6 +324,7 @@
       "StationRecord",
       "AssemblyLineRecord"
     ],
+    "add_log": true,
     "attributes": [
       {
         "name": "sensorId",
@@ -382,6 +388,7 @@
       "CompositionRecord",
       "StationRecord"
     ],
+    "add_log": true,
     "attributes": [
       {
         "name": "code",
@@ -497,6 +504,7 @@
       "OperatorRecord",
       "OperatorEventRecord"
     ],
+    "add_log": true,
     "seperator": ";",
     "attributes": [
       {
@@ -544,6 +552,7 @@
       "StatusEventRecord",
       "LockStatusRecord"
     ],
+    "add_log": true,
     "seperator": ";",
     "attributes": [
       {
@@ -590,6 +599,7 @@
       "WIPEventRecord",
       "SensorRecord"
     ],
+    "add_log": true,
     "seperator": ";",
     "attributes": [
       {
