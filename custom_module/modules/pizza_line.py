@@ -6,8 +6,8 @@ from custom_module.cypher_queries.custom_query_library import CustomCypherQueryL
 
 
 class PizzaLineModule:
-    def __init__(self):
-        self.connection = DatabaseConnection()
+    def __init__(self, database_connection):
+        self.connection = database_connection
 
     @Performance.track('entity_type')
     def create_station_aggregation(self, entity_type):

@@ -12,10 +12,6 @@ from custom_module.modules.pizza_line import PizzaLineModule
 # several steps of import, each can be switch on/off
 from colorama import Fore
 
-config = Configuration()
-semantic_header = SemanticHeader.create_semantic_header(config=config)
-dataset_descriptions = DatasetDescriptions(config=config)
-
 # several steps of import, each can be switch on/off
 step_clear_db = True
 step_populate_graph = True
@@ -50,10 +46,14 @@ def main() -> None:
     else:
         use_remote_connection = False
 
+    config = Configuration.init_conf_with_config_file()
     db_connection = DatabaseConnection.set_up_connection(config=config)
+
     # performance class to measure performance
     performance = Performance.set_up_performance(config=config)
-    db_manager = DBManagement()
+    dataset_descriptions = DatasetDescriptions(config=config)
+    semantic_header = SemanticHeader.create_semantic_header(config=config)
+    db_manager = DBManagement(db_connection)
 
     # only clear db if we are working with local connection
     if step_clear_db and not use_remote_connection:
@@ -70,18 +70,20 @@ def main() -> None:
         oced_pg = OcedPg(dataset_descriptions=dataset_descriptions,
                          use_sample=config.use_sample,
                          use_preprocessed_files=config.use_preprocessed_files,
-                         import_directory=config.import_directory)
+                         import_directory=config.import_directory,
+                         database_connection=db_connection,
+                         semantic_header=semantic_header)
 
         oced_pg.load()
         oced_pg.create_nodes_by_records()
 
-        pizza_module = PizzaLineModule()
+        pizza_module = PizzaLineModule(database_connection=db_connection)
         pizza_module.merge_sensor_events()
         pizza_module.connect_wip_sensor_to_assembly_line()
 
         oced_pg.create_relations()
 
-        df_discovery = DFDiscoveryModule()
+        df_discovery = DFDiscoveryModule(db_connection)
         df_edges_to_be_created = [
             {"entity_type": "Pizza", "df_label": "DF_CONTROL_FLOW_ITEM"},
             {"entity_type": "Pack", "df_label": "DF_CONTROL_FLOW_ITEM"},
@@ -108,13 +110,13 @@ def main() -> None:
         pizza_module.complete_quality()
         pizza_module.connect_operators_to_station()
 
-        process_discoverer = ProcessDiscovery()
+        process_discoverer = ProcessDiscovery(db_connection)
         process_discoverer.create_df_process_model(df_label="DF_CONTROL_FLOW_ITEM", df_a_label="DF_A_CONTROL_FLOW_ITEM")
 
         pizza_module.connect_stations_and_sensors()
 
-        exporter = Exporter()
-        exporter.save_event_log(entity_type="Pizza")
+        # exporter = Exporter(db_connection)
+        # exporter.save_event_log(entity_type="Pizza")
 
     performance.finish_and_save()
     db_manager.print_statistics()
