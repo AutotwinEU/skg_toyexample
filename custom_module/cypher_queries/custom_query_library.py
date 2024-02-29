@@ -263,25 +263,14 @@ class CustomCypherQueryLibrary:
     def get_delete_temp_properties_query(station_id):
         query_str = '''
                     MATCH (e:Event) - [:OCCURRED_AT] -> (packingStation {sysId:'$stationId'})
-                    REMOVE e.tempPPChanged, e.tempPartOf, e.tempNumberInRun, e.tempNumRange, e:StartNode, e:TerminatorNode
+                    REMOVE e.tempPPChanged, e.tempPartOf, e.tempNumberInRun, e.tempNumRange, e:StartNode, 
+                    e:TerminatorNode
                 '''
 
         return Query(query_str=query_str,
                      template_string_parameters={
                          "stationId": station_id
                      })
-
-    @staticmethod
-    def get_merge_sensor_events_query():
-        query_str = '''
-            MATCH (e:SensorStatusEvent)
-            WITH e.timestamp as timestamp, e.activity as activity, collect(e) as batchedEvents
-            CALL apoc.refactor.mergeNodes(batchedEvents, {properties:"combine", mergeRels: true})
-            YIELD node
-            return count(*)
-        '''
-
-        return Query(query_str=query_str)
 
     @staticmethod
     def get_connect_wip_sensor_to_assembly_line_query():

@@ -39,6 +39,8 @@ def main() -> None:
     """
     print("Started at =", datetime.now().strftime("%H:%M:%S"))
 
+    config = Configuration.init_conf_with_config_file()
+
     if "bolt://localhost" not in config.uri:
         use_remote_connection = check_remote_connection()
         if not use_remote_connection:
@@ -46,7 +48,6 @@ def main() -> None:
     else:
         use_remote_connection = False
 
-    config = Configuration.init_conf_with_config_file()
     db_connection = DatabaseConnection.set_up_connection(config=config)
 
     # performance class to measure performance
@@ -78,9 +79,6 @@ def main() -> None:
         oced_pg.create_nodes_by_records()
 
         pizza_module = PizzaLineModule(database_connection=db_connection)
-        pizza_module.merge_sensor_events()
-        pizza_module.connect_wip_sensor_to_assembly_line()
-
         oced_pg.create_relations()
 
         df_discovery = DFDiscoveryModule(db_connection)

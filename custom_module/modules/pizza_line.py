@@ -83,10 +83,6 @@ class PizzaLineModule:
                                    })
 
     @Performance.track()
-    def merge_sensor_events(self):
-        self.connection.exec_query(ccql.get_merge_sensor_events_query)
-
-    @Performance.track()
     def connect_wip_sensor_to_assembly_line(self):
         self.connection.exec_query(ccql.get_connect_wip_sensor_to_assembly_line_query)
 
