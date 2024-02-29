@@ -5,8 +5,8 @@ from custom_module.cypher_queries.process_model_discovery_query_library import A
 
 
 class ProcessDiscovery:
-    def __init__(self):
-        self.connection = DatabaseConnection()
+    def __init__(self, database_connection):
+        self.connection = database_connection
 
     def create_df_process_model(self, df_label, df_a_label):
         """

@@ -10,8 +10,8 @@ from custom_module.cypher_queries.df_discovery_query_library import DFDiscoveryQ
 
 
 class DFDiscoveryModule:
-    def __init__(self):
-        self.connection = DatabaseConnection()
+    def __init__(self, database_connection):
+        self.connection = database_connection
 
     @Performance.track("entity_type")
     def create_df_edges_for_entity(self, entity_type: str, df_label: str, include_sys_id: bool = False,
