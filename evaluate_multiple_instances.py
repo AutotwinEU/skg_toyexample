@@ -84,7 +84,7 @@ def conformance_checking(d_instance_begin, d_instance_goal, d_space_all, d_space
 # design_space_exploration(starting_design_space()[0], design_space_all())
 
 # evaluate four designs
-brute_force_evaluation(design_space_small_to_test())
+# brute_force_evaluation(design_space_small_to_test())
 
 # conformance checking
-# conformance_checking(starting_design_space()[0], random_instance(design_space_all()), design_space_all())
+conformance_checking(starting_design_space()[0], random_instance(design_space_all()), design_space_all())

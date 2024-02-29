@@ -3,6 +3,10 @@ import os
 import numpy
 
 
+def d_instancedbname_to_printable_d_instance(d_instancedbname):
+    return d_instancedbname.replace("yyy",".").replace("xx"," ")
+
+
 class Performance_website:
     def __init__(self, working_dir, ecdfcs, queues, flows, utils):
         if not os.path.exists(working_dir):
@@ -70,6 +74,7 @@ class Performance_website:
         sim=np.zeros((size,size))
         diff=np.zeros((size,size))
         perf=np.zeros((size,size))
+        kolm=np.zeros((size, size))
         for index1 in range(size):
             for index2 in range(size):
                 ecdf1=ecdfc.return_ecdfs()[index1]
@@ -81,38 +86,40 @@ class Performance_website:
                 sim[index1,index2]=sim_diff_perf[0]["sim"]
                 diff[index1,index2]=sim_diff_perf[0]["diff"]
                 perf[index1,index2]=sim_diff_perf[0]["perf"]
+                kolm[index1, index2] = sim_diff_perf[0]["kolm"]
         f.write("<br>Similarity:<br>")
         self.print_metric_table(sim, ecdfc, f)
         f.write("<br>Difference:<br>")
         self.print_metric_table(diff, ecdfc, f)
         f.write("<br>Performance:<br>")
         self.print_metric_table(perf, ecdfc, f)
+        f.write("<br>Kolmogorov:<br>")
+        self.print_metric_table(kolm, ecdfc, f)
         self.print_ecdfs_aggregated_data(ecdfc,f)
 
     def print_metric_table(self,data,ecdfc,f):
         size=len(ecdfc.return_ecdfs())
         f.write("<table border=1><tr><td></td>")
         for index in range(size):
-            f.write("<td><b>"+ecdfc.return_ecdfs()[index].legend()+"</b></td>")
+            f.write("<td><b>"+d_instancedbname_to_printable_d_instance(ecdfc.return_ecdfs()[index].legend())+"</b></td>")
         for index1 in range(size):
-            f.write("</tr><tr><td><b>"+ecdfc.return_ecdfs()[index1].legend()+"</b></td>")
+            f.write("</tr><tr><td><b>"+d_instancedbname_to_printable_d_instance(ecdfc.return_ecdfs()[index1].legend())+"</b></td>")
             for index2 in range(size):
-                f.write("<td>"+str(round(data[index1][index2],2))+"</td>")
+                f.write("<td>"+str(round(data[index1][index2],3))+"</td>")
             f.write("</tr")
         f.write("</table>")
 
     def print_ecdfs_aggregated_data(self,ecdfc,f):
         connection = DatabaseConnection()
         f.write("<br>Aggregated values:<br>")
-        f.write("<table border=1><tr><td><b>Design</b></td><td><b>Minimum</b></td><td><b>Maximum</b></td><td><b>Average</b></td><td><b>Median</b></td><td><b>Kolmogorov</b></td></tr>")
+        f.write("<table border=1><tr><td><b>Design</b></td><td><b>Minimum</b></td><td><b>Maximum</b></td><td><b>Average</b></td><td><b>Median</b></td></tr>")
         for ecdf in ecdfc.return_ecdfs():
             min_max_average_median = connection.exec_query(pfql.get_ecdf_properties, **{"name": ecdf.legend()})
             f.write("<tr><td><b>" + ecdf.legend()+ "</b></td>")
             f.write("<td>" + str(round(min_max_average_median[0]["min"],2)) + "</td>")
             f.write("<td>" + str(round(min_max_average_median[0]["max"],2)) + "</td>")
             f.write("<td>" + str(round(min_max_average_median[0]["average"],2)) + "</td>")
-            f.write("<td>" + str(round(min_max_average_median[0]["median"],2)) + "</td>")
-            f.write("<td>TODO: kolmogorov</td></tr>")
+            f.write("<td>" + str(round(min_max_average_median[0]["median"],2)) + "</td><tr>")
         f.write("</table>")
 
     def print_utils(self,f):

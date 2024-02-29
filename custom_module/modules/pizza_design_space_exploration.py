@@ -8,7 +8,7 @@ from custom_module.cypher_queries.performance_queries import PerformanceQueryLib
 
 # the complete design space, which contains 5^8=390625 design instances.
 def design_space_all():
-    dim_var = [0.3, 0.45, 0.66, 1, 1.5, 2.0]
+    dim_var = [0.3, 0.45, 0.66, 1, 1.5, 2]
     return list(list(it.product([1], dim_var, dim_var, dim_var, dim_var, dim_var, dim_var, dim_var, dim_var)))
 
 def starting_design_space():

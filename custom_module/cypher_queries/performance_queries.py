@@ -234,7 +234,7 @@ class PerformanceQueryLibrary:
         query_str = '''match (e1:Performance:LatencyECDF{name:"$ecdf_name1"})
                        match (e2:Performance:LatencyECDF{name:"$ecdf_name2"})
                        match (e1)-[c:CONFORMANCE]->(e2)
-                       return c.similarity as sim, c.difference as diff, c.performance as perf'''
+                       return c.similarity as sim, c.difference as diff, c.performance as perf, c.kolmogorov as kolm'''
         return Query(query_str=query_str,
                      template_string_parameters={"ecdf_name1": ecdf_name1, "ecdf_name2": ecdf_name2} )
 
@@ -269,7 +269,7 @@ class PerformanceQueryLibrary:
     @staticmethod
     def get_ecdf_properties(name):
         query_str = '''MATCH (p:LatencyECDF{name:"$name"}) 
-                       RETURN p.max as max, p.min as min, p.average as average, p.median as median, p.kolmogorov as kolmogorov'''
+                       RETURN p.max as max, p.min as min, p.average as average, p.median as median'''
         return Query(query_str=query_str,
                      template_string_parameters={"name": name } )
 
@@ -285,7 +285,7 @@ class PerformanceQueryLibrary:
                         MATCH (p1)-[c:CONFORMANCE]->(p2)
                         WHERE p1.dbname<>p2.dbname
                         AND p2.dbname="$goal_design"
-                        RETURN p1.dbname as p1db,min(c.similarity) as minsim
+                        RETURN p1.dbname as p1db,avg(toFloat(c.kolmogorov)) as minsim
                         ORDER BY minsim DESC'''
         return Query(query_str=query_str,
                      template_string_parameters={"goal_design": goal_design})
