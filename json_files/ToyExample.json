@@ -184,7 +184,7 @@
       "constructor": [
         {
           "prevalent_record": "(record:StationRecord)",
-          "result": "(v:Entity:Resource:Station {sysId: record.stationName, OPTIONAL type: record.stationType})",
+          "result": "(v:Entity:Resource:Station:Ensemble {sysId: record.stationName, OPTIONAL type: record.stationType})",
           "infer_corr_from_event_record": true,
           "corr_type": "OCCURRED_AT"
         }
