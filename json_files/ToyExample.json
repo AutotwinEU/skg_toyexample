@@ -2,6 +2,7 @@
   "name": "ToyExample",
   "version": "3.6.1",
   "records": [
+    "(record:Record {log})",
     "(record:EventRecord:SensorEventRecord {timestamp, sensorId})",
     "(record:EntityRecord:PizzaRecord {pizzaId})",
     "(record:EntityRecord:PackRecord {packId})",
@@ -183,7 +184,7 @@
       "constructor": [
         {
           "prevalent_record": "(record:StationRecord)",
-          "result": "(v:Entity:Resource:Station:Location {sysId: record.stationName, OPTIONAL type: record.stationType})",
+          "result": "(v:Entity:Resource:Station {sysId: record.stationName, OPTIONAL type: record.stationType})",
           "infer_corr_from_event_record": true,
           "corr_type": "OCCURRED_AT"
         }
