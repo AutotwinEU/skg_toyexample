@@ -382,7 +382,7 @@ class CustomCypherQueryLibrary:
             MATCH (s1:Station) <- [:OCCURS_AT] - (:Activity) 
                 - [df] -> (:Activity) - [:OCCURS_AT] -> (s2:Station)
             WHERE s1 <> s2
-            MERGE (s1) - [:CONN {movedEntity: df.entityType}] -> (s2)
+            MERGE (s1) - [:ORIGIN] -> (:Entity:Resource:Connection) - [:DESTINATION] -> (s2)
         '''
 
         return Query(query_str=query_str)
@@ -395,7 +395,7 @@ class CustomCypherQueryLibrary:
             [:EXECUTED_BY] -> (s2:Sensor) 
             WHERE s1 <> s2
             WITH DISTINCT s1, s2, df.entityType as movedEntity
-            MERGE (s1) - [:CONN {movedEntity: movedEntity}] -> (s2)
+            MERGE (s1) - [:ORIGIN] -> (:Entity:Resource:Connection {movedEntity: movedEntity}) - [:DESTINATION] -> (s2)
             '''
 
         return Query(query_str=query_str)
