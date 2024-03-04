@@ -1,0 +1,637 @@
+[
+  {
+    "name": "ToyExamplePizzaSensors",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_names": [
+      "S1_sim.csv",
+      "S2_sim.csv",
+      "S3_sim.csv",
+      "S4_sim.csv",
+      "S5_sim.csv",
+      "S6_sim.csv",
+      "S101_sim.csv",
+      "S105_sim.csv"
+    ],
+    "labels": [
+      "Record",
+      "PizzaRecord",
+      "SensorEventRecord",
+      "SensorRecord",
+      "EntityTypeRecord"
+    ],
+    "add_log": true,
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "pizzaId",
+        "columns": [
+          {
+            "name": "pizzaId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "code",
+        "columns": [
+          {
+            "name": "pizzaId",
+            "dtype": "str",
+            "range_end": 7
+          }
+        ]
+      },
+      {
+        "name": "sensorId",
+        "columns": [
+          {
+            "name": "sensorId"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExamplePizzaSensorsExceededCookingTime",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_names": [
+      "S100_sim.csv"
+    ],
+    "labels": [
+      "Record",
+      "PizzaRecord",
+      "SensorEventRecord",
+      "SensorRecord",
+      "PizzaQualityAttributeRecord",
+      "EntityTypeRecord"
+    ],
+    "add_log": true,
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "pizzaId",
+        "columns": [
+          {
+            "name": "pizzaId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "code",
+        "columns": [
+          {
+            "name": "pizzaId",
+            "dtype": "str",
+            "range_end": 7
+          }
+        ]
+      },
+      {
+        "name": "sensorId",
+        "columns": [
+          {
+            "name": "sensorId"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "exceededCookingTime",
+        "columns": [
+          {
+            "name": "exceededCookingTime",
+            "dtype": "boolean"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExamplePackSensors",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_names": [
+      "S7_sim.csv",
+      "S8_sim.csv",
+      "S102_sim.csv",
+      "S104_sim.csv"
+    ],
+    "labels": [
+      "Record",
+      "PackRecord",
+      "SensorEventRecord",
+      "SensorRecord",
+      "EntityTypeRecord"
+    ],
+    "add_log": true,
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "packId",
+        "columns": [
+          {
+            "name": "packId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "code",
+        "columns": [
+          {
+            "name": "packId",
+            "dtype": "str",
+            "range_end": 9
+          }
+        ]
+      },
+      {
+        "name": "sensorId",
+        "columns": [
+          {
+            "name": "sensorId"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExampleBoxSensors",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_names": [
+      "S9_sim.csv",
+      "S10_sim.csv",
+      "S103_sim.csv",
+      "S106_sim.csv"
+    ],
+    "labels": [
+      "BoxRecord",
+      "SensorEventRecord",
+      "SensorRecord",
+      "EntityTypeRecord"
+    ],
+    "add_log": true,
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "boxId",
+        "columns": [
+          {
+            "name": "boxId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "code",
+        "columns": [
+          {
+            "name": "boxId",
+            "dtype": "str",
+            "range_end": 8
+          }
+        ]
+      },
+      {
+        "name": "sensorId",
+        "columns": [
+          {
+            "name": "sensorId"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExamplePizzaPalletSensors",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_names": [
+      "S11_sim.csv",
+      "S12_sim.csv",
+      "S13_sim.csv",
+      "S14_sim.csv",
+      "S15_sim.csv",
+      "S16_sim.csv"
+    ],
+    "labels": [
+      "Record",
+      "PalletRecord",
+      "SensorEventRecord",
+      "SensorRecord",
+      "EntityTypeRecord"
+    ],
+    "add_log": true,
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "palletId",
+        "columns": [
+          {
+            "name": "palletId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "code",
+        "columns": [
+          {
+            "name": "palletId",
+            "dtype": "str",
+            "range_end": 3
+          }
+        ]
+      },
+      {
+        "name": "sensorId",
+        "columns": [
+          {
+            "name": "sensorId"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExampleStations",
+    "file_directory": "data\\ToyExampleV3Simulation\\",
+    "file_names": [
+      "stations_sim.csv"
+    ],
+    "labels": [
+      "Record",
+      "SensorRecord",
+      "StationRecord",
+      "AssemblyLineRecord"
+    ],
+    "add_log": true,
+    "attributes": [
+      {
+        "name": "sensorId",
+        "columns": [
+          {
+            "name": "sensorId"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "sensorType",
+        "columns": [
+          {
+            "name": "sensorType"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "stationName",
+        "columns": [
+          {
+            "name": "stationName",
+            "dtype": "str"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "stationType",
+        "columns": [
+          {
+            "name": "stationType"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "assemblyName",
+        "columns": [
+          {
+            "name": "assemblyName",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExampleProductionPlan",
+    "file_directory": "data\\ToyExampleV3Simulation\\",
+    "file_names": [
+      "production_plan_sim.csv"
+    ],
+    "labels": [
+      "Record",
+      "EntityTypeRecord",
+      "TimeDistributionRecord",
+      "CompositionRecord",
+      "StationRecord"
+    ],
+    "add_log": true,
+    "attributes": [
+      {
+        "name": "code",
+        "columns": [
+          {
+            "name": "code",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "outputCode",
+        "columns": [
+          {
+            "name": "outputCode",
+            "dtype": "str"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "diameter",
+        "columns": [
+          {
+            "name": "diameter",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "height",
+        "columns": [
+          {
+            "name": "height",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "weight",
+        "columns": [
+          {
+            "name": "weight",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "inputQuantity",
+        "columns": [
+          {
+            "name": "inputQuantity",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "outputQuantity",
+        "columns": [
+          {
+            "name": "outputQuantity",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "interval",
+        "columns": [
+          {
+            "name": "interval",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "intervalDelta",
+        "columns": [
+          {
+            "name": "intervalDelta",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": true
+      },
+      {
+        "name": "stationName",
+        "columns": [
+          {
+            "name": "stationName",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExampleOperators",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_names": [
+      "opBox_onBreak_sim.csv",
+      "opPack_onBreak_sim.csv"
+    ],
+    "labels": [
+      "Record",
+      "OperatorRecord",
+      "OperatorEventRecord"
+    ],
+    "add_log": true,
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "operatorId",
+        "columns": [
+          {
+            "name": "operatorId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "hasBreak",
+        "columns": [
+          {
+            "name": "hasBreak",
+            "dtype": "boolean"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExampleLockStatus",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_names": [
+      "In1_distanceLock_sim.csv",
+      "In1_policyLock_sim.csv"
+    ],
+    "labels": [
+      "Record",
+      "SensorRecord",
+      "StatusEventRecord",
+      "LockStatusRecord"
+    ],
+    "add_log": true,
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "sensorId",
+        "columns": [
+          {
+            "name": "sensorId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "locked",
+        "columns": [
+          {
+            "name": "locked",
+            "dtype": "boolean"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  },
+  {
+    "name": "ToyExampleWIPStatus",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_names": [
+      "wip_sim.csv"
+    ],
+    "labels": [
+      "Record",
+      "WIPRecord",
+      "WIPEventRecord",
+      "SensorRecord"
+    ],
+    "add_log": true,
+    "seperator": ";",
+    "attributes": [
+      {
+        "name": "timestamp",
+        "columns": [
+          {
+            "name": "timestamp",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "sensorId",
+        "columns": [
+          {
+            "name": "sensorId",
+            "dtype": "str"
+          }
+        ],
+        "optional": false
+      },
+      {
+        "name": "amount",
+        "columns": [
+          {
+            "name": "amount",
+            "dtype": "Int64"
+          }
+        ],
+        "optional": false
+      }
+    ]
+  }
+]
