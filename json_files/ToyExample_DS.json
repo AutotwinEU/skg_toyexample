@@ -588,7 +588,7 @@
     ]
   },
   {
-    "name": "ToyExampleLockStatus",
+    "name": "ToyExampleWIPStatus",
     "file_directory": "data\\ToyExampleV3\\",
     "file_names": [
       "wip.csv"
