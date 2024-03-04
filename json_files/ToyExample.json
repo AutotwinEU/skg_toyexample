@@ -211,7 +211,6 @@
           "result": "(v:EntityType {code: record.code, OPTIONAL diameter: record.diameter, OPTIONAL height: record.height, OPTIONAL weight: record.weight})",
           "infer_corr_from_event_record": false
         },
-
         {
           "prevalent_record": "(record:OutputEntityTypeRecord)",
           "result": "(v:EntityType {code: record.outputCode})",
@@ -387,7 +386,6 @@
         "infer_corr_from_reified_parents": false
       }
     },
-
     {
       "type": "FOLLOWS_COMP",
       "constructor": {
@@ -438,6 +436,74 @@
         "result": "(a) - [:OCCURS_AT] -> (station)",
         "model_as_node": false,
         "infer_corr_from_reified_parents": false
+      }
+    },
+    {
+      "include": true,
+      "type": "PART_OF_PIZZA_PACK",
+      "constructor": {
+        "from_node": "(pizza:Pizza)",
+        "to_node": "(pack:Pack)",
+        "result": "(pizza) - [:PART_OF] -> (pack)",
+        "infer_corr_from_reified_parents": false,
+        "use_inference": true
+      }
+    },
+    {
+      "include": true,
+      "type": "PART_OF_PACK_BOX",
+      "constructor": {
+        "from_node": "(pack:Pack)",
+        "to_node": "(box:Box)",
+        "result": "(pack) - [:PART_OF] -> (box)",
+        "infer_corr_from_reified_parents": false,
+        "use_inference": true
+      }
+    },
+    {
+      "include": true,
+      "type": "PART_OF_BOX_PALLET",
+      "constructor": {
+        "from_node": "(box:Box)",
+        "to_node": "(pallet:Pallet)",
+        "result": "(box) - [:PART_OF] -> (pallet)",
+        "infer_corr_from_reified_parents": false,
+        "use_inference": true
+      }
+    },
+    {
+      "include": true,
+      "type": "PIZZA_PACK",
+      "model_as_node": true,
+      "constructor": {
+        "from_node": "(pizza:Pizza)",
+        "to_node": "(pack:Pack)",
+        "result": "(pizza) - [:PizzaPack] -> (pack)",
+        "use_inference": true
+      }
+    },
+    {
+      "include": true,
+      "type": "PACK_BOX",
+      "model_as_node": true,
+      "constructor": {
+        "from_node": "(pack:Pack)",
+        "to_node": "(box:Box)",
+        "result": "(pack) - [:PackBox] -> (box)",
+        "infer_corr_from_reified_parents": false,
+        "use_inference": true
+      }
+    },
+    {
+      "include": true,
+      "type": "BOX_PALLET",
+      "model_as_node": true,
+      "constructor": {
+        "from_node": "(box:Box)",
+        "to_node": "(pallet:Pallet)",
+        "result": "(box) - [:BoxPallet] -> (pallet)",
+        "infer_corr_from_reified_parents": false,
+        "use_inference": true
       }
     }
   ]
