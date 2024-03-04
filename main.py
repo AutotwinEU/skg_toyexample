@@ -1,126 +1,99 @@
+import os
 from datetime import datetime
-import random
 
-from promg import SemanticHeader, OcedPg, DatabaseConnection, DatasetDescriptions, Performance, Configuration
-from promg.modules.db_management import DBManagement
-from promg.modules.exporter import Exporter
+from promg import SemanticHeader, DatabaseConnection, DatasetDescriptions, Performance, Configuration
 
-from custom_module.modules.process_model_discovery import ProcessDiscovery
-from custom_module.modules.df_discovery import DFDiscoveryModule
-from custom_module.modules.pizza_line import PizzaLineModule
-
-# several steps of import, each can be switch on/off
-from colorama import Fore
-
-# several steps of import, each can be switch on/off
-step_clear_db = True
-step_populate_graph = True
+from custom_module.main_functionalities import check_remote_connection, clear_db, load_data, transform_data, \
+    print_statistics, delete_data, prepare
 
 
-def check_remote_connection() -> bool:
-    number_str = str(random.randint(0, 9999)).zfill(4)
-    request_permission = input(
-        f"You are going to make changes to {config.uri}. Is this your intention? Type {number_str} for Yes or "
-        f"N [No]")
-    if request_permission.lower().strip() == number_str:
-        return True
-    elif request_permission.lower().strip() == "n" or request_permission.lower().strip() == "no":
-        print(f"As it is not your intention to make changes to {config.uri}, change use_local to True")
-        return False
-    else:
-        print(f"Invalid input")
-        return False
+def clear_db_config(config):
+    db_connection = DatabaseConnection.set_up_connection(config=config)
+    # only clear db if we are working with local connection
+    clear_db(db_connection)
 
 
-def main() -> None:
+def populate_graph(config: Configuration,
+                   step_preprocess_files: bool = True,
+                   input_directory=os.path.join(os.getcwd(), "data"),
+                   file_suffix=""):
     """
-    Main function, read all the logs, clear and create the graph, perform checks
-    @return: None
-    """
+        Main function, read all the logs, clear and create the graph, perform checks
+        @return: None
+        """
+
+    semantic_header = SemanticHeader.create_semantic_header(config=config)
+    dataset_descriptions = DatasetDescriptions(config=config)
+    # performance class to measure performance
+    performance = Performance.set_up_performance(config=config)
+
+    db_connection = DatabaseConnection.set_up_connection(config=config)
+
+    if step_preprocess_files:
+        prepare(input_path=input_directory, file_suffix=file_suffix)
+    load_data(db_connection=db_connection,
+              config=config,
+              semantic_header=semantic_header,
+              dataset_descriptions=dataset_descriptions)
+    transform_data(db_connection=db_connection,
+                   config=config,
+                   semantic_header=semantic_header,
+                   dataset_descriptions=dataset_descriptions)
+
+    performance.finish_and_save()
+    print_statistics(db_connection)
+
+    db_connection.close_connection()
+
+
+def delete_data(config):
+    db_connection = DatabaseConnection.set_up_connection(config=config)
+    semantic_header = SemanticHeader.create_semantic_header(config=config)
+    dataset_descriptions = DatasetDescriptions(config=config)
+    files = dataset_descriptions.get_structure_name_file_mapping()
+    for _, file_names in files.items():
+        delete_data(db_connection=db_connection,
+                    semantic_header=semantic_header,
+                    logs=file_names)
+
+
+def main(step_clear_db,
+         import_ground_truth,
+         import_simulation_data,
+         _config_ground_truth: Configuration,
+         _config_simulation: Configuration) -> None:
     print("Started at =", datetime.now().strftime("%H:%M:%S"))
 
-    config = Configuration.init_conf_with_config_file()
-
-    if "bolt://localhost" not in config.uri:
-        use_remote_connection = check_remote_connection()
+    if "bolt://localhost" not in _config_ground_truth.uri:
+        use_remote_connection = check_remote_connection(_config_ground_truth)
         if not use_remote_connection:
             return
     else:
         use_remote_connection = False
 
-    db_connection = DatabaseConnection.set_up_connection(config=config)
+    if not use_remote_connection and step_clear_db:
+        clear_db_config(_config_ground_truth)
 
-    # performance class to measure performance
-    performance = Performance.set_up_performance(config=config)
-    dataset_descriptions = DatasetDescriptions(config=config)
-    semantic_header = SemanticHeader.create_semantic_header(config=config)
-    db_manager = DBManagement(db_connection)
+    if import_ground_truth:
+        # import ground truth data
+        populate_graph(config=_config_ground_truth,
+                       step_preprocess_files=False)
 
-    # only clear db if we are working with local connection
-    if step_clear_db and not use_remote_connection:
-        print(Fore.RED + 'Clearing the database.' + Fore.RESET)
-        db_manager.clear_db(replace=True)
-        db_manager.set_constraints()
-
-    if step_populate_graph:
-        if config.use_preprocessed_files:
-            print(Fore.RED + '💾 Preloaded files are used!' + Fore.RESET)
-        else:
-            print(Fore.RED + '📝 Importing and creating files' + Fore.RESET)
-
-        oced_pg = OcedPg(dataset_descriptions=dataset_descriptions,
-                         use_sample=config.use_sample,
-                         use_preprocessed_files=config.use_preprocessed_files,
-                         import_directory=config.import_directory,
-                         database_connection=db_connection,
-                         semantic_header=semantic_header)
-
-        oced_pg.load()
-        oced_pg.create_nodes_by_records()
-
-        pizza_module = PizzaLineModule(database_connection=db_connection)
-        oced_pg.create_relations()
-
-        df_discovery = DFDiscoveryModule(db_connection)
-        df_edges_to_be_created = [
-            {"entity_type": "Pizza", "df_label": "DF_CONTROL_FLOW_ITEM"},
-            {"entity_type": "Pack", "df_label": "DF_CONTROL_FLOW_ITEM"},
-            {"entity_type": "Box", "df_label": "DF_CONTROL_FLOW_ITEM"},
-            {"entity_type": "Pallet", "df_label": "DF_CONTROL_FLOW_ITEM"},
-            {"entity_type": "Sensor", "df_label": "DF_SENSOR"},
-            {"entity_type": "Station", "df_label": "DF_STATION"},
-            {"entity_type": "Operator", "df_label": "DF_OPERATOR"}]
-
-        for df in df_edges_to_be_created:
-            df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"])
-
-        for station_id in ["PackStation", "BoxStation", "PalletStation"]:
-            pizza_module.infer_part_of_relation(station_id=station_id)
-
-        df_edges_to_be_created = [
-            {"entity_type": "PizzaPack", "df_label": "DF_CONTROL_FLOW_ITEM"},
-            {"entity_type": "PackBox", "df_label": "DF_CONTROL_FLOW_ITEM"},
-            {"entity_type": "BoxPallet", "df_label": "DF_CONTROL_FLOW_ITEM"}]
-
-        for df in df_edges_to_be_created:
-            df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"])
-
-        pizza_module.complete_quality()
-        pizza_module.connect_operators_to_station()
-
-        process_discoverer = ProcessDiscovery(db_connection)
-        process_discoverer.create_df_process_model(df_label="DF_CONTROL_FLOW_ITEM", df_a_label="DF_A_CONTROL_FLOW_ITEM")
-
-        pizza_module.connect_stations_and_sensors()
-
-        # exporter = Exporter(db_connection)
-        # exporter.save_event_log(entity_type="Pizza")
-
-    performance.finish_and_save()
-    db_manager.print_statistics()
-
-    db_connection.close_connection()
+    if import_simulation_data:
+        populate_graph(config=_config_simulation,
+                       step_preprocess_files=False,
+                       input_directory=os.path.join(os.getcwd(), "data", "ToyExampleV3Simulation"),
+                       file_suffix="sim")
 
 
 if __name__ == "__main__":
-    main()
+    config_ground_truth = Configuration.init_conf_with_config_file()
+    config_simulation = Configuration.init_conf_with_config_file('config_sim.yaml')
+
+    main(step_clear_db=True,
+         import_ground_truth=True,
+         import_simulation_data=True,
+         _config_ground_truth=config_ground_truth,
+         _config_simulation=config_simulation)
+
+    delete_data(config_simulation)

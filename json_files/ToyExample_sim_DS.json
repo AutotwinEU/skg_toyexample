@@ -1,16 +1,16 @@
 [
   {
     "name": "ToyExamplePizzaSensors",
-    "file_directory": "data\\ToyExampleV3\\",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
     "file_names": [
-      "S1.csv",
-      "S2.csv",
-      "S3.csv",
-      "S4.csv",
-      "S5.csv",
-      "S6.csv",
-      "S101.csv",
-      "S105.csv"
+      "S1_sim.csv",
+      "S2_sim.csv",
+      "S3_sim.csv",
+      "S4_sim.csv",
+      "S5_sim.csv",
+      "S6_sim.csv",
+      "S101_sim.csv",
+      "S105_sim.csv"
     ],
     "labels": [
       "Record",
@@ -65,9 +65,9 @@
   },
   {
     "name": "ToyExamplePizzaSensorsExceededCookingTime",
-    "file_directory": "data\\ToyExampleV3\\",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
     "file_names": [
-      "S100.csv"
+      "S100_sim.csv"
     ],
     "labels": [
       "Record",
@@ -133,12 +133,12 @@
   },
   {
     "name": "ToyExamplePackSensors",
-    "file_directory": "data\\ToyExampleV3\\",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
     "file_names": [
-      "S7.csv",
-      "S8.csv",
-      "S102.csv",
-      "S104.csv"
+      "S7_sim.csv",
+      "S8_sim.csv",
+      "S102_sim.csv",
+      "S104_sim.csv"
     ],
     "labels": [
       "Record",
@@ -193,12 +193,12 @@
   },
   {
     "name": "ToyExampleBoxSensors",
-    "file_directory": "data\\ToyExampleV3\\",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
     "file_names": [
-      "S9.csv",
-      "S10.csv",
-      "S103.csv",
-      "S106.csv"
+      "S9_sim.csv",
+      "S10_sim.csv",
+      "S103_sim.csv",
+      "S106_sim.csv"
     ],
     "labels": [
       "BoxRecord",
@@ -252,14 +252,14 @@
   },
   {
     "name": "ToyExamplePizzaPalletSensors",
-    "file_directory": "data\\ToyExampleV3\\",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
     "file_names": [
-      "S11.csv",
-      "S12.csv",
-      "S13.csv",
-      "S14.csv",
-      "S15.csv",
-      "S16.csv"
+      "S11_sim.csv",
+      "S12_sim.csv",
+      "S13_sim.csv",
+      "S14_sim.csv",
+      "S15_sim.csv",
+      "S16_sim.csv"
     ],
     "labels": [
       "Record",
@@ -314,9 +314,9 @@
   },
   {
     "name": "ToyExampleStations",
-    "file_directory": "data\\ToyExampleV3\\",
+    "file_directory": "data\\ToyExampleV3Simulation\\",
     "file_names": [
-      "stations.csv"
+      "stations_sim.csv"
     ],
     "labels": [
       "Record",
@@ -377,9 +377,9 @@
   },
   {
     "name": "ToyExampleProductionPlan",
-    "file_directory": "data\\ToyExampleV3\\",
+    "file_directory": "data\\ToyExampleV3Simulation\\",
     "file_names": [
-      "production_plan.csv"
+      "production_plan_sim.csv"
     ],
     "labels": [
       "Record",
@@ -494,10 +494,10 @@
   },
   {
     "name": "ToyExampleOperators",
-    "file_directory": "data\\ToyExampleV3\\",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
     "file_names": [
-      "opBox_onBreak.csv",
-      "opPack_onBreak.csv"
+      "opBox_onBreak_sim.csv",
+      "opPack_onBreak_sim.csv"
     ],
     "labels": [
       "Record",
@@ -541,10 +541,10 @@
   },
   {
     "name": "ToyExampleLockStatus",
-    "file_directory": "data\\ToyExampleV3\\",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
     "file_names": [
-      "In1_distanceLock.csv",
-      "In1_policyLock.csv"
+      "In1_distanceLock_sim.csv",
+      "In1_policyLock_sim.csv"
     ],
     "labels": [
       "Record",
@@ -589,9 +589,9 @@
   },
   {
     "name": "ToyExampleWIPStatus",
-    "file_directory": "data\\ToyExampleV3\\",
+    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
     "file_names": [
-      "wip.csv"
+      "wip_sim.csv"
     ],
     "labels": [
       "Record",
