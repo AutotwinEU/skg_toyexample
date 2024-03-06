@@ -8,16 +8,48 @@ from custom_module.cypher_queries.performance_queries import PerformanceQueryLib
 
 # the complete design space, which contains 5^8=390625 design instances.
 def design_space_all():
+    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 10]
+    return list(list(it.product([1], dim_var, dim_var, dim_var, dim_var, dim_var, dim_var, dim_var, dim_var)))
+
+def design_space_refined():
     dim_var = [0.3, 0.45, 0.66, 1, 1.5, 2]
     return list(list(it.product([1], dim_var, dim_var, dim_var, dim_var, dim_var, dim_var, dim_var, dim_var)))
 
 def starting_design_space():
     return list(list(it.product([1], [1], [1], [1], [1], [1], [1], [1], [1])))
 
-# a small design space for testing consisting of 2*2 design instances.
-def design_space_small_to_test():
-    return list(list(it.product([1], [1], [1], [0.3, 1], [1], [0.3, 1], [1], [1], [1])))
+# a small design space for testing
+def design_space_small_dim1():
+    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    return list(list(it.product([1], dim_var, [1], [1], [1], [1], [1], [1], [1])))
 
+def design_space_small_dim2():
+    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    return list(list(it.product([1], [1], dim_var, [1], [1], [1], [1], [1], [1])))
+
+def design_space_small_dim3():
+    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    return list(list(it.product([1], [1], [1], dim_var, [1], [1], [1], [1], [1])))
+
+def design_space_small_dim4():
+    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    return list(list(it.product([1], [1], [1], [1], dim_var, [1], [1], [1], [1])))
+
+def design_space_small_dim5():
+    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    return list(list(it.product([1], [1], [1], [1], [1], dim_var, [1], [1], [1])))
+
+def design_space_small_dim6():
+    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    return list(list(it.product([1], [1], [1], [1], [1], [1], dim_var, [1], [1])))
+
+def design_space_small_dim7():
+    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    return list(list(it.product([1], [1], [1], [1], [1], [1], [1], dim_var, [1])))
+
+def design_space_small_dim8():
+    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    return list(list(it.product([1], [1], [1], [1], [1], [1], [1], [1], dim_var)))
 
 # creates a template for the TTS simulator based on a design instance
 # processing time (pt): pt=1 default, pt=2 twice as slow, pt=0.5 twice as fast

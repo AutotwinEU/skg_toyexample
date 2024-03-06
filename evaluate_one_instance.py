@@ -31,8 +31,7 @@ from process_discovery.discover_process_model import ProcessDiscoveryLog
 
 def create_ini_simulation_file_per_d_instance(d_instance, d_instances_dir):
     # write pizza config
-    filename = d_instance_to_filename(d_instance)
-    ini_file = d_instances_dir + "/" + filename + ".ini"
+    ini_file = d_instances_dir + "/config.ini"
     f = open(ini_file, "w")
     f.write(simulator_config(d_instance))
     f.close()
@@ -117,6 +116,7 @@ def evaluate_one_instance(d_instance, html_output_dir, simulator_dir, d_instance
 
     if step_perform_simulation:
         create_simulated_data(simulator_dir,config_filename,data_dir,Headers_dir)
+        os.chdir("R:/git/")
 
     db_manager = DBManagement()
     if _step_clear_db:
@@ -129,7 +129,6 @@ def evaluate_one_instance(d_instance, html_output_dir, simulator_dir, d_instance
                          use_preprocessed_files=use_preprocessed_files)
         pizza_module = PizzaLineModule()
 
-        os.chdir("R:/git2/")
         oced_pg.load()
         oced_pg.create_nodes_by_records()
         if version_number == "V3":
@@ -180,21 +179,3 @@ def evaluate_one_instance(d_instance, html_output_dir, simulator_dir, d_instance
     db_manager.print_statistics()
 
     db_connection.close_connection()
-
-'''
-if __name__ == "__main__":
-    # only needs to be set when simulation is enabled (otherwise neglected)
-    simulator_dir = "Q:/PizzaLineComplete_V3.7_2023_11_17" # the TTS simulator directory
-    config_filename = "runargsnogui.ini" # assumed to be located in the simulator dir
-    data_dir = "R:/git2/data/ToyExampleV3" # the target directory of the simulation results and starting point of building the SKG
-    Headers_dir = "R:/git2/data/ToyExampleV3.ava" # a directory with production_plan.csv and stations.csv, and headers
-
-    # only needs to be set when performance analysis is enabled (otherwise neglected)
-    html_output_dir="d:/temp2" # a website with performance results will be written to this path
-
-    db_name = "freek678"
-    db_name2 = "freek679"
-
-    evaluate_one_instance(db_name, html_output_dir, simulator_dir, config_filename, data_dir, Headers_dir)
-    evaluate_one_instance(db_name2, html_output_dir, simulator_dir, config_filename, data_dir, Headers_dir)
-'''
