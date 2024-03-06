@@ -20,35 +20,35 @@ def starting_design_space():
 
 # a small design space for testing
 def design_space_small_dim1():
-    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    dim_var = [0.15, 0.3, 0.45, 0.6, 0.8, 1, 1.25, 1.5, 2, 4, 6, 9]
     return list(list(it.product([1], dim_var, [1], [1], [1], [1], [1], [1], [1])))
 
 def design_space_small_dim2():
-    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    dim_var = [0.15, 0.3, 0.45, 0.6, 0.8, 1, 1.25, 1.5, 2, 4, 6, 9]
     return list(list(it.product([1], [1], dim_var, [1], [1], [1], [1], [1], [1])))
 
 def design_space_small_dim3():
-    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    dim_var = [0.15, 0.3, 0.45, 0.6, 0.8, 1, 1.25, 1.5, 2, 4, 6, 9]
     return list(list(it.product([1], [1], [1], dim_var, [1], [1], [1], [1], [1])))
 
 def design_space_small_dim4():
-    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    dim_var = [0.15, 0.3, 0.45, 0.6, 0.8, 1, 1.25, 1.5, 2, 4, 6, 9]
     return list(list(it.product([1], [1], [1], [1], dim_var, [1], [1], [1], [1])))
 
 def design_space_small_dim5():
-    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    dim_var = [0.15, 0.3, 0.45, 0.6, 0.8, 1, 1.25, 1.5, 2, 4, 6, 9]
     return list(list(it.product([1], [1], [1], [1], [1], dim_var, [1], [1], [1])))
 
 def design_space_small_dim6():
-    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    dim_var = [0.15, 0.3, 0.45, 0.6, 0.8, 1, 1.25, 1.5, 2, 4, 6, 9]
     return list(list(it.product([1], [1], [1], [1], [1], [1], dim_var, [1], [1])))
 
 def design_space_small_dim7():
-    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    dim_var = [0.15, 0.3, 0.45, 0.6, 0.8, 1, 1.25, 1.5, 2, 4, 6, 9]
     return list(list(it.product([1], [1], [1], [1], [1], [1], [1], dim_var, [1])))
 
 def design_space_small_dim8():
-    dim_var = [0.15, 0.3, 0.45, 0.66, 1, 1.5, 2, 5, 9]
+    dim_var = [0.15, 0.3, 0.45, 0.6, 0.8, 1, 1.25, 1.5, 2, 4, 6, 9]
     return list(list(it.product([1], [1], [1], [1], [1], [1], [1], [1], dim_var)))
 
 # creates a template for the TTS simulator based on a design instance

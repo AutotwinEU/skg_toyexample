@@ -64,7 +64,7 @@ class Performance_website:
         f.write("<h2>Ecdfcs</h2>\n")
         for count in range(0, len(self.__ecdfcs)):
             f.write("<h4>" + self.__ecdfcs[count].return_title() + "\n")
-            f.write("<a id=\"eCDF" + str(count) + "\"></h4><img src=\"" + self.__working_dir + "/" + self.__ecdfcs[
+            f.write("<a id=\"eCDF" + str(count) + "\"></h4><img src=\"" + self.__ecdfcs[
                 count].return_title() + ".svg\"><a href=\"#top\">back to top<a><br>\n")
             self.print_ecdfc_conformance(self.__ecdfcs[count],f)
 
@@ -126,14 +126,14 @@ class Performance_website:
         f.write("<h2>Utils</h2>\n")
         for count in range(0, len(self.__utils)):
             f.write("<h4>" + self.__utils[count].return_title() + "\n")
-            f.write("<a id=\"uCDF" + str(count) + "\"></h4><img src=" + self.__working_dir + "/u" + str(
+            f.write("<a id=\"uCDF" + str(count) + "\"></h4><img src=" + "/u" + str(
                 count) + ".svg><a href=\"#top\">back to top<a><br>\n")
 
     def print_queues(self,f):
         f.write("<h2>Queues</h2>\n")
         for count in range(0, len(self.__queues)):
             f.write("<h4>" + self.__queues[count].return_title() + "\n")
-            f.write("<a id=\"qCDF" + str(count) + "\"></h4><img src=" + self.__working_dir + "/q" + str(
+            f.write("<a id=\"qCDF" + str(count) + "\"></h4><img src=" + "/q" + str(
                 count) + ".svg><a href=\"#top\">back to top<a><br>\n")
             self.print_queues_aggregated_data(self.__queues[count].return_title(),f)
 
@@ -150,5 +150,5 @@ class Performance_website:
         f.write("<h2>Flows</h2>\n")
         for count in range(0, len(self.__flows)):
             f.write("<h4>" + self.__flows[count].return_title() + "\n")
-            f.write("<a id=\"fCDF" + str(count) + "\"></h4><img src=" + self.__working_dir + "/f" + str(
+            f.write("<a id=\"fCDF" + str(count) + "\"></h4><img src=" + "/f" + str(
                 count) + ".svg><a href=\"#top\">back to top<a><br>\n")

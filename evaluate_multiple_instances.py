@@ -87,17 +87,17 @@ def conformance_checking(d_instance_begin, d_instance_goal, d_space_all, d_space
 
 
 # evaluate designs on one dimension
-#brute_force_evaluation(design_space_small_dim1(),"d:/perf_analysis/dim1")
-#brute_force_evaluation(design_space_small_dim2(),"d:/perf_analysis/dim2")
-#brute_force_evaluation(design_space_small_dim3(),"d:/perf_analysis/dim3")
-#brute_force_evaluation(design_space_small_dim4(),"d:/perf_analysis/dim4")
-#brute_force_evaluation(design_space_small_dim5(),"d:/perf_analysis/dim5")
-#brute_force_evaluation(design_space_small_dim6(),"d:/perf_analysis/dim6")
-#brute_force_evaluation(design_space_small_dim7(),"d:/perf_analysis/dim7")
-#brute_force_evaluation(design_space_small_dim8(),"d:/perf_analysis/dim8")
+brute_force_evaluation(design_space_small_dim1(),"d:/perf_analysis/dim1")
+brute_force_evaluation(design_space_small_dim2(),"d:/perf_analysis/dim2")
+brute_force_evaluation(design_space_small_dim3(),"d:/perf_analysis/dim3")
+brute_force_evaluation(design_space_small_dim4(),"d:/perf_analysis/dim4")
+brute_force_evaluation(design_space_small_dim5(),"d:/perf_analysis/dim5")
+brute_force_evaluation(design_space_small_dim6(),"d:/perf_analysis/dim6")
+brute_force_evaluation(design_space_small_dim7(),"d:/perf_analysis/dim7")
+brute_force_evaluation(design_space_small_dim8(),"d:/perf_analysis/dim8")
 
 # conformance checking
 # conformance_checking(starting_design_space()[0], random_instance(design_space_all()), design_space_all())
-compare_design_space1=list(list(it.product([1], [1], [1], [2], [0.45], [0.2], [0.1], [1.5], [1])))
-compare_design_space2=list(list(it.product([1], [1], [0.3], [2], [2], [1], [0.3], [1.5], [2])))
-brute_force_evaluation(compare_design_space1+compare_design_space2,"d:/perf_analysis/compare")
+#compare_design_space1=list(list(it.product([1], [1], [1], [2], [0.45], [0.2], [0.1], [1.5], [1])))
+#compare_design_space2=list(list(it.product([1], [1], [0.3], [2], [2], [1], [0.3], [1.5], [2])))
+#brute_force_evaluation(compare_design_space1+compare_design_space2,"d:/perf_analysis/compare")
