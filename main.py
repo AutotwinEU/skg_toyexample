@@ -5,6 +5,7 @@ from promg import SemanticHeader, DatabaseConnection, DatasetDescriptions, Perfo
 
 from custom_module.main_functionalities import check_remote_connection, clear_db, load_data, transform_data, \
     print_statistics, delete_data, prepare
+from custom_module.modules.pizza_performance import PizzaPerformanceModule
 
 
 def clear_db_config(config):
@@ -82,7 +83,9 @@ def main(step_clear_db,
                        step_preprocess_files=False)
 
     if add_ground_truth_performance:
-        print("")
+        perf_module = PizzaPerformanceModule(config=_config_ground_truth)
+        perf_module.add_performance_to_skg()
+        #perf_module.retrieve_performance_from_skg()
 
     if import_simulation_data:
         populate_graph(config=_config_simulation,
@@ -99,10 +102,10 @@ if __name__ == "__main__":
 
     main(step_clear_db=True,
          import_ground_truth=True,
-         import_simulation_data=True,
+         import_simulation_data=False,
          add_ground_truth_performance=True,
          add_simulation_performance=False,
          _config_ground_truth=config_ground_truth,
          _config_simulation=config_simulation)
 
-    delete_data(config_simulation)
+    #delete_data(config_simulation)
