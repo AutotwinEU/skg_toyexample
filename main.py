@@ -60,6 +60,8 @@ def delete_data(config):
 def main(step_clear_db,
          import_ground_truth,
          import_simulation_data,
+         add_ground_truth_performance,
+         add_simulation_performance,
          _config_ground_truth: Configuration,
          _config_simulation: Configuration) -> None:
     print("Started at =", datetime.now().strftime("%H:%M:%S"))
@@ -79,12 +81,17 @@ def main(step_clear_db,
         populate_graph(config=_config_ground_truth,
                        step_preprocess_files=False)
 
+    if add_ground_truth_performance:
+        print("")
+
     if import_simulation_data:
         populate_graph(config=_config_simulation,
                        step_preprocess_files=False,
                        input_directory=os.path.join(os.getcwd(), "data", "ToyExampleV3Simulation"),
                        file_suffix="sim")
 
+    if add_simulation_performance:
+        print("")
 
 if __name__ == "__main__":
     config_ground_truth = Configuration.init_conf_with_config_file()
@@ -93,6 +100,8 @@ if __name__ == "__main__":
     main(step_clear_db=True,
          import_ground_truth=True,
          import_simulation_data=True,
+         add_ground_truth_performance=True,
+         add_simulation_performance=False,
          _config_ground_truth=config_ground_truth,
          _config_simulation=config_simulation)
 
