@@ -32,10 +32,11 @@ class PizzaPerformanceModule:
         print("start add_performance_to_skg")
         self.__add_ecdfcs_to_skg()
         add_metrics(self.connection)
-        #self.connection.exec_query(pfql.create_main_performance_nodes)
-        #self.connection.exec_query(pfql.connect_main_performance_nodes_to_children)
         print("finish add_performance_to_skg")
 
-    def retrieve_performance_from_skg(self):
+    def retrieve_performance_from_skg(self,working_dir):
+        print("start retrieve_performance_from_skg")
         ecdfcs = self.__retrieve_ecdfcs_from_skg()
-        Performance_website(self.connection,"d:/temp4", ecdfcs, [], [], []).create()
+        Performance_website(self.connection,working_dir, ecdfcs, [], [], []).create()
+        print("finish retrieve_performance_from_skg")
+

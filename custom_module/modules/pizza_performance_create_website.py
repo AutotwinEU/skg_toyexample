@@ -22,9 +22,9 @@ class Performance_website:
         for count in range(0, len(self.__ecdfcs)):
             Ecdf_visualize.plot_to_file(self.__working_dir + "/" + self.__ecdfcs[count].return_title(),
                                         self.__ecdfcs[count], 80, "svg")
-            for ecdf in self.__ecdfcs[count].return_ecdfs():
-                Ecdf_visualize.plot_to_file(self.__working_dir + "/" + ecdf.legend(),
-                                            Ecdf_collection([ecdf], ecdf.legend()), 80, "svg")
+            #for ecdf in self.__ecdfcs[count].return_ecdfs():
+            #    Ecdf_visualize.plot_to_file(self.__working_dir + "/" + ecdf.legend(),
+            #                                Ecdf_collection([ecdf], ecdf.legend()), 80, "svg")
         for count in range(0, len(self.__utils)):
             continue
         for count in range(0, len(self.__queues)):
@@ -38,11 +38,18 @@ class Performance_website:
 
     def create_website_index(self):
         f = open(self.__working_dir + "/index.html", "w")
-        f.write("<html><a id=\"top\"><h2>Performance result</h2><ul>\n")
+        f.write("<a id=\"top\"><h2>Performance result</h2><ul>\n")
         self.print_toc_performance_objects(f)
         f.write("</ul>")
         self.print_performance_objects(f)
-        f.write("</html>\n")
+        f.close()
+
+        f = open(self.__working_dir + "/../index.html", "a")
+        f.write("<td><a id=\"top\"><h2>Performance result</h2><ul>\n")
+        self.print_toc_performance_objects(f)
+        f.write("</ul>")
+        self.print_performance_objects(f)
+        f.write("</td>")
         f.close()
 
     def print_toc_performance_objects(self, f):
@@ -88,14 +95,14 @@ class Performance_website:
                 diff[index1,index2]=sim_diff_perf[0]["diff"]
                 perf[index1,index2]=sim_diff_perf[0]["perf"]
                 kolm[index1, index2] = sim_diff_perf[0]["kolm"]
-        f.write("<br>Similarity:<br>")
-        self.print_metric_table(sim, ecdfc, f)
-        f.write("<br>Difference:<br>")
-        self.print_metric_table(diff, ecdfc, f)
-        f.write("<br>Performance:<br>")
-        self.print_metric_table(perf, ecdfc, f)
-        f.write("<br>Kolmogorov:<br>")
-        self.print_metric_table(kolm, ecdfc, f)
+        #f.write("<br>Similarity:<br>")
+        #self.print_metric_table(sim, ecdfc, f)
+        #f.write("<br>Difference:<br>")
+        #self.print_metric_table(diff, ecdfc, f)
+        #f.write("<br>Performance:<br>")
+        #self.print_metric_table(perf, ecdfc, f)
+        #f.write("<br>Kolmogorov:<br>")
+        #self.print_metric_table(kolm, ecdfc, f)
         self.print_ecdfs_aggregated_data(ecdfc,f)
 
     def print_metric_table(self,data,ecdfc,f):
@@ -111,7 +118,7 @@ class Performance_website:
         f.write("</table>")
 
     def print_ecdfs_aggregated_data(self,ecdfc,f):
-        connection = DatabaseConnection()
+        connection = self.dbconnection
         f.write("<br>Aggregated values:<br>")
         f.write("<table border=1><tr><td><b>Design</b></td><td><b>Minimum</b></td><td><b>Maximum</b></td><td><b>Average</b></td><td><b>Median</b></td></tr>")
         for ecdf in ecdfc.return_ecdfs():

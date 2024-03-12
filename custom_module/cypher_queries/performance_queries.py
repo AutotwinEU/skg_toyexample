@@ -24,8 +24,11 @@ class PerformanceQueryLibrary:
     @staticmethod
     def retrieve_sensor_connections():
         # language=sql
-        query_str = '''match (s1:Sensor) match (s1)-[:ORIGIN] ->(:Connection) - [:DESTINATION]->(s2) 
-                       return s1.sysId as input, collect(s2.sysId) as outputs'''
+        query_str = '''match (s1:Sensor) match (s1)-[:ORIGIN] ->(:Connection) - [:DESTINATION]->(s2)
+                        with s1,s2
+                        order by s2.sysId
+                        return s1.sysId as input, collect(s2.sysId) as outputs
+                        order by input'''
         return Query(query_str=query_str)
 
     # retrieves a lists with input sensors and corresponding output sensors, which are all full path
