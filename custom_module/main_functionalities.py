@@ -111,6 +111,6 @@ def transform_data(db_connection, config, semantic_header, dataset_descriptions)
     pizza_module.connect_stations_and_sensors()
 
 
-def delete_data(db_connection, semantic_header, logs):
+def delete_data2(db_connection, semantic_header, logs):
     delete_module = DeleteModule(db_connection, semantic_header)
     delete_module.delete_records(logs=logs)

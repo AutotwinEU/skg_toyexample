@@ -23,8 +23,7 @@ class Store_in_db:
         return id
 
     @staticmethod
-    def retrieve(name):
-        connection=DatabaseConnection()
+    def retrieve(connection,name):
         ret=connection.exec_query(pfql.retrieve_from_db, **{"name": name})
         step0=ret[0]["value"]
         step1=codecs.decode(step0.encode(), "base64")
@@ -33,6 +32,5 @@ class Store_in_db:
         return step3
 
     @staticmethod
-    def retrieve_names(kind):
-        connection = DatabaseConnection()
+    def retrieve_names(connection,kind):
         return connection.exec_query(pfql.retrieve_performance_artifacts_from_db, **{"kind": kind})

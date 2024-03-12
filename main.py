@@ -4,7 +4,7 @@ from datetime import datetime
 from promg import SemanticHeader, DatabaseConnection, DatasetDescriptions, Performance, Configuration
 
 from custom_module.main_functionalities import check_remote_connection, clear_db, load_data, transform_data, \
-    print_statistics, delete_data, prepare
+    print_statistics, delete_data2, prepare
 from custom_module.modules.pizza_performance import PizzaPerformanceModule
 
 
@@ -53,7 +53,7 @@ def delete_data(config):
     dataset_descriptions = DatasetDescriptions(config=config)
     files = dataset_descriptions.get_structure_name_file_mapping()
     for _, file_names in files.items():
-        delete_data(db_connection=db_connection,
+        delete_data2(db_connection=db_connection,
                     semantic_header=semantic_header,
                     logs=file_names)
 
@@ -77,6 +77,19 @@ def main(step_clear_db,
     if not use_remote_connection and step_clear_db:
         clear_db_config(_config_ground_truth)
 
+    if import_simulation_data:
+        populate_graph(config=_config_simulation,
+                       step_preprocess_files=False,
+                       input_directory=os.path.join(os.getcwd(), "data", "ToyExampleV3Simulation"),
+                       file_suffix="sim")
+
+    if add_simulation_performance:
+        perf_module = PizzaPerformanceModule(config=_config_ground_truth)
+        perf_module.add_performance_to_skg()
+        perf_module.retrieve_performance_from_skg()
+
+    delete_data(config_simulation)
+
     if import_ground_truth:
         # import ground truth data
         populate_graph(config=_config_ground_truth,
@@ -85,16 +98,7 @@ def main(step_clear_db,
     if add_ground_truth_performance:
         perf_module = PizzaPerformanceModule(config=_config_ground_truth)
         perf_module.add_performance_to_skg()
-        #perf_module.retrieve_performance_from_skg()
-
-    if import_simulation_data:
-        populate_graph(config=_config_simulation,
-                       step_preprocess_files=False,
-                       input_directory=os.path.join(os.getcwd(), "data", "ToyExampleV3Simulation"),
-                       file_suffix="sim")
-
-    if add_simulation_performance:
-        print("")
+        perf_module.retrieve_performance_from_skg()
 
 if __name__ == "__main__":
     config_ground_truth = Configuration.init_conf_with_config_file()
@@ -102,9 +106,9 @@ if __name__ == "__main__":
 
     main(step_clear_db=True,
          import_ground_truth=True,
-         import_simulation_data=False,
+         import_simulation_data=True,
          add_ground_truth_performance=True,
-         add_simulation_performance=False,
+         add_simulation_performance=True,
          _config_ground_truth=config_ground_truth,
          _config_simulation=config_simulation)
 
