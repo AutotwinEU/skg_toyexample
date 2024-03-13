@@ -8,15 +8,17 @@ def d_instancedbname_to_printable_d_instance(d_instancedbname):
 
 
 class Performance_website:
-    def __init__(self, dbconnection, working_dir, ecdfcs, queues, flows, utils):
+    def __init__(self, dbconnection, working_dir, ecdfcs, queues, flows, utils, first_time):
         if not os.path.exists(working_dir):
             os.makedirs(working_dir)
-        self.__working_dir = working_dir
+        self.__working_dir = "./performance_results/"+working_dir
+        self.__design_dir = working_dir+"/"
         self.__ecdfcs = ecdfcs
         self.__utils = utils
         self.__queues = queues
         self.__flows = flows
         self.dbconnection = dbconnection
+        self.first_time = first_time
 
     def write_performance_objects_to_file(self):
         for count in range(0, len(self.__ecdfcs)):
@@ -44,13 +46,23 @@ class Performance_website:
         self.print_performance_objects(f)
         f.close()
 
+        if self.first_time:
+            f = open(self.__working_dir + "/../index.html", "w")
+            f.write("<html><table border=1><tr>")
+            f.close()
+
         f = open(self.__working_dir + "/../index.html", "a")
         f.write("<td><a id=\"top\"><h2>Performance result</h2><ul>\n")
         self.print_toc_performance_objects(f)
         f.write("</ul>")
-        self.print_performance_objects(f)
+        self.print_performance_objects(f,self.__design_dir)
         f.write("</td>")
         f.close()
+
+        if not self.first_time:
+            f = open(self.__working_dir + "/../index.html", "a")
+            f.write("</tr></table></html>")
+            f.close()
 
     def print_toc_performance_objects(self, f):
         for count in range(0, len(self.__ecdfcs)):
@@ -62,17 +74,17 @@ class Performance_website:
         for count in range(0, len(self.__flows)):
             f.write("<li><a href=\"#fCDF" + str(count) + "\">" + self.__flows[count].return_title() + "</a></li>\n")
 
-    def print_performance_objects(self, f):
-        self.print_ecdfcs(f)
+    def print_performance_objects(self, f,design_dir="./"):
+        self.print_ecdfcs(f,design_dir)
         self.print_utils(f)
         self.print_queues(f)
         self.print_flows(f)
 
-    def print_ecdfcs(self,f):
+    def print_ecdfcs(self,f,design_dir):
         f.write("<h2>Ecdfcs</h2>\n")
         for count in range(0, len(self.__ecdfcs)):
             f.write("<h4>" + self.__ecdfcs[count].return_title() + "\n")
-            f.write("<a id=\"eCDF" + str(count) + "\"></h4><img src=\"" + self.__ecdfcs[
+            f.write("<a id=\"eCDF" + str(count) + "\"></h4><img src=\"" + design_dir+self.__ecdfcs[
                 count].return_title() + ".svg\"><a href=\"#top\">back to top<a><br>\n")
             self.print_ecdfc_conformance(self.__ecdfcs[count],f)
 

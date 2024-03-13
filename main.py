@@ -84,9 +84,9 @@ def main(step_clear_db,
                        step_preprocess_files=False)
 
     if add_ground_truth_performance:
-        perf_module = PizzaPerformanceModule(config=_config_ground_truth)
+        perf_module = PizzaPerformanceModule(config=_config_ground_truth, first_time=True)
         perf_module.add_performance_to_skg()
-        perf_module.retrieve_performance_from_skg("./performance_results/gt")
+        perf_module.retrieve_performance_from_skg("gt")
 
     if not use_remote_connection and step_clear_db:
         clear_db_config(_config_ground_truth)
@@ -98,9 +98,9 @@ def main(step_clear_db,
                        file_suffix="sim")
 
     if add_simulation_performance:
-        perf_module = PizzaPerformanceModule(config=_config_simulation)
+        perf_module = PizzaPerformanceModule(config=_config_simulation, first_time=False)
         perf_module.add_performance_to_skg()
-        perf_module.retrieve_performance_from_skg("./performance_results/sim")
+        perf_module.retrieve_performance_from_skg("sim")
 
 
 if __name__ == "__main__":

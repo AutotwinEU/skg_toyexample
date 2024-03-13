@@ -6,8 +6,9 @@ from custom_module.cypher_queries.performance_queries import PerformanceQueryLib
 from promg import DatabaseConnection
 
 class PizzaPerformanceModule:
-    def __init__(self, config):
+    def __init__(self, config, first_time):
         self.connection = DatabaseConnection.set_up_connection(config=config)
+        self.first_time = first_time
 
     def __add_ecdfcs_to_skg(self):
         for ecdfc in PizzaPerformanceModuleEcdfs(self.connection).return_ecdfcs():
@@ -37,6 +38,6 @@ class PizzaPerformanceModule:
     def retrieve_performance_from_skg(self,working_dir):
         print("start retrieve_performance_from_skg")
         ecdfcs = self.__retrieve_ecdfcs_from_skg()
-        Performance_website(self.connection,working_dir, ecdfcs, [], [], []).create()
+        Performance_website(self.connection,working_dir, ecdfcs, [], [], [], self.first_time).create()
         print("finish retrieve_performance_from_skg")
 
