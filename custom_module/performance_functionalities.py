@@ -58,60 +58,48 @@ def delete_data(config):
                     logs=file_names)
 
 
-def main(step_clear_db,
-         import_ground_truth,
-         import_simulation_data,
-         add_ground_truth_performance,
-         add_simulation_performance,
-         _config_ground_truth: Configuration,
-         _config_simulation: Configuration) -> None:
+def evaluate_performance() -> None:
     print("Started at =", datetime.now().strftime("%H:%M:%S"))
 
-    if "bolt://localhost" not in _config_ground_truth.uri:
-        use_remote_connection = check_remote_connection(_config_ground_truth)
+    config_ground_truth = Configuration.init_conf_with_config_file()
+    config_simulation = Configuration.init_conf_with_config_file('config_sim.yaml')
+
+    step_clear_db=True
+    import_ground_truth=True
+    import_simulation_data=True
+    add_ground_truth_performance=True
+    add_simulation_performance=True
+
+    if "bolt://localhost" not in config_ground_truth.uri:
+        use_remote_connection = check_remote_connection(config_ground_truth)
         if not use_remote_connection:
             return
     else:
         use_remote_connection = False
 
     if not use_remote_connection and step_clear_db:
-        clear_db_config(_config_ground_truth)
+        clear_db_config(config_ground_truth)
 
     if import_ground_truth:
         # import ground truth data
-        populate_graph(config=_config_ground_truth,
+        populate_graph(config=config_ground_truth,
                        step_preprocess_files=False)
 
     if add_ground_truth_performance:
-        perf_module = PizzaPerformanceModule(config=_config_ground_truth, first_time=True)
+        perf_module = PizzaPerformanceModule(config=config_ground_truth, first_time=True)
         perf_module.add_performance_to_skg()
         perf_module.retrieve_performance_from_skg("gt")
 
     if not use_remote_connection and step_clear_db:
-        clear_db_config(_config_ground_truth)
+        clear_db_config(config_ground_truth)
 
     if import_simulation_data:
-        populate_graph(config=_config_simulation,
+        populate_graph(config=config_simulation,
                        step_preprocess_files=False,
                        input_directory=os.path.join(os.getcwd(), "data", "ToyExampleV3Simulation"),
                        file_suffix="sim")
 
     if add_simulation_performance:
-        perf_module = PizzaPerformanceModule(config=_config_simulation, first_time=False)
+        perf_module = PizzaPerformanceModule(config=config_simulation, first_time=False)
         perf_module.add_performance_to_skg()
         perf_module.retrieve_performance_from_skg("sim")
-
-
-if __name__ == "__main__":
-    config_ground_truth = Configuration.init_conf_with_config_file()
-    config_simulation = Configuration.init_conf_with_config_file('config_sim.yaml')
-
-    main(step_clear_db=True,
-         import_ground_truth=True,
-         import_simulation_data=True,
-         add_ground_truth_performance=True,
-         add_simulation_performance=True,
-         _config_ground_truth=config_ground_truth,
-         _config_simulation=config_simulation)
-
-    #delete_data(config_simulation)
