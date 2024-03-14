@@ -1,0 +1,27 @@
+sensorId,sensorType,stationName,stationType,assemblyName
+S1,EXIT,PizzaSource,source,assemblyLine1
+S2,ENTER,Oven,process,assemblyLine1
+S3,EXIT,Oven,process,assemblyLine1
+S100,ENTER,DefectPizzaSink,sink,assemblyLine1
+S4,ENTER,Freezer,process,assemblyLine1
+S5,EXIT,Freezer,process,assemblyLine1
+S6,ENTER,PackStation,process,assemblyLine1
+S7,EXIT_AP,PackStation,process,assemblyLine1
+S105,EXIT_AR,PackStation,process,assemblyLine1
+S101,ENTER,PizzaSink,sink,assemblyLine1
+S8,ENTER,BoxStation,process,assemblyLine1
+S9,EXIT_AP,BoxStation,process,assemblyLine1
+S104,EXIT_AR,BoxStation,process,assemblyLine1
+S102,ENTER,PackSink,sink,assemblyLine1
+S10,ENTER,PalletStation,process,assemblyLine1
+S103,ENTER,BoxSink,sink,assemblyLine1
+S11,ENTER,PalletStation,process,assemblyLine1
+S12,EXIT_AP,PalletStation,process,assemblyLine1
+S106,EXIT_AR,PalletStation,process,assemblyLine1
+S13,ENTER,Warehouse,process,assemblyLine1
+S14,EXIT,Warehouse,process,assemblyLine1
+S15,ENTER,PalletSink,sink,assemblyLine1
+S16,EXIT,PalletSource,source,assemblyLine1
+In1_distanceLock,Lock Sensor,PizzaSource,source,assemblyLine1
+In1_policyLock,Lock Sensor,PizzaSource,source,assemblyLine1
+wip,Wip Sensor,,,assemblyLine1
