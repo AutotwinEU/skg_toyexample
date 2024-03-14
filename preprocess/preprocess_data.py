@@ -24,7 +24,8 @@ file_info = {
     "S6.csv": {"headers": ["timestamp", "sensorId", "pizzaId"], "has_change": False, "range": None},
     "S7.csv": {"headers": ["timestamp", "sensorId", "packId"], "has_change": False, "range": None},
     "S8.csv": {"headers": ["timestamp", "sensorId", "packId"], "has_change": False, "range": None},
-    "S9.csv": {"headers": ["timestamp", "sensorId", "boxId", "type"], "has_change": False, "range": None},
+    # EV: Removed type, not used by v3
+    "S9.csv": {"headers": ["timestamp", "sensorId", "boxId"], "has_change": False, "range": None},
     "S10.csv": {"headers": ["timestamp", "sensorId", "boxId"], "has_change": False, "range": None},
     "S11.csv": {"headers": ["timestamp", "sensorId", "palletId"], "has_change": False, "range": None},
     "S12.csv": {"headers": ["timestamp", "sensorId", "palletId"], "has_change": False, "range": None},
@@ -72,7 +73,7 @@ def add_headers_to_csv(input_path, file_name, headers, has_change, _range, file_
 
     output_path = get_output_path(input_path)
     file_name_without_extension = os.path.splitext(file_name)[0]
-    df.to_csv(os.path.join(output_path, f"{file_name_without_extension}_{file_suffix}.csv"), sep=";", index=False)
+    df.to_csv(os.path.join(output_path, f"{file_name_without_extension}{file_suffix}.csv"), sep=";", index=False)
 
 
 def model_changes(df, sensor_value_name="Power"):

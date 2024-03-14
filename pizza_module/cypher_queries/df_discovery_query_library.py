@@ -139,3 +139,19 @@ class DFDiscoveryQueryLibrary:
                          "df_label": df_label,
                          "entity_type": entity_type
                      })
+
+    # EV: Copied from v4
+    @staticmethod
+    def get_add_statistics_to_df_level_sensors_query():
+        query_str = '''
+            MATCH (e:SensorReadingEvent {activity: "Read Inventory level"}) - [df:DF_SENSOR] -> (f:SensorReadingEvent {activity:"Read Inventory level"})
+            WITH df, e, f, CASE
+            WHEN e.value > f.value THEN "decrease"
+            when e.value < f.value THEN "increase"
+            else "nothing"
+            END as update_type
+            SET df.update_type = update_type
+            SET df.update_count =  f.value - e.value
+        '''
+
+        return Query(query_str=query_str)

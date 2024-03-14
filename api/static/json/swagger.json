@@ -1,0 +1,328 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "SKG Manager for ToyExamplev4 API",
+    "version": "v1.0.0"
+  },
+  "host": "localhost:8080",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Status",
+      "description": "Get status of the running app and the connections"
+    },
+    {
+      "name": "Retrieval",
+      "description": "Retrieve data from the Neo4j Database"
+    },
+    {
+      "name": "Manage Database - SKG Manager",
+      "description": "Manage Neo4j Database"
+    },
+    {
+      "name": "OCED-PG - SKG Manager",
+      "description": "Load and Transform Records"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "description": "Returns message showing app is up",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    },
+    "/connection": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "description": "Returns message showing whether connection to Neo4j Database is made successful",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful database connectivity"
+          },
+          "503": {
+            "description": "Unsuccessful database connectivity"
+          }
+        }
+      }
+    },
+    "/db_manager/statistics": {
+      "get": {
+        "tags": [
+          "Retrieval"
+        ],
+        "description": "Returns the number of nodes and edges per type",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A dictionary of nodes and edge types together with their count",
+            "schema": {
+              "$ref": "#/definitions/statistics"
+            }
+          },
+          "400": {
+            "description": "Invalid request data"
+          },
+          "503": {
+            "description": "Unsuccessful database connectivity"
+          }
+        }
+      }
+    },
+    "/db_manager/logs": {
+      "get": {
+        "tags": [
+          "Retrieval"
+        ],
+        "description": "Returns a list of the imported logs",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A list of imported logs",
+            "schema": {
+              "$ref": "#/definitions/logs"
+            }
+          },
+          "400": {
+            "description": "Invalid request data"
+          },
+          "503": {
+            "description": "Unsuccessful database connectivity"
+          }
+        }
+      }
+    },
+    "/db_manager/eventlog/{entity_type}": {
+      "get": {
+        "tags": [
+          "Retrieval"
+        ],
+        "description": "Returns an event log for the given entity type. Please note that the response is quite large, so not recommended to run in Swagger UI. ",
+
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "description": "entity type for which event log is requested",
+            "required": true,
+            "type": "string",
+            "enum": ["Pizza"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An event log for the given entity type"
+          },
+          "400": {
+            "description": "Invalid request data. Given entity type is not supported"
+          },
+          "503": {
+            "description": "Unsuccessful database connectivity"
+          }
+        }
+      }
+    },
+    "/db_manager/get_model_ids": {
+      "get": {
+        "tags": [
+          "Retrieval"
+        ],
+        "description": "Returns the id's of the discovered models. ",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of the model ids"
+          },
+          "400": {
+            "description": "Invalid request data. Given entity type is not supported"
+          },
+          "503": {
+            "description": "Unsuccessful database connectivity"
+          }
+        }
+      }
+    },
+    "/db_manager/clear_db": {
+      "post": {
+        "tags": ["Manage Database - SKG Manager"],
+        "description": "Clears the Neo4j database",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Database successfully cleared"
+          },
+          "503": {
+            "description": "Unsuccessful database connectivity"
+          }
+        }
+      }
+    },
+    "/oced_pg/load": {
+      "post": {
+        "tags": ["OCED-PG - SKG Manager"],
+        "description": "Retrieve data from Common Data Space and Load as (:Record) nodes into Neo4j Database",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "is_simulation_data",
+            "in": "query",
+            "description": "is the data to be loaded ground truth data (false) or simulation data (true)",
+            "required": true,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Records successfully loaded into Neo4j Database"
+          },
+          "503": {
+            "description": "Unsuccessful database connectivity"
+          }
+        }
+      }
+    },
+    "/oced_pg/transform": {
+      "post": {
+        "tags": ["OCED-PG - SKG Manager"],
+        "description": "Transform (:Record) nodes using Semantic Header into System Knowledge Graph",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "is_simulation_data",
+            "in": "query",
+            "description": "is the data to be loaded ground truth data (false) or simulation data (true)",
+            "required": true,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Records successfully transformed into Neo4j Database"
+          },
+          "503": {
+            "description": "Unsuccessful database connectivity"
+          }
+        }
+      }
+    },
+    "/oced_pg/delete_simulated_data": {
+      "post": {
+        "tags": ["Manage Database - SKG Manager"],
+        "description": "Delete simulated data (their :Record nodes and all created nodes)",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Simulation data successfully deleted from Neo4j Database"
+          },
+          "503": {
+            "description": "Unsuccessful database connectivity"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "statistics": {
+      "type": "object",
+      "properties": {
+        "edgeCount": {
+          "type": "integer",
+          "description": "The number of edges present in the graph",
+          "example": 2970000
+        },
+        "nodeCount": {
+          "type": "integer",
+          "description": "The number of nodes present in the graph",
+          "example": 536012
+        },
+        "nodes": {
+          "type": "array",
+          "description": "A list describing the number of nodes per type",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "the first label of the nodes",
+                "example": "Event"
+              },
+              "count": {
+                "type": "integer",
+                "description": "the number of nodes for that label",
+                "example": 241000
+              }
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "description": "A list describing the number of nodes per type",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "the edge type",
+                "example": "DF"
+              },
+              "count": {
+                "type": "integer",
+                "description": "the number of edges for that type",
+                "example": 560000
+              }
+            }
+          }
+        }
+      }
+    },
+    "logs": {
+      "type": "array",
+      "description": "A list with strings of the imported logs",
+      "items": {
+        "type": "string",
+        "description": "Log name",
+        "example": "P10 Entrada de material.csv"
+      }
+    }
+  }
+}

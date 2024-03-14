@@ -1,7 +1,8 @@
 from promg import SemanticHeader
 from promg.database_managers.db_connection import DatabaseConnection
 from promg.utilities.performance_handling import Performance
-from custom_module.cypher_queries.process_model_discovery_query_library import AnalysisQueryLibrary as analysis_ql
+from pizza_module.cypher_queries.process_model_discovery_query_library import AnalysisQueryLibrary as analysis_ql
+from pizza_module.cypher_queries.custom_query_library import CustomCypherQueryLibrary as cql
 
 
 class ProcessDiscovery:
@@ -25,3 +26,8 @@ class ProcessDiscovery:
                                        "df_label": df_label,
                                        "df_a_label": df_a_label
                                    })
+
+    # EV: Copied from v4.
+    def get_model_ids(self):
+        model_ids = self.connection.exec_query(cql.get_model_ids_query)
+        return model_ids

@@ -1,7 +1,7 @@
 [
   {
     "name": "ToyExamplePizzaSensors",
-    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "S1_sim.csv",
       "S2_sim.csv",
@@ -65,7 +65,7 @@
   },
   {
     "name": "ToyExamplePizzaSensorsExceededCookingTime",
-    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "S100_sim.csv"
     ],
@@ -133,7 +133,7 @@
   },
   {
     "name": "ToyExamplePackSensors",
-    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "S7_sim.csv",
       "S8_sim.csv",
@@ -193,7 +193,7 @@
   },
   {
     "name": "ToyExampleBoxSensors",
-    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "S9_sim.csv",
       "S10_sim.csv",
@@ -252,7 +252,7 @@
   },
   {
     "name": "ToyExamplePizzaPalletSensors",
-    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "S11_sim.csv",
       "S12_sim.csv",
@@ -314,7 +314,7 @@
   },
   {
     "name": "ToyExampleStations",
-    "file_directory": "data\\ToyExampleV3Simulation\\",
+    "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "stations_sim.csv"
     ],
@@ -377,7 +377,7 @@
   },
   {
     "name": "ToyExampleProductionPlan",
-    "file_directory": "data\\ToyExampleV3Simulation\\",
+    "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "production_plan_sim.csv"
     ],
@@ -494,7 +494,7 @@
   },
   {
     "name": "ToyExampleOperators",
-    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "opBox_onBreak_sim.csv",
       "opPack_onBreak_sim.csv"
@@ -541,7 +541,7 @@
   },
   {
     "name": "ToyExampleLockStatus",
-    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "In1_distanceLock_sim.csv",
       "In1_policyLock_sim.csv"
@@ -589,7 +589,7 @@
   },
   {
     "name": "ToyExampleWIPStatus",
-    "file_directory": "data\\ToyExampleV3Simulation\\prepared\\",
+    "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "wip_sim.csv"
     ],

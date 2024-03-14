@@ -3,7 +3,7 @@ from datetime import datetime
 
 from promg import SemanticHeader, DatabaseConnection, DatasetDescriptions, Performance, Configuration
 
-from custom_module.main_functionalities import check_remote_connection, clear_db, load_data, transform_data, \
+from pizza_module.main_functionalities import check_remote_connection, clear_db, load_data, transform_data, \
     print_statistics, delete_data, prepare
 
 
@@ -83,7 +83,7 @@ def main(step_clear_db,
         populate_graph(config=_config_simulation,
                        step_preprocess_files=False,
                        input_directory=os.path.join(os.getcwd(), "data", "ToyExampleV3Simulation"),
-                       file_suffix="sim")
+                       file_suffix="_sim")
 
 
 if __name__ == "__main__":

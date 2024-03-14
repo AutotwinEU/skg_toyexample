@@ -2,12 +2,24 @@ import pandas as pd
 
 from promg import DatabaseConnection
 from promg import Performance
-from custom_module.cypher_queries.custom_query_library import CustomCypherQueryLibrary as ccql
+from pizza_module.cypher_queries.custom_query_library import CustomCypherQueryLibrary as ccql
 
 
 class PizzaLineModule:
-    def __init__(self, database_connection):
-        self.connection = database_connection
+    # EV: Copied is_simulated from v4
+    def __init__(self, db_connection, is_simulated=False):
+        self.connection = db_connection
+        self.is_simulated = is_simulated
+
+    # EV: Copied from v4
+    def create_sys_id_and_simulated_properties(self, sys_id=None):
+        if sys_id is not None:
+            properties = {"sysId": f'"{sys_id}"'}
+        else:
+            properties = {}
+        if self.is_simulated:
+            properties["simulated"] = True
+        return properties
 
     @Performance.track('entity_type')
     def create_station_aggregation(self, entity_type):
@@ -81,6 +93,35 @@ class PizzaLineModule:
                                    **{
                                        "station_id": station_id
                                    })
+
+    # EV: Copied from v4.
+    @Performance.track()
+    def merge_sensor_events(self):
+        self.connection.exec_query(ccql.get_merge_sensor_events_query)
+
+    # EV: Copied from v4
+    @Performance.track()
+    def create_virtual_event_exit_inventory(self):
+        self.connection.exec_query(ccql.get_create_virtual_event_exit_inventory_query,
+                                   **{
+                                       "use_simulated": self.is_simulated
+                                   })
+
+    # EV: Copied from v4
+    def create_virtual_enter_box_station(self):
+        sensor_properties = self.create_sys_id_and_simulated_properties(sys_id="VS003")
+        station_properties = self.create_sys_id_and_simulated_properties()
+        self.connection.exec_query(ccql.get_create_virtual_event_enter_box_station_query,
+                                   **{
+                                       "sensor_properties": sensor_properties,
+                                       "station_properties": station_properties
+                                   })
+     
+    # EV: Copied from v4.   
+    def delete_duplicate_df_cfi(self):
+        self.connection.exec_query(ccql.get_delete_duplicate_df_cfi_query)
+        self.connection.exec_query(ccql.get_delete_duplicate_df_box_query)
+
 
     @Performance.track()
     def connect_wip_sensor_to_assembly_line(self):

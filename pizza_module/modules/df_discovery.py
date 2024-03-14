@@ -6,7 +6,7 @@ from promg import DatabaseConnection
 from promg import Performance
 from promg.data_managers.semantic_header import ConstructedNodes
 
-from custom_module.cypher_queries.df_discovery_query_library import DFDiscoveryQueryLibrary as dfql
+from pizza_module.cypher_queries.df_discovery_query_library import DFDiscoveryQueryLibrary as dfql
 
 
 class DFDiscoveryModule:
@@ -72,3 +72,8 @@ class DFDiscoveryModule:
     #                                        "type": type,
     #                                        "node": node
     #                                    })
+
+    # EV: Copied from v4
+    @Performance.track()
+    def add_statistics_to_df_sensor(self):
+        self.connection.exec_query(dfql.get_add_statistics_to_df_level_sensors_query)

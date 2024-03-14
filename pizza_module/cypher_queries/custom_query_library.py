@@ -11,6 +11,10 @@ station_info = {
     'PalletStation': {'enter_entity': 'Box', 'exit_entity': 'Pallet', 'quantity': 'boxQuantity'}
 }
 
+# EV; Copied vrom v4.
+def create_properties_str(properties):
+    return ", ".join(f"{key}: {value}" for key, value in properties.items())
+
 
 class CustomCypherQueryLibrary:
 
@@ -484,3 +488,131 @@ class CustomCypherQueryLibrary:
                          "mean": transfer_time['mean'],
                          "std": transfer_time['std']
                      })
+
+    # Copied from v4.
+    @staticmethod
+    def get_merge_sensor_events_query():
+        query_str = '''
+            MATCH (e:SensorStatusEvent)
+            WITH e.timestamp as timestamp, e.activity as activity, collect(e) as batchedEvents
+            CALL apoc.refactor.mergeNodes(batchedEvents, {properties:"combine", mergeRels: true})
+            YIELD node
+            return count(*)
+        '''
+
+        return Query(query_str=query_str)
+
+    # EV: Copied from v4
+    @staticmethod
+    def get_create_virtual_event_exit_inventory_query(use_simulated=False):
+        if use_simulated:
+            station_str = "(station: Station {simulated: True})"
+            box_station_str = '(:Station {sysId:"BoxStation", simulated: True})'
+            simulated_str = ", simulated: True"
+        else:
+            station_str = "(station: Station where station.simulated is null)"
+            box_station_str = '(s:Station where s.simulated is null AND s.sysId="BoxStation")'
+            simulated_str = ""
+
+        # language=sql
+        query_str = '''
+            MATCH (e1:SensorReadingEvent {activity: "Read Inventory level"}) - [df:DF_SENSOR {
+            update_type:"decrease"}] -> (e2:SensorReadingEvent {activity:"Read Inventory level"})
+            MATCH (e2) - [:OCCURRED_AT] -> $station_str
+            WHERE station.sysId = "NewBoxWarehouse" OR station.sysId = "RefurbishedBoxWarehouse"
+            CALL { WITH e2
+                    MATCH (f:Event) - [:OCCURRED_AT] -> $box_station_str
+                    MATCH (f) - [:EXECUTED_BY] -> (:Sensor {type:"EXIT"})
+                    MATCH (f) - [:ACTS_ON] -> (b:Box)
+                    WHERE f.timestamp > e2.timestamp
+                    RETURN f, b ORDER BY f.timestamp ASC LIMIT 1
+            }
+            WITH f, b, e2, station, case station.sysId
+            WHEN "NewBoxWarehouse" THEN "VS001"
+            WHEN "RefurbishedBoxWarehouse" THEN "VS002"
+            END AS sensorId  
+            MATCH (e2) - [:EXTRACTED_FROM] -> (r:Record)
+            MERGE (new_sensor:Sensor {sysId:sensorId $simulated_str})
+            MERGE (new_event:Event:SensorEvent {activity: "Pass Sensor " + sensorId, timestamp: e2.timestamp, 
+            virtual:True}) - [:ACTS_ON] -> (b)
+            MERGE (new_activity:Activity {activity: "Pass Sensor " + sensorId, virtual: True})
+            MERGE (new_activity) - [:OBSERVED] -> (new_event)
+            MERGE (new_activity) - [:OCCURS_AT] -> (station)
+            MERGE (new_event) - [:EXECUTED_BY] -> (new_sensor)
+            MERGE (new_event) - [:OCCURRED_AT] -> (station)
+            MERGE (new_event) - [:EXTRACTED_FROM {inferred: True}] -> (r)
+            SET new_event.simulated=e2.simulated
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "station_str": station_str,
+                         "box_station_str": box_station_str,
+                         "simulated_str": simulated_str
+                     })
+
+    # EV: Copied from v4
+    @staticmethod
+    def get_create_virtual_event_enter_box_station_query(sensor_properties, station_properties):
+        sensor_str = create_properties_str(sensor_properties)
+        station_str = create_properties_str(station_properties)
+        if station_str != "":
+            station_str = "{" + station_str + "}"
+
+        # language=sql
+        query_str = '''
+            MATCH (leave_inventory_event:Event:SensorEvent {virtual:True}) - [:ACTS_ON] -> (b)
+            MATCH (leave_inventory_event) - [:EXECUTED_BY] -> (exit_sensor {type:"EXIT"})
+            MATCH (leave_inventory_event) - [:OCCURRED_AT] -> (station:Station $station_str)
+            MATCH (leave_inventory_event) - [:EXTRACTED_FROM] -> (r:Record)
+            WHERE station.sysId IN ["NewBoxWarehouse", "RefurbishedBoxWarehouse"]
+            MATCH (new_sensor:Sensor {$sensor_str}) - [:PART_OF] -> (box_station:Station)
+            MERGE (new_event:Event:SensorEvent 
+            {activity: "Pass Sensor " + new_sensor.sysId, timestamp: leave_inventory_event.timestamp, 
+            virtual:True}) - [:ACTS_ON] -> (b)
+            MERGE (new_activity:Activity {activity: "Pass Sensor " + new_sensor.sysId, virtual: True})
+            MERGE (new_activity) - [:OBSERVED] -> (new_event)
+            MERGE (new_activity) - [:OCCURS_AT] -> (box_station)
+            MERGE (new_event) - [:OCCURRED_AT] -> (box_station)
+            MERGE (new_event) - [:EXECUTED_BY] -> (new_sensor)
+            MERGE (new_event) - [:EXTRACTED_FROM {inferred: True}] -> (r)
+            SET new_event.simulated=leave_inventory_event.simulated
+        '''
+
+        return Query(query_str=query_str,
+                     template_string_parameters={
+                         "station_str": station_str,
+                         "sensor_str": sensor_str
+                     })
+
+    # EV: Copied from v4.
+    @staticmethod
+    def get_model_ids_query():
+        query_str = '''
+            MATCH (n:GraphModel:Instance)
+            RETURN elementId(n) as model_id
+        '''
+
+        return Query(query_str=query_str)
+
+    # EV: Copied from v4
+    @staticmethod
+    def get_delete_duplicate_df_cfi_query():
+        query_str = '''
+            MATCH (e:Event {activity:"Pass Sensor CS010"}) - [df:DF_CONTROL_FLOW_ITEM] -> (f)
+            WHERE f.activity in ["Pass Sensor CS4103", "Pass Sensor CS4102"]
+            DELETE df
+        '''
+
+        return Query(query_str=query_str)
+
+    # EV: Copied from v4
+    @staticmethod
+    def get_delete_duplicate_df_box_query():
+        query_str = '''
+            MATCH (e) - [df:DF_BOX] -> (f)
+            WHERE EXISTS ((e) - [:DF_CONTROL_FLOW_ITEM*] -> (f))
+            DELETE df
+        '''
+
+        return Query(query_str=query_str)

@@ -3,7 +3,7 @@ from typing import Optional, List
 from promg import Performance
 from promg.data_managers.semantic_header import NodeConstructor, RelationConstructor
 
-from custom_module.cypher_queries.delete_data_query_library import DeleteDataQueryLibrary as ddql
+from pizza_module.cypher_queries.delete_data_query_library import DeleteDataQueryLibrary as ddql
 
 
 class DeleteModule:

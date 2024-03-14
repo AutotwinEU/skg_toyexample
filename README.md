@@ -1,6 +1,43 @@
 # Create a System Knowledge Graph for Toy Example V3.6 for Auto Twin
 
 ---------------------
+## Docker Build Instructions
+
+Make sure Docker Desktop (or equivalent) has been installed. At least, the docker executable should exist.
+
+Run the following command in a terminal, from the folder where you have cloned the orchestrator repository:
+
+`docker build -t skg_toyexamplev3 .`
+
+---------------------
+## Docker Run Instructions
+
+### Container name
+
+`skg_toyexamplev3`
+
+### Ports
+
+ * :8080/tcp
+   * Host port: `8080`
+
+### Volumes
+
+#### Folder shared with skg_croma (and others) to import data
+
+ - Host path: `/data/csv`
+   * It is important that the host path is identical to the host path as provided for the Neo4J database. The skg_toyexamplev3 will write files into that directory, and Neo4J then will need to import those files.
+ - Container path: `/var/lib/neo4j/import`
+
+### Environment variables
+
+None.
+
+### URI to access the skg_toyexamplev3 on the host
+
+`http://localhost:8080`
+
+---------------------
 
 ## Installation
 ### Neo4j
