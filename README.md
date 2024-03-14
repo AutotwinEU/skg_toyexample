@@ -5,7 +5,7 @@
 
 Make sure Docker Desktop (or equivalent) has been installed. At least, the docker executable should exist.
 
-Run the following command in a terminal, from the folder where you have cloned the orchestrator repository:
+Run the following command in a terminal, from the folder where you have cloned the skg_toyexample repository:
 
 `docker build -t skg_toyexamplev3 .`
 
