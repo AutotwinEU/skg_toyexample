@@ -25,10 +25,10 @@ def load_records_route():
     is_simulation_data = request.args.get('is_simulation_data').lower() in ['true', '1']
     config = get_config(is_simulation_data)
     if is_simulation_data:
-        prepare(input_path=os.path.join(os.getcwd(), "data/simulation"),
+        prepare(input_path=os.path.join(os.getcwd(), "data/simulation/raw"),
                 file_suffix="_sim")
     else:
-        prepare(input_path=os.path.join(os.getcwd(), "data"))
+        prepare(input_path=os.path.join(os.getcwd(), "data/groundtruth/raw"))
 
     load_data(db_connection=current_app.connection,
               config=config

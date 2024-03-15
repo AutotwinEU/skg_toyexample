@@ -8,7 +8,7 @@ input_path_prep = os.path.join(os.getcwd(), "..", "data")
 # input_prep_path = os.path.join(os.getcwd(), "..", "data", "prepared")
 
 def get_output_path(input_path):
-    output_path = os.path.join(input_path, "prepared")  # where prepared files will be stored
+    output_path = os.path.join(input_path, "..", "prepared")  # where prepared files will be stored
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
