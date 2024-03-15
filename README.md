@@ -35,6 +35,12 @@ Run the following command in a terminal, from the folder where you have cloned t
    * It is important that the host path is identical to the host path as provided for the orhcestrator. The simulator will write files into that directory, and Neo4J then the skg_toyexamplev3 need to import those files.
  - Container path: `/skgpizza/data/simulation/raw`
 
+#### Folder to view the performance results in a browser on the host
+
+ - Host path: `/data/perf`
+   * The results of the performance calculations will be written into this folder. By opening the reslting `index.html` file in a browser, one can view the results.
+ - Container path: `/skgpizza/performance_results`
+
 ### Environment variables
 
 None.
