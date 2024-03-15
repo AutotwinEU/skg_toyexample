@@ -38,7 +38,7 @@ Run the following command in a terminal, from the folder where you have cloned t
 #### Folder to view the performance results in a browser on the host
 
  - Host path: `/data/perf`
-   * The results of the performance calculations will be written into this folder. By opening the reslting `index.html` file in a browser, one can view the results.
+   * The results of the performance calculations will be written into this folder. By opening the resulting `index.html` file in a browser, one can view the results.
  - Container path: `/skgpizza/performance_results`
 
 ### Environment variables
