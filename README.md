@@ -23,11 +23,17 @@ Run the following command in a terminal, from the folder where you have cloned t
 
 ### Volumes
 
-#### Folder shared with skg_croma (and others) to import data
+#### Folder shared with Neo4J (and others) to import data
 
  - Host path: `/data/csv`
    * It is important that the host path is identical to the host path as provided for the Neo4J database. The skg_toyexamplev3 will write files into that directory, and Neo4J then will need to import those files.
  - Container path: `/var/lib/neo4j/import`
+
+#### Folder shared with the simulator (contained in the orchestrator) to import simulated data
+
+ - Host path: `/data/sim`
+   * It is important that the host path is identical to the host path as provided for the orhcestrator. The simulator will write files into that directory, and Neo4J then the skg_toyexamplev3 need to import those files.
+ - Container path: `/skgpizza/data/simulation/raw`
 
 ### Environment variables
 
