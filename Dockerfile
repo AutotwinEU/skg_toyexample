@@ -11,6 +11,12 @@ COPY . /skgpizza
 # Install required dependencies
 RUN pip install --no-cache-dir -r /skgpizza/requirements.txt
 
+# Install a web server
+#RUN apt-get update
+#RUN apt-get install mini-httpd -y
+
+# Expose the post for the web server
+#EXPOSE 80
 # Expose the port for Flask
 EXPOSE 8080
 

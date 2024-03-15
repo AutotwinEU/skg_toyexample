@@ -15,6 +15,8 @@ from .neo4j import init_db_connection, init_promg_configuration, init_performanc
 from .routes.db_manager import db_manager_routes
 from .routes.oced_pg import oced_pg_routes
 
+from .routes.performance import performance_routes
+
 from dotenv import load_dotenv, find_dotenv
 
 from .routes.status import status_routes
@@ -111,6 +113,7 @@ def create_app(test_config=None):
     app.register_blueprint(oced_pg_routes)
     app.register_blueprint(status_routes)
     app.register_blueprint(swagger_ui_blueprint)
+    app.register_blueprint(performance_routes)
 
     @app.errorhandler(BadRequestException)
     def handle_bad_request(err):
