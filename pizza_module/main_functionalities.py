@@ -171,13 +171,6 @@ def transform_data(db_connection, config, is_simulated_data=False):
     for df in df_edges_to_be_created:
         df_discovery.create_df_edges_for_entity(entity_type=df["entity_type"], df_label=df["df_label"])
 
-    # Discover box children and DF relations between them
-    box_module = BoxChildrenModule(db_connection, is_simulated_data)
-    box_module.create_box_children()
-    box_module.create_df_box_children()
-    box_module.create_run_id_children()
-    box_module.create_extracted_from_record_query()
-
     df_edges_to_be_created = [
         {"entity_type": "Pizza", "df_label": "DF_CONTROL_FLOW_ITEM"},
         {"entity_type": "Pack", "df_label": "DF_CONTROL_FLOW_ITEM"},
@@ -209,10 +202,6 @@ def transform_data(db_connection, config, is_simulated_data=False):
     process_discoverer.create_df_process_model(df_label="DF_BOX", df_a_label="DF_A_BOX")
 
     pizza_module.connect_stations_and_sensors()
-
-    entity_type_module = EntityTypeModule(db_connection, is_simulated_data)
-    entity_type_module.create_generic_entity_types()
-    entity_type_module.create_associate_dissociate_type_rules()
 
 # EV: Replaced by next method from v4.
 def delete_data_EV(db_connection, semantic_header, logs):
