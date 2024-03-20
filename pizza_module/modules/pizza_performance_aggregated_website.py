@@ -36,13 +36,13 @@ def print_ecdfs_aggregated_data(ecdfc,f,connection):
     f.write("<table border=1><tr><td><b>Design</b></td><td><b>Minimum</b></td><td><b>Maximum</b></td><td><b>Average</b></td><td><b>Median</b></td></tr>")
     ecdf=ecdfc.return_ecdfs()[0]
     min_max_average_median = connection.exec_query(pfql.get_ecdf_properties, **{"name": ecdf.legend()+" gt"})
-    f.write("<tr><td><p style=color:blue;>" + ecdf.legend()+ " gt</p></td>")
+    f.write("<tr><td><p style=color:red;>" + ecdf.legend()+ " sim</p></td>")
     f.write("<td>" + str(round(min_max_average_median[0]["min"],2)) + "</td>")
     f.write("<td>" + str(round(min_max_average_median[0]["max"],2)) + "</td>")
     f.write("<td>" + str(round(min_max_average_median[0]["average"],2)) + "</td>")
     f.write("<td>" + str(round(min_max_average_median[0]["median"],2)) + "</td><tr>")
     min_max_average_median = connection.exec_query(pfql.get_ecdf_properties, **{"name": ecdf.legend()+" sim"})
-    f.write("<tr><td><p style=color:red;>" + ecdf.legend()+ " sim</p></td>")
+    f.write("<tr><td><p style=color:blue;>" + ecdf.legend()+ " gt</p></td>")
     f.write("<td>" + str(round(min_max_average_median[0]["min"],2)) + "</td>")
     f.write("<td>" + str(round(min_max_average_median[0]["max"],2)) + "</td>")
     f.write("<td>" + str(round(min_max_average_median[0]["average"],2)) + "</td>")
@@ -59,12 +59,12 @@ def print_ecdfc_conformance(ecdfc:Ecdf_collection,f,connection):
     for index1 in range(size):
         for index2 in range(size):
             ecdfleg=ecdfc.return_ecdfs()[index1].legend()
-            add1=" gt"
-            add2=" gt"
+            add1=" sim"
+            add2=" sim"
             if index1==1:
-                add1=" sim"
+                add1=" gt"
             if index2==1:
-                add2=" sim"
+                add2=" gt"
             sim_diff_perf=connection.exec_query(pfql.similarity_difference_and_performance,
                                   **{"ecdf_name1": ecdfleg+add1, "ecdf_name2": ecdfleg+add2})
             sim[index1,index2]=sim_diff_perf[0]["sim"]
