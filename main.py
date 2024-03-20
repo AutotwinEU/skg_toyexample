@@ -35,10 +35,13 @@ def populate_graph(config: Configuration,
               config=config,
               semantic_header=semantic_header,
               dataset_descriptions=dataset_descriptions)
+    # EV: Fix required
+    #transform_data(db_connection=db_connection,
+    #               config=config,
+    #               semantic_header=semantic_header,
+    #               dataset_descriptions=dataset_descriptions)
     transform_data(db_connection=db_connection,
-                   config=config,
-                   semantic_header=semantic_header,
-                   dataset_descriptions=dataset_descriptions)
+                   config=config)
 
     performance.finish_and_save()
     print_statistics(db_connection)

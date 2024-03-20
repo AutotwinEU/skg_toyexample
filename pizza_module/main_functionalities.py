@@ -91,8 +91,11 @@ def load_data(db_connection, config):
     oced_pg.load()
 
 
-# EV: Replaced by next method from v4.
-def transform_data_EV(db_connection, config, semantic_header, dataset_descriptions):
+# EV: Fixed a bit due to new signature
+def transform_data(db_connection, config, is_simulated_data=False):
+    dataset_descriptions = DatasetDescriptions(config=config)
+    semantic_header = SemanticHeader.create_semantic_header(config=config)
+    
     oced_pg = OcedPg(dataset_descriptions=dataset_descriptions,
                      use_sample=config.use_sample,
                      use_preprocessed_files=config.use_preprocessed_files,
@@ -101,7 +104,9 @@ def transform_data_EV(db_connection, config, semantic_header, dataset_descriptio
                      semantic_header=semantic_header)
     oced_pg.create_nodes_by_records()
 
-    pizza_module = PizzaLineModule(database_connection=db_connection)
+    # EV: Change of signature.
+    #pizza_module = PizzaLineModule(database_connection=db_connection)
+    pizza_module = PizzaLineModule(db_connection=db_connection)
     oced_pg.create_relations()
 
     df_discovery = DFDiscoveryModule(db_connection)
@@ -136,8 +141,8 @@ def transform_data_EV(db_connection, config, semantic_header, dataset_descriptio
 
     pizza_module.connect_stations_and_sensors()
 
-
-def transform_data(db_connection, config, is_simulated_data=False):
+# EV: Copied from v4, adapted to make it work for v3.
+def transform_data_v4(db_connection, config, is_simulated_data=False):
     dataset_descriptions = DatasetDescriptions(config=config)
     semantic_header = SemanticHeader.create_semantic_header(config=config)
 
