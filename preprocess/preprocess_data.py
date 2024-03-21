@@ -49,6 +49,33 @@ file_info = {
     "wip.csv": {"headers": ["timestamp", "sensorId", "amount"], "has_change": False, "range": None}
 }
 
+file_info_sim = {
+    "S1.csv": {"headers": ["timestamp", "sensorId", "pizzaId"], "has_change": False, "range": None},
+    "S2.csv": {"headers": ["timestamp", "sensorId", "pizzaId"], "has_change": False, "range": None},
+    "S3.csv": {"headers": ["timestamp", "sensorId", "pizzaId"], "has_change": False, "range": None},
+    "S4.csv": {"headers": ["timestamp", "sensorId", "pizzaId"], "has_change": False, "range": None},
+    "S5.csv": {"headers": ["timestamp", "sensorId", "pizzaId"], "has_change": False, "range": None},
+    "S6.csv": {"headers": ["timestamp", "sensorId", "pizzaId"], "has_change": False, "range": None},
+    "S7.csv": {"headers": ["timestamp", "sensorId", "packId"], "has_change": False, "range": None},
+    "S8.csv": {"headers": ["timestamp", "sensorId", "packId"], "has_change": False, "range": None},
+    # EV: Removed type, not used by v3
+    "S9.csv": {"headers": ["timestamp", "sensorId", "boxId"], "has_change": False, "range": None},
+    "S11.csv": {"headers": ["timestamp", "sensorId", "palletId"], "has_change": False, "range": None},
+    "S12.csv": {"headers": ["timestamp", "sensorId", "palletId"], "has_change": False, "range": None},
+    "S13.csv": {"headers": ["timestamp", "sensorId", "palletId"], "has_change": False, "range": None},
+    "S14.csv": {"headers": ["timestamp", "sensorId", "palletId"], "has_change": False, "range": None},
+    "S15.csv": {"headers": ["timestamp", "sensorId", "palletId"], "has_change": False, "range": None},
+    "S100.csv": {
+        "headers": ["timestamp", "sensorId", "pizzaId"], "has_change": False, "range": None
+    },
+    "S101.csv": {"headers": ["timestamp", "sensorId", "pizzaId"], "has_change": False, "range": None},
+    "S102.csv": {"headers": ["timestamp", "sensorId", "packId"], "has_change": False, "range": None},
+    "S103.csv": {"headers": ["timestamp", "sensorId", "boxId"], "has_change": False, "range": None},
+    "S104.csv": {"headers": ["timestamp", "sensorId", "packId"], "has_change": False, "range": None},
+    "S105.csv": {"headers": ["timestamp", "sensorId", "pizzaId"], "has_change": False, "range": None},
+    "S106.csv": {"headers": ["timestamp", "sensorId", "boxId"], "has_change": False, "range": None},
+}
+
 
 def prepare_sig_change_file(df, column_name, range_size=.5):
     df["diff"] = df[column_name].diff(1)
@@ -63,7 +90,12 @@ def prepare_sig_change_file(df, column_name, range_size=.5):
 
 
 def add_headers_to_csv(input_path, file_name, headers, has_change, _range, file_suffix):
-    df = pd.read_csv(os.path.join(input_path, file_name), sep=";", names=headers)
+    # EV: Forget about fourth column...
+    # df = pd.read_csv(os.path.join(input_path, file_name), sep=";", names=headers])
+    if file_suffix == "":
+        df = pd.read_csv(os.path.join(input_path, file_name), sep=";", names=headers)
+    else:
+        df = pd.read_csv(os.path.join(input_path, file_name), sep=";", names=headers, usecols=[0,1,2])
     if has_change:
         sensor_value_name = headers[-1]
         df = model_changes(df, sensor_value_name)
@@ -86,7 +118,11 @@ def model_changes(df, sensor_value_name="Power"):
 
 
 def prepare_files(input_path, file_suffix=""):
-    for file_name, file_info_dict in file_info.items():
+    if file_suffix == "":
+        fi = file_info
+    else:
+        fi = file_info_sim
+    for file_name, file_info_dict in fi.items():
         headers = file_info_dict["headers"]
         change_level = file_info_dict["has_change"]
         _range = file_info_dict["range"]

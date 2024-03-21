@@ -9,6 +9,7 @@
       "S4_sim.csv",
       "S5_sim.csv",
       "S6_sim.csv",
+      "S100_sim.csv",
       "S101_sim.csv",
       "S105_sim.csv"
     ],
@@ -66,6 +67,7 @@
   {
     "name": "ToyExamplePizzaSensorsExceededCookingTime",
     "file_directory": "data\\simulation\\prepared\\",
+    "include": false,
     "file_names": [
       "S100_sim.csv"
     ],
@@ -127,7 +129,8 @@
             "dtype": "boolean"
           }
         ],
-        "optional": false
+        "optional_EV": false,
+        "optional": true
       }
     ]
   },
@@ -196,6 +199,11 @@
     "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
       "S9_sim.csv",
+      "S103_sim.csv",
+      "S106_sim.csv"
+    ],
+     "file_names_with_S10": [
+      "S9_sim.csv",
       "S10_sim.csv",
       "S103_sim.csv",
       "S106_sim.csv"
@@ -254,6 +262,13 @@
     "name": "ToyExamplePizzaPalletSensors",
     "file_directory": "data\\simulation\\prepared\\",
     "file_names": [
+      "S11_sim.csv",
+      "S12_sim.csv",
+      "S13_sim.csv",
+      "S14_sim.csv",
+      "S15_sim.csv"
+    ],
+    "file_names_with_S16": [
       "S11_sim.csv",
       "S12_sim.csv",
       "S13_sim.csv",
@@ -495,6 +510,7 @@
   {
     "name": "ToyExampleOperators",
     "file_directory": "data\\simulation\\prepared\\",
+	"include": false,
     "file_names": [
       "opBox_onBreak_sim.csv",
       "opPack_onBreak_sim.csv"
@@ -542,6 +558,7 @@
   {
     "name": "ToyExampleLockStatus",
     "file_directory": "data\\simulation\\prepared\\",
+	"include": false,
     "file_names": [
       "In1_distanceLock_sim.csv",
       "In1_policyLock_sim.csv"
@@ -590,6 +607,7 @@
   {
     "name": "ToyExampleWIPStatus",
     "file_directory": "data\\simulation\\prepared\\",
+	"include": false,
     "file_names": [
       "wip_sim.csv"
     ],

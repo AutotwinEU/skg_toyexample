@@ -14,7 +14,8 @@ class PerformanceQueryLibrary:
     @staticmethod
     def retrieve_sensor_connections():
         # language=sql
-        query_str = '''match (s1:Sensor) match (s1)-[:ORIGIN] ->(:Connection) - [:DESTINATION]->(s2)
+        # EV: only look in the simulated data set
+        query_str = '''match (s1:Sensor{simulated:True}) match (s1)-[:ORIGIN] ->(:Connection) - [:DESTINATION]->(s2)
                         where s1.sysId<>s2.sysId
                         with s1,s2
                         order by s2.sysId
